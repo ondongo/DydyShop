@@ -1,0 +1,622 @@
+{% extends './layout/baseEldy.html' %}
+
+{% block title %}
+    {{super()}} | Article
+{% endblock %}
+
+
+{% block content %}
+   
+    <!-- Offcanvas Menu End -->
+
+    <!-- Header Section Begin -->
+ 
+    <!-- Header Section End -->
+
+    <!-- Categories Section Begin -->
+    <section class="categories">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-6 p-0">
+            <div
+              class="categories__item categories__large__item set-bg"
+              data-setbg="{{url_for('static',filename='eldyCss/img/eldy.png')}} "
+            >
+              <div class="categories__text">
+                <h2 style="font-size: 55px; color: aliceblue">
+                  Bienvenue sur DydyShop
+                </h2>
+
+                <p style="text-align: justify; color: white">
+                  "Découvrez la fusion parfaite entre tradition et modernité<br />
+                  chez DydyShop : votre destination fashion africaine<br />
+                  incontournable pour être à la pointe de la mode !".
+                </p>
+                <a href="#" style="display: inline-block; background-color: #d85629; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                    Decouvrir</a>
+
+
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="row">
+              <div class="col-lg-6 col-md-6 col-sm-6 p-0">
+                <div
+                  class="categories__item set-bg"
+                  data-setbg="{{url_for('static',filename='eldyCss/img/categories/test1.png')}}" 
+                >
+                  <div class="categories__text">
+                    <h4 style="color: aliceblue">Sac Africain</h4>
+                    <p>358 items</p>
+                    <a href="#" style="color: aliceblue">Acheter</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-6 p-0">
+                <div
+                  class="categories__item set-bg"
+                  data-setbg="{{url_for('static',filename='eldyCss/img/categories/category6.png')}}"
+                >
+                  <div class="categories__text">
+                    <h4 style="color: aliceblue">Ensemble</h4>
+                    <p>273 items</p>
+                    <a href="#" style="color: aliceblue">Acheter</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-6 p-0">
+                <div
+                  class="categories__item set-bg"
+                  data-setbg="{{url_for('static',filename='eldyCss/img/categories/category7.png')}}"
+                >
+                  <div class="categories__text">
+                    <h4 style="color: aliceblue">Tuniques</h4>
+                    <p>159 items</p>
+                    <a href="#" style="color: aliceblue">Shop now</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-6 p-0">
+                <div
+                  class="categories__item set-bg"
+                  data-setbg="{{url_for('static',filename='eldyCss/img/image1.jpg')}}"
+                >
+                  <div class="categories__text">
+                    <h4 style="color: aliceblue">Tous</h4>
+                    <p>792 items</p>
+                    <a href="#" style="color: aliceblue">Acheter</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Categories Section End -->
+
+    <!-- Product Section Begin -->
+    <section class="product spad">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 col-md-4">
+            <div class="section-title">
+              <h4>Items</h4>
+            </div>
+          </div>
+          <div class="col-lg-8 col-md-8">
+            <ul class="filter__controls">
+              <li class="active" data-filter="*">Tous</li>
+              <li data-filter=".women">Sacs</li>
+              <li data-filter=".men">Ensembles</li>
+              <li data-filter=".kid">Tuniques</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row property__gallery">
+          <div class="col-lg-3 col-md-4 col-sm-6 mix women">
+            <div class="product__item">
+              <div
+                class="product__item__pic set-bg"
+                data-setbg="{{url_for('static',filename='eldyCss/img/categories/test1.png')}}"
+              >
+                <div  class="label sale">Tendance</div>
+                <ul class="product__hover">
+                  <li>
+                    <a href="img/categories/test1.png" class="image-popup"
+                      ><span class="arrow_expand"></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_heart_alt"></span></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_bag_alt"></span></a>
+                  </li>
+                </ul>
+              </div>
+              <div class="product__item__text">
+                <h6><a href="#">Sac1</a></h6>
+                <div class="rating">
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                </div>
+                <div class="product__price">5000 FCFA</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6 mix men">
+            <div class="product__item">
+              <div
+                class="product__item__pic set-bg"
+                data-setbg="{{url_for('static',filename='eldyCss/img/categories/category6.png')}}"
+              >
+              <div class="label new ">Nouveau</div>
+                <ul class="product__hover">
+                  <li>
+                    <a href="img/product/product-2.jpg" class="image-popup"
+                      ><span class="arrow_expand"></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_heart_alt"></span></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_bag_alt"></span></a>
+                  </li>
+                </ul>
+              </div>
+              <div class="product__item__text">
+                <h6><a href="#">Sac1</a></h6>
+                <div class="rating">
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                </div>
+                <div class="product__price">5000 FCFA</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6 mix accessories">
+            <div class="product__item">
+              <div
+                class="product__item__pic set-bg"
+                data-setbg="{{url_for('static',filename='eldyCss/img/categories/test1.png')}}"
+              >
+                <div class="label stockout">Rupture de Stock</div>
+                <ul class="product__hover">
+                  <li>
+                    <a href="img/product/product-3.jpg" class="image-popup"
+                      ><span class="arrow_expand"></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_heart_alt"></span></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_bag_alt"></span></a>
+                  </li>
+                </ul>
+              </div>
+              <div class="product__item__text">
+                <h6><a href="#">Sac1</a></h6>
+                <div class="rating">
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                </div>
+                <div class="product__price">5000 FCFA</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6 mix cosmetic">
+            <div class="product__item">
+              <div
+                class="product__item__pic set-bg"
+                data-setbg="{{url_for('static',filename='eldyCss/img/categories/category6.png')}}"
+              >
+                <ul class="product__hover">
+                  <li>
+                    <a href="img/product/product-4.jpg" class="image-popup"
+                      ><span class="arrow_expand"></span
+                    ></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_heart_alt"></span></a>
+                  </li>
+                  <li>
+                    <a href="#"><span class="icon_bag_alt"></span></a>
+                  </li>
+                </ul>
+              </div>
+              <div class="product__item__text">
+                <h6><a href="#">Sac1</a></h6>
+                <div class="rating">
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                  <i class="fa fa-star"></i>
+                </div>
+                <div class="product__price">5000 FCFA</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- Product Section End -->
+
+    <!-- Banner Section Begin -->
+    <section
+      class="banner set-bg"
+      data-setbg="{{url_for('static',filename='eldyCss/img/banner/bannermod.jpg')}}"
+      style="opacity: 0.8"
+    >
+      <div class="container">
+        <div class="row">
+          <div class="col-xl-7 col-lg-8 m-auto">
+            <div class="banner__slider owl-carousel">
+              <div class="banner__item">
+                <div class="banner__text">
+                  <span
+                    >"Explorez la richesse de la mode africaine avec DydyShop
+                    !"</span
+                  >
+                  <h1 style="color: aliceblue">The Project Jacket</h1>
+                  <a href="#">Acheter</a>
+                </div>
+              </div>
+              <div class="banner__item">
+                <div class="banner__text">
+                  <span
+                    >"Explorez la richesse de la mode africaine avec DydyShop
+                    !"</span
+                  >
+                  <h1 style="color: aliceblue">The Project Jacket</h1>
+                  <a href="#">Acheter</a>
+                </div>
+              </div>
+              <div class="banner__item">
+                <div class="banner__text">
+                  <span
+                    >"Explorez la richesse de la mode africaine avec DydyShop
+                    !"</span
+                  >
+                  <h1 style="color: aliceblue">The Project Jacket</h1>
+                  <a href="#">Acheter</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Banner Section End -->
+
+    <!-- Trend Section Begin -->
+    <section class="trend spad">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="trend__content">
+              <div class="section-title">
+                <h4>Tendance</h4>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="{{url_for('static',filename='eldyCss/img/trend/category6.png')}}"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Chain bucket bag</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="{{url_for('static',filename='eldyCss/img/trend/category6.png')}}"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Pendant earrings</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="{{url_for('static',filename='eldyCss/img/trend/category6.png')}}"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Cotton T-Shirt</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="trend__content">
+              <div class="section-title">
+                <h4>Meilleure Vente</h4>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Cotton T-Shirt</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Zip-pockets pebbled tote <br />briefcase</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Round leather bag</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6">
+            <div class="trend__content">
+              <div class="section-title">
+                <h4>Petit Prix</h4>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Bow wrap skirt</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Metallic earrings</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+              <div class="trend__item">
+                <div class="trend__item__pic">
+                  <img src="img/trend/category6.png"  width="90px" height="90px" alt="" />
+                </div>
+                <div class="trend__item__text">
+                  <h6>Flap cross-body bag</h6>
+                  <div class="rating">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <div class="product__price">$ 59.0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Trend Section End -->
+
+    <!-- Discount Section Begin -->
+
+    <!-- Discount Section End -->
+
+    <!-- Services Section Begin -->
+    <section class="services spad">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="services__item">
+              <i class="fa fa-car"></i>
+              <h6>Free Shipping</h6>
+              <p>For all oder over $99</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="services__item">
+              <i class="fa fa-money"></i>
+              <h6>Money Back Guarantee</h6>
+              <p>If good have Problems</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="services__item">
+              <i class="fa fa-support"></i>
+              <h6>Online Support 24/7</h6>
+              <p>Dedicated support</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="services__item">
+              <i class="fa fa-headphones"></i>
+              <h6>Payment Secure</h6>
+              <p>100% secure payment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Services Section End -->
+
+    <!-- Instagram End -->
+
+    <!-- Footer Section Begin -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-7">
+            <div class="footer__about">
+              <div class="footer__logo">
+                <a href="./index.html"
+                  ><img src="{{url_for('static',filename='eldyCss/img/logo.png')}}" alt="" width="150px" height="60px"
+                /></a>
+              </div>
+              <p>
+                "Laissez-vous séduire par la beauté intemporelle des vêtements
+                africains sur DydyShop."
+              </p>
+              <div class="footer__payment">
+                <a href="#"
+                  ><img
+                    src="{{url_for('static',filename='eldyCss/img/payment/orange.png')}}"
+                    alt=""
+                    width="40px"
+                    height="40px"
+                /></a>
+                <a href="#"
+                  ><img
+                    src="{{url_for('static',filename='eldyCss/img/payment/wave.png')}}"
+                    alt=""
+                    width="40px"
+                    height="40px"
+                /></a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-3 col-sm-5">
+            <div class="footer__widget">
+              <h6>A Propos</h6>
+              <ul>
+                <li><a href="#">About</a></li>
+                <li><a href="#">FAQ</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-3 col-sm-4">
+            <div class="footer__widget">
+              <h6>Profile</h6>
+              <ul>
+                <li><a href="#">Mon compte</a></li>
+                <li><a href="#">Mes Commandes</a></li>
+                <li><a href="#">Checkout</a></li>
+                <li><a href="#">Mes Favoris</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-8 col-sm-8">
+            <div class="footer__newslatter">
+              <h6>Contact</h6>
+              <form action="#">
+                <input type="text" placeholder="Email" />
+                <button type="submit" class="site-btn">Envoyer</button>
+              </form>
+              <div class="footer__social">
+                <a href="#"><i class="fa fa-whatsapp"></i></a>
+                <a href="#"><i class="fa fa-instagram"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+            <div class="footer__copyright__text">
+              <p>
+                Copyright &copy;
+                <script>
+                  document.write(new Date().getFullYear());
+                </script>
+
+                <i class="fa fa-heart" aria-hidden="true"></i> by DydyShop
+              </p>
+            </div>
+            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Footer Section End -->
+
+    <!-- Search Begin -->
+    <div class="search-model">
+      <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+          <input type="text" id="search-input" placeholder="Search here....." />
+        </form>
+      </div>
+    </div>
+
+    {% endblock %}
+
+

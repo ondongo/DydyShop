@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{config['APP_NAME']}}</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="Free HTML Templates" name="keywords">
+        <meta content="Free HTML Templates" name="description">
+    
+        <!-- Favicon -->
+        <link href="img/favicon.ico" rel="icon">
+    
+     
+    <title>{{config['APP_NAME']}}</title>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cookie&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/bootstrap.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/font-awesome.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/elegant-icons.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/jquery-ui.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/magnific-popup.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/owl.carousel.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/slicknav.min.css') }}" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='eldyCss/css/style.css') }}" type="text/css" />
+
+    </head>
+    <body style="background-color: #f0f0f0;">
+
+        <div class="row d-flex align-items-center bg-white" style="
+   
+        
+        
+        box-shadow: 0 1px 1px rgba(0,0,0,.11),0 2px 2px rgba(0,0,0,.11),0 4px 4px rgba(0,0,0,.11),0 6px 8px rgba(0,0,0,.11),0 8px 16px rgba(0,0,0,.11);
+        color: #fff;
+        height:100px;
+        ">
+
+            <div class="col-12"
+           style="display:flex;justify-content:center;" >
+               
+           <a href="{{url_for('index')}}" >   <img class="img-fluid" src="{{ url_for('static',filename='eldyCss/img/logo.png') }}" width="150px" height="50px" alt="Image"></a>
+                   
+                    
+            </div>
+        
+        </div>
+       {% block content %}
+    
+       {% endblock  %}
+        
+        <script src="" async defer></script>
+       
+<!-- Contact Javascript File -->
+
+
+
+    </body>
+</html>

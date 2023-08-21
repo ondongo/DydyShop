@@ -1,0 +1,194 @@
+
+        <!--<h1>Welcom to blog {{nom}}</h1>-->
+        <br>
+      <div class="row align-items-center pb-4 bg-white"  style="
+   
+        box-shadow: 0 1px 1px rgba(0,0,0,.11), 0 2px 2px rgba(0,0,0,.11), 0 4px 0 rgba(0,0,0,.11);
+        
+        z-index: 100;
+        height:72px;">
+
+        <div class="col-1 "></div>
+
+        <div class="col-3 " >
+           
+          <a href="{{url_for('index')}}" >   <img class="img-fluid" src="{{ url_for('static',filename='img/expat.jpg') }}" alt="Image" style="height:42px"></a>
+               
+                
+        </div>
+
+
+
+        <!-- space-->
+
+       
+        <div class="col-4 mt-1">
+           
+
+          <form method="GET" action="{{ url_for('recherche_annon') }}" class="global-search__form" id="navbar-search-main">
+            <div class="input-group input-group-merge search-bar col-lg-12">
+                
+                <input type="text" name="querygloire" class="form-control autocomplete global-search__query-input" style="background:#f8f9fa" id="topbarInputIconLeft" placeholder="Je recherche ..." aria-label="Search" aria-describedby="topbar-addon">
+                
+                    <button class="btn global-search__button" type="submit">
+                        <i class="fas fa-search fa-sm"></i>
+                    </button>
+            </div>
+          </form>
+
+  
+         
+          <!-- / Search form -->
+
+        </div>
+
+        <div class="col-4 d-flex align-items-center " 
+        >
+
+         
+        <a href="{{url_for('publierAnnonce')}}" class="btn  " role="button "style="
+        background-color: #f29541; color:white; margin-right:20px;">
+            <!--<i class="fas fa-shopping-cart text-primary"></i>
+            <span class="badge">0</span> -->
+            vendre
+        </a>
+
+
+        {% if current_user.is_authenticated %}
+        <!-- Cacher les boutons ici -->
+        <a class="btn  mx-2 " href="{{url_for('publierAnnonce')}}" role="button" style="
+        background-color: blue;color:white;">Crédit</a>
+      {% else %}
+        <!-- Afficher les boutons ici -->
+        <a class="btn  mx-2 d-none" href="{{url_for('publierAnnonce')}}" role="button" style="
+        background-color: blue; color:white;">Crédit</a>
+      {% endif %}
+        
+
+        
+      {% if current_user.is_authenticated %}
+          <a class="nav-link d-none"   href="{{url_for('login')}}" 
+         id="navbarDropdown" role="button"  aria-expanded="false">
+         Connexion/Inscription
+          </a>
+      {% else %}
+
+      <a class="nav-link "   href="{{url_for('login')}}" 
+      id="navbarDropdown" role="button"  aria-expanded="false">
+      Connexion/Inscription
+       </a>
+      {% endif %}
+         
+
+         
+      {% if current_user.is_authenticated %}
+        <a href="" class="btn dropdown " role="button " data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="
+      ">
+
+          <span class="badge navbar-badge " style="color:#f29541";><i class="far fa-bell fa-2x"></i>15</span>
+      </a>
+      
+        <ul class="dropdown-menu bg-secondary ">
+         
+              <div class="card "  style="width: 20rem; margin-right:20px;margin-left:20px;">
+                  <div class="card-body">
+                    This is some text within a card body.
+                  </div>
+                </div>
+          
+        </ul>
+
+        {% else %}
+
+
+
+        <a href="" class="btn dropdown d-none" role="button " data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="
+        ">
+
+            <span class="badge navbar-badge " style="color:#f29541";><i class="far fa-bell fa-2x"></i>15</span>
+        </a>
+        
+          <ul class="dropdown-menu bg-secondary ">
+           
+                <div class="card "  style="width: 20rem; margin-right:20px;margin-left:20px;">
+                    <div class="card-body">
+                      This is some text within a card body.
+                    </div>
+                  </div>
+            
+          </ul>
+          {% endif %}
+        
+       
+
+
+
+            
+           
+
+
+
+          {% if current_user.is_authenticated %}
+              <a href="" class="btn mr-2 dropdown btn-circle" role="button " data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="
+              background-color: #f29541; border-radius:50%">
+               
+               <i class="fas fa-users " style="color:#f5af70";></i>
+             
+            </a>
+              <ul class="dropdown-menu ">
+                <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
+                <li><a class="dropdown-item" href="#">Accueil</a></li>
+                <li><a class="dropdown-item" href="{{url_for('gestionAnnonce')}}">Gérer Annonces</a></li>
+                <li><a class="dropdown-item" href="{{url_for('publierAnnonce')}}">Publier Annonces</a></li>
+                <li><a class="dropdown-item" href="">Historique d'achats</a></li>
+                <li><a class="dropdown-item" href="{{url_for('articles_favoris')}}">Mes Favoris</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{url_for('logout')}}">Deconnexion</a></li>
+                
+              </ul>
+            
+              {% else %}
+
+
+              <a href="" class="btn mr-2 dropdown btn-circle d-none" role="button " data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="
+              background-color: #f29541; border-radius:50%">
+               
+               <i class="fas fa-users " style="color:#f5af70";></i>
+             
+            </a>
+              <ul class="dropdown-menu ">
+                <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
+                <li><a class="dropdown-item" href="#">Accueil</a></li>
+                <li><a class="dropdown-item" href="{{url_for('gestionAnnonce')}}">Gérer Annonces</a></li>
+                <li><a class="dropdown-item" href="{{url_for('publierAnnonce')}}">Publier Annonces</a></li>
+                <li><a class="dropdown-item" href="">Historique d'achats</a></li>
+                <li><a class="dropdown-item" href="{{url_for('articles_favoris')}}">Mes Favoris</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{url_for('logout')}}">Deconnexion</a></li>
+                
+              </ul>
+          
+              {% endif %}
+  
+          
+  
+        </div>
+
+      
+
+      </div>
+
+
+
+
+
+<!-- Topbar End -->
+
+
+
+
+
+<!-- fin Head -->
+
+
+
