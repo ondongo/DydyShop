@@ -1,0 +1,155 @@
+
+<!--affiche parent-->
+{% extends './layout/connBase.html' %}
+ 
+{%block title%}
+{{super() }}|Creation
+{%endblock%}
+
+
+
+        
+
+
+        {%block content%}
+
+        
+<section class="vh-100" >
+
+    <div class="container py-5 h-100">
+
+        
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-xl-7">
+          <div class="card auth">
+            <div class="row ">
+              
+              <div class=" col-lg-12 d-flex align-items-center">
+                <div class="card-body p-4 p-lg-5 text-black">
+  
+                  <form method="POST" action="{{ url_for('creation_compte') }}">
+  
+                    <div class="d-flex align-items-center mb-3 pb-1">
+                      
+                      <h1 class="" style="color: #616161;text-align:center;">Bienvenue sur Expat-Dakar</h1>
+                    
+                    </div>
+  
+                    <div  style="margin: 12px 0 24px 0;
+                    text-align: center;">Pour acheter et vendre en toute sécurité, créez un compte ou connnectez-vous.</div>
+  
+                    {% for message in get_flashed_messages() %}
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                      <strong>Messages!</strong> {{ message }}
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                {% endfor %}
+  
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon2">SN (+221)</span>
+                        <input type="text" class="form-control  bg-light" name="tel" placeholder="Saisissez votre numero de telephone" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                        
+                    </div>
+  
+                    <div class="form-group mb-3">
+                        <label for="">Nom</label>
+                        <input value="" type="text" class="form-control  bg-light" name="nom" id=""  >
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="">Prenom</label>
+                        <input value="" type="text" class="form-control  bg-light" name="prenom" id="">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="">login</label>
+                        <input value="" type="text" class="form-control  bg-light" name="login" id="">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="">Password</label>
+                        <input type="password" class="form-control  bg-light" id="inputPassword" placeholder="Password" name="pass">
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="">Password Confirmation</label>
+                        <input type="password" class="form-control  bg-light" id="inputPassword" placeholder="Password Confirmation" name="PassConfirmation">
+                    </div>
+
+
+
+                   
+
+                    
+
+
+  
+  
+                    <div class=" mb-4 " >
+    
+                        <button type="submit" class="btn  btn-lg my-4" style="adding-bottom: 13px;
+                        padding-top: 13px;background-color: #f29541;
+                        border-color: #f29541;
+                        color: #fff;font-weight: 500;display: block;
+                        width: 100%;" >Enregistrer</button>
+                    </div>
+
+                    <h5 class="my-3" style="text-align:center"> ou </h5>
+                    <div class=" mb-3 "  >
+    
+                        <button type="button" class="btn btn-primary btn-lg my-1" style="adding-bottom: 13px;
+                        padding-top: 13px;
+                        border-color: #0b64d8;
+                        color: #fff;font-weight: 400;display: block;
+                        width: 100%;"><i class="fab fa-facebook-f"></i> Se connecter à Facebook</button>
+
+                        <button type="button" class="btn btn-danger btn-lg " style="adding-bottom: 13px;
+                        padding-top: 13px; ;
+                        ;
+                        color: #fff;font-weight: 400;display: block;
+                        width: 100%;"><i class="fab fa-google"></i> Se connecter avec Google</button>
+                    </div>
+
+                    
+  
+                    
+                    <p class="mb-5 pb-lg-2" style="color: #393f81;">En créant un compte et en vous connectant, vous acceptez nos Conditions et Charte d'utilisation.</p>
+                        
+
+                        
+                   
+                  </form>
+
+                  
+                 
+                </div>
+
+                
+                
+              </div>
+              
+              
+            </div>
+
+            <div class="" style="background: #e2e2e2;
+            
+            margin-left: -1px;
+            margin-right: -1px;
+            
+            padding: 12px 24px;
+            text-align: center; ">   
+                
+                <a href="#!" class="small text-muted">Besoin d'aide ? </a>
+                <a href="#!" class="small text-muted ">Contactez-nous.</a>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%endblock%}

@@ -1,0 +1,348 @@
+<!--affiche parent-->
+{% extends './layout/base.html' %}
+ 
+{%block title%}
+{{super() }}|Details
+{%endblock%}
+
+
+
+        
+
+{%block content%}
+
+
+<div class="listing-page listing-page--has-sidebar">
+  <div class="listing-page__container"><div class="listing-page__row">
+      <div class="listing-page__header">
+          <div class="listing-page-header">
+              <div class="listing-page-header__back">
+                  <a href="" class="listing-page-header__back__link">
+                      <svg class="i i-chevron-left " aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#chevron-left"></use></svg>Précédent
+                  </a>
+              </div>
+              <div class="listing-page-header__breadcrumbs">
+                  <div class="breadcrumbs" data-cy="breadcrumbs">
+
+                      <ul class="breadcrumbs__list">
+                          <li class="breadcrumbs__list-item">
+                              <a href="" class="breadcrumbs__list-item__link">Accueil</a>
+                          </li>
+                          <li id="breadcrumbs-category-annonces" class="breadcrumbs__list-item ">
+                              <a href="#" class="breadcrumbs__list-item__link">Annonces</a>
+                          </li>
+                      </ul>
+
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="listing-page__content">
+          <div class="listing-item">
+              <div class="listing-item__gallery">
+                  <div class="gallery-container" data-listing-gallery="">
+                      <div class="gallery-inner gallery-inner--main gallery-inner--main-has-thumbs gallery-inner--priority-default" data-listing-gallery-main="" data-slider-container="">
+                          <ul class="gallery gallery--main " data-slider-wrapper="">
+                              <li class="gallery__image gallery__image--main swiper-slide-active" data-slider-item="0">
+                                  <div class="gallery__image__inner-container gallery__image__inner-container--main">
+                                      <svg class="i i-beauty-products gallery__image__placeholder gallery__image__placeholder--custom" aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/category.1af8f532.svg#beauty-products"></use></svg>
+                                      <div class="gallery__image__inner">
+                                          <!--image de l'Item en question-->
+                                          <img class="gallery__image__resource vh-img" loading="eager" alt="Articles bébé image 1" src="{{Item.img_url}}">
+                                      </div>
+                                  </div>
+                              </li>
+                          </ul>
+                      </div>
+
+                      
+                  </div>
+              </div>
+              <div class="listing-item__info">
+                  <div class="listing-item__details">
+                      <div class="listing-item__details__inner">
+                          <div class="listing-item__details__date">{{Item.date}}</div>
+                          <div class="listing-item__details__ad-id">Référence de l'Item : {{Item.id}}</div>
+                      </div>
+                  </div>
+
+                    <div class = 'col-8 grandBlocnote'>
+                        <div class = 'note5' data-count = '5'>★</div>
+                        <div class = 'note4' data-count = '4'>★</div>
+                        <div class = 'note3' data-count = '3'>★</div>
+                        <div class = 'note2' data-count = '2'>★</div>
+                        <div class = 'note1' data-count = '1'>★</div>
+                    </div>
+
+              
+
+
+                <style>
+                    .grandBlocnote
+{
+        display: flex;
+       
+        width: 185px;
+        height: 70px;
+        
+        font-size: 45px;
+        background-color: rgba(255,255,255,0.5);
+}
+ 
+.grandBlocnote div
+{
+    float:right;
+    color: gray;
+    text-decoration: none;
+    -webkit-transition: color .4s;
+    -moz-transition: color .4s;
+    -o-transition: color .4s;
+    transition: color .4s;
+}
+ 
+.grandBlocnote div:hover,
+.grandBlocnote div:hover ~ div,
+.grandBlocnote div:focus,
+.grandBlocnote div:focus ~ div
+{
+    color: orange;
+    cursor: pointer;
+}
+ 
+.grandBlocnote
+{
+    direction: rtl;
+}
+ 
+
+
+                </style>
+
+                <h1 class="d-flex justify-content-start text-warning listing-item__header">{{Item.prix}} F Cfa</h1>
+                <h1 class="d-flex justify-content-start listing-item__header">{{Item.title}}</h1>
+  
+                    <div class="listing-item__address">
+                        <span class="d-flex justify-content-start listing-item__address-location">{{Item.lieuPub}}</span>
+                    </div>
+  
+  
+  
+                    <div class="d-flex justify-content-start listing-item__title">Description</div>
+                    <div class="d-flex justify-content-start listing-item__description">
+                        <p>{{Item.description}}</p>
+                    </div>
+
+
+                <small>
+                    <span class="text-primary">{{Item.users.nom}}</span> |
+                    <span class="text-secondary">11-01-2023 à 07:20:17</span> |
+                    <span class="text-warning">Vue : {{Item.nbreVues}} fois</span> |
+                    <span class="text-danger">10 Commentaires</span>
+                </small>
+            
+                <hr class="m-0">
+            
+            
+                <hr>
+            
+                <h3 class="mb-5">10 Commentaires Verifies</h3>
+            
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Nash</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Il y 1h</h6>
+                    <p class="card-text">J'ai achete ce produit et il est authentique</p>
+                    <small>
+                        <a href="#" class="card-link">Repondre</a>
+                        <a href="#" class="card-link text-danger">Signaler</a>
+                    </small>
+                  </div>
+                </div>
+            
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Prince Ondongo</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Il y 2h</h6>
+                    <p class="card-text">
+                       Je vous conseille vivement cette article
+                    </p>
+                    <small>
+                        <a href="#" class="card-link">Liker</a>
+                        <a href="#" class="card-link text-danger">Signaler</a>
+                    </small>
+                  </div>
+                </div>
+
+
+
+
+                
+             
+
+                  <div class="listing-item__safety-tips">
+                      <h3 class="d-flex justify-content-start">Conseils de sécurité</h3>
+                      <ul>
+                          <li class="d-flex justify-content-start">Ne payez pas d’avance, même pour la livraison.</li>
+                          <li class="d-flex justify-content-start">Rencontrez le vendeur dans un lieu public sûr.</li>
+                          <li class="d-flex justify-content-start">Inspectez l’Item et assurez-vous que c’est exactement ce que vous voulez.</li>
+                          <li class="d-flex justify-content-start">Assurez-vous que l’Item emballé est celui que vous avez inspecté.</li>
+                          <li class="d-flex justify-content-start">Ne payez que si vous êtes satisfait.</li>
+                      </ul>
+                      <a href="https://www.expat-dakar.com/qui-sommes-nous" class="listing-item-safety__link" target="_blank">Lisez nos conseils de sécurité</a>
+                  </div>
+              </div>
+              <div class="listing-item-share listing-item__share">
+                  <span class="listing-item-share__title">Partager</span>
+                 <a href="https://wa.me/221778374889" target="_blank">
+                      <img src="https://img.icons8.com/color/256/whatsapp.png" alt="Contacter via WhatsApp" width="30px" height="30px">
+                 </a>
+                  <a href="mailto:adresse-email@example.com">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/OOjs_UI_icon_message.svg/1200px-OOjs_UI_icon_message.svg.png" width="30px" height="30px" alt="">
+                  </a>
+                  <a href="https://www.facebook.com/votrepagacebook" target="_blank">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/2048px-2021_Facebook_icon.svg.png" alt="Suivez-nous sur Facebook" width="30px" height="30px">
+                  </a>
+                  <a href="https://twitter.com/votrecomptetwitter" target="_blank">
+                      <img src="https://www.u-paris2.fr/sites/default/files/photo_image/icone-twitter-ronde.png" alt="Suivez-nous sur Twitter" width="30px" height="30px">
+                  </a>
+
+              </div>
+          </div>
+      </div>
+
+
+      <div class="listing-page__sidebar">
+          <div class="listing-page__sidebar__container">
+              <div class="listing-page__sidebar__inner listing-page__sidebar__inner--transparency" id="transparency">
+                  <div class="listing-item-transparency">
+                      <div class="listing-item-transparency__member">
+                          <div class="listing-item-transparency__image">
+                              <span class="avatar">
+                                  <img src="https://th.bing.com/th/id/R.babb3d08bb51364499b5a3f62b5b8e20?rik=Wr9We6VA5HUc4g&pid=ImgRaw&r=0" width="80px" height="80px"/>
+                              </span>
+                          </div>
+                          <div class="listing-item-transparency__title">{{Item.users.nom}}</div>
+                          <span class="listing-item-transparency__member-since">Membre depuis<br />Hier</span>
+                      </div>
+                      <div class="listing-item-transparency__verified">
+                          <div class="listing-item-transparency__verified__title">Vérifié via : </div>
+                          <div class="listing-item-transparency__verified__list">
+                              <svg class="i i-check listing-item-transparency__verified__icon" aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#check"></use></svg>Numéro de portable : {{Item.users.tel}}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="listing-page__sidebar__inner listing-page__sidebar__inner--more"></div><!--googleoff: index--><div class="listing-page__sidebar__inner listing-page__sidebar__inner--contact" id="contact"><div class="listing-item-contact"><div class="listing-item-contact__header">
+              <div class="listing-item-contact__header__title">Contacte Vendeur</div>
+          </div>
+          <div class="listing-item-contact__contact-phone">
+              <div class="listing-item-contact__contact-phone__title">Contacter par Téléphone</div>
+
+              <div class="listing-item-contact__contact-phone__container listing-item-contact__contact-phone__container--visible">
+                  <a href="https://api.whatsapp.com/send?phone=+221{{Item.users.tel}}&text=Bonjour%2C%20je%20suis%20intéressé%20par%20vos%20produits." class="mb-3 btn btn-whatsapp btn-block" href="">
+                      <svg class="i i-whatsapp btn__i btn__i--left" aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#whatsapp"></use></svg>WhatsApp
+                  </a>
+              </div>
+
+              <div class="listing-item-contact__contact-phone__container listing-item-contact__contact-phone__container--phone ">
+                  <svg class="i i-phone listing-item-contact__contact-phone__icon" aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#phone"></use></svg>
+                  <div class="listing-item-contact__contact-phone__container-inner">
+                      <a href="tel:+221779744643" class="listing-item-contact__contact-phone__number" rel="noopener noindex nofollow" data-t-enquiry-submit="" data-t-contact_type="phone" data-t-contact_context="listing" data-t-listing_id="5547799" data-t-listing_title="Articles bébé" data-t-listing_type="classified" data-t-listing_category_title="Enfant &amp; bébé" data-t-listing_category_slug="enfant-bebe" data-t-listing_slug="annonces-bebe" data-t-listing_price="0.00" data-t-listing_currency="XOF" data-t-listing_location_title="Hlm" data-t-listing_source="ed_sn" data-t-listing_product_slugs="listing" data-t-listing_context="view">
+                        779744643</a>
+                  </div>
+              </div>
+              <form method="POST" action="https://www.expat-dakar.com/Item/annonces-bebe-5547799/view-phone" >
+                  <input name="_token" type="hidden" value="ifn1WoXGnqL6JKR2FO46SoZ8ulZPN9A1SfOdUHWc">
+                  <a href="tel:+221{{Item.users.tel}}" type="submit" class="btn btn-primary btn-block listing-item-contact__contact-phone__show-btn">
+                      <svg class="i i-phone btn__i btn__i--left" aria-hidden="true">
+                      <use xlink:href="tel:+221{{Item.users.tel}}"></use>
+                      </svg>Afficher le numéro</a>
+              </form>
+          </div>
+              <div class="listing-item-contact__contact-chat">
+                  <div class="listing-item-contact__contact-chat__title">Contacter via Chat</div>
+                  <object class="listing-item-contact__contact-chat__container listing-item-contact__contact-chat__container--visible" alt="Contacter via Chat">
+                      <form method="GET" action="https://www.expat-dakar.com/compte/profile/mobile-verify/send" accept-charset="UTF-8" class="listing-item-contact__contact-chat__container-inner" data-t-enquiry-auth="" data-t-contact_type="chat" data-t-contact_context="listing" data-t-listing_id="5547799" data-t-listing_title="Articles bébé" data-t-listing_type="classified" data-t-listing_category_title="Enfant &amp; bébé" data-t-listing_category_slug="enfant-bebe" data-t-listing_slug="annonces-bebe" data-t-listing_price="0.00" data-t-listing_currency="XOF" data-t-listing_location_title="Hlm" data-t-listing_source="ed_sn" data-t-listing_product_slugs="listing" data-t-listing_context="view"><input name="redirect" type="hidden" value="https://www.expat-dakar.com/Item/annonces-bebe-5547799"><input name="require_mobile_verified" type="hidden" value="1"><input name="trigger_contact[id]" type="hidden" value="5547799">
+                          <input name="trigger_contact[type]" type="hidden" value="chat">
+                          <button type="submit" class="btn btn-primary btn-block listing-item-contact__contact-chat__show-btn" aria-label="Contacter via Chat">
+                              <svg class="i i-chat btn__i btn__i--left" aria-hidden="true">
+                                  <use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#chat"></use>
+                              </svg>Commencez à discuter
+                          </button>
+                      </form>
+                  </object>
+              </div>
+              <div class="listing-item-contact__enquiry__favourite">
+                  <div class="listing-favourite listing-favourite--not-favourite" data-listing-favourite="" data-listing-favourite-active-class="listing-favourite--is-favourite" data-listing-favourite-inactive-class="listing-favourite--not-favourite">
+                      <form method="POST" action="https://www.expat-dakar.com/favourites/annonces-bebe-5547799" accept-charset="UTF-8" class="listing-favourite__action listing-favourite__action--unfavourite" data-listing-favourite-unfavourite="" data-t-unfavourite="">
+                          <input name="_method" type="hidden" value="DELETE">
+                          <input name="_token" type="hidden" value="ifn1WoXGnqL6JKR2FO46SoZ8ulZPN9A1SfOdUHWc">
+                          <button type="submit" class="btn btn-danger btn-block">
+                              <svg class="i i-heart btn__i btn__i--left" aria-hidden="true">
+                                  <use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#heart"></use>
+                              </svg>Supprimer des favoris</button>
+                      </form>
+
+
+
+
+
+
+
+
+
+                    
+
+                      <form action="" method="POST">
+                      
+                        <input name="_token" type="hidden" value="ifn1WoXGnqL6JKR2FO46SoZ8ulZPN9A1SfOdUHWc">
+                        <a href="{{ url_for('ajouter_favoriBack', id_annonce=Item.id) }}" type="submit" class="btn btn-secondary btn-block">
+                            <i class="fa-solid fa-heart" style="color: #ff0000;"></i> Favoris
+                        </a>
+                        
+                      </form>
+
+
+
+
+                  </div>
+              </div>
+          </div>
+          </div><!--googleon: index-->
+              <div class="listing-page__sidebar__inner listing-page__sidebar__inner--push-notification" data-onesignal="{&quot;subscribeElement&quot;:&quot;[data-onesignal-subscribe]&quot;,&quot;unsubscribeElement&quot;:&quot;[data-onesignal-unsubscribe]&quot;,&quot;showClass&quot;:&quot;listing-item-push-notification--visible&quot;,&quot;hideClass&quot;:&quot;listing-item-push-notification--hidden&quot;}" style="display: block;"><div class="listing-item-push-notification listing-item-push-notification--visible" data-onesignal-subscribe="">
+                  <div class="listing-item-push-notification__icon">
+                      <div class="ic listing-item-push-notification__icon-inner">
+                         <img src="https://cdn-icons-png.flaticon.com/512/181/181539.png" width="50px" height="50px"/>
+                      </div>
+                  </div>
+                  <div class="listing-item-push-notification__content">
+                  <div class="listing-item-push-notification__title">Activer les notifications</div>
+                  <div class="listing-item-push-notification__description">Pour recevoir les dernières mises à jour et actualités</div>
+                  <div class="listing-item-push-notification__cta"><span class="btn btn-secondary">Souscrire</span></div>
+              </div>
+              </div>
+                  <div class="listing-item-push-notification listing-item-push-notification--hidden" data-onesignal-unsubscribe=""><div class="listing-item-push-notification__icon"><div class="ic listing-item-push-notification__icon-inner"><svg class="i i-bell-off-outline " aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#bell-off-outline"></use></svg></div></div><div class="listing-item-push-notification__content">
+                      <div class="listing-item-push-notification__title">Désactiver les notifications</div>
+                      <div class="listing-item-push-notification__description">Pour ne plus recevoir les dernières mises à jour et actualités</div>
+                      <div class="listing-item-push-notification__cta"><span class="btn btn-secondary">Se désabonner</span></div>
+                  </div>
+                  </div>
+              </div>
+              <div class="listing-page__sidebar__inner listing-page__sidebar__inner--report">
+                  <div class="listing-item-report">
+                      <a href="#report" class="btn btn-secondary btn-block listing-item-report__link" data-listing-report-abuse="">
+                          <svg class="i i-alert listing-item-report__link-icon" aria-hidden="true"><use xlink:href="https://www.expat-dakar.com/assets/ed-site/icons/map.caece3cf.svg#alert"></use></svg>Signaler cette Item</a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  </div>
+</div>
+
+<br><br>
+
+
+
+  {%endblock%}
