@@ -1,0 +1,34 @@
+{% extends "layout/baseEldy.html" %}
+
+{% block title %}
+    {{super()}} | 404
+{% endblock title %}
+
+
+{% block content %}
+
+<br><br>
+<div style="text-align:center">
+    <h1 style="color: #d85629;
+   
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-shadow: 4px 1px 0 rgba(242,149,65,.2);
+    text-transform: uppercase;">Oops !!!</h1>
+
+    <p style=" color: #616161;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.5;">Pas de resultat nous sommes désolés!<br>
+    
+
+    Nous n'avons pas trouvé de correspondance pour votre requête de recherche aujourd'hui
+        Corrigeons ça </p>
+
+        <a href="{{url_for('Shop')}}" class="btn" style="background-color:#d85629;border: 1px solid transparent;border-color: #d85629;
+        color: #fff;display: inline-block;">Retour au shop</a>
+    </div>
+{% endblock content %}
+
+

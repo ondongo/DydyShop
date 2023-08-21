@@ -1,0 +1,166 @@
+<!--affiche parent-->
+{% extends "./layout/baseAdmin.html" %}
+{% block title %}{{ super() }}|Accueil{% endblock title %}
+{% block content %}
+        <div class="row ">
+                <div class="col-3 ">
+                        <ul class="menu-nav__list">
+                                <br>
+                                <li class="menu-nav__list-item menu-nav__list-item__header menu-nav__list-item__header-user">Compte/Profil</li>
+                                {% if current_user.is_authenticated %}
+                                        <li class="menu-nav__list-item">Bienvenue, {{ current_user.nom }}</li>
+                                {% endif %}
+                                <li class="menu-nav__list-item">
+                                        <a href="{{ url_for("logout") }}"> <i class="fa-solid fa-key"></i> Deconnexion</a>
+                                </li>
+                                <hr class="menu-nav__list-item__divider">
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="{{ url_for("gestionAnnonce") }}" class="text-black">Accueil</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation menu-nav__list-item__active ">
+                                        <a href="{{ url_for("publierAnnonce") }}" class="text-blue">Gerer Annonces</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="{{ url_for("publierAnnonce") }}"class="text-black">publier Item</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="{{ url_for("articles_favoris") }}" class="text-black">Mes Favoris</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="#" class="text-black">Mon Showroom</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="#" class="text-black">Mon Profil</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="#" class="text-black">Mes Messages</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a href="#" class="text-black">Mon Profil Cv</a>
+                                </li>
+                                <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">
+                                        <a class="text-black"
+                                           href="{{ url_for('chatAdmin',recipient_id=current_user.id) }}">chat</a>
+                                </li>
+                        </div>
+                </ul>
+                <div class="col-9" style="border-left: 1px solid #adb5bd; height:100%; ">
+                        <br>
+                        <li class="menu-nav__list-item menu-nav__list-item__user-navigation ">Gérer mes annonces</li>
+                        <br>
+                        <div class="btn-group " style="background:#f0f0f0">
+                                <a href="{{ url_for("gestionAnnonce_Brouillon") }}"
+                                   class="btn btn-lg text-secondary {% if request.path == '/admin/listings/Brouillon' %}bg-primary text-white activedGloire{% endif %}"
+                                   aria-current="page">Brouillons <span class="badge text-bg-warning">{{ count_brouillon }}</span></a>
+                                <a href="#" class="btn btn-lg text-secondary ">En attente de Validation</a>
+                                <a href="{{ url_for("gestionAnnonce") }}"
+                                   class=" btn btn-lg text-secondary {% if request.path == '/admin/listings' %}bg-primary text-white activedGloire{% endif %}">En ligne <span class="badge text-bg-warning">{{ count_publier }}</span></a>
+                                <a href="#" class="btn btn-lg text-secondary ">Expirées</a>
+                                <a href="" class="btn btn-lg text-secondary">Hors ligne</a>
+                                <a href="{{ url_for("gestionAnnonce_Corbeille") }}"
+                                   class="btn btn-lg text-secondary {% if request.path == '/admin/listings/Corbeille' %}bg-primary text-white activedGloire{% endif %}">Rejetées <span class="badge text-bg-warning">{{ count_corbeille }}</span></a>
+                        </div>
+                        <br>
+                        <br>
+                        <div class="row">
+                                <div class="col-4">
+                                        <form class="navbar-search form-inline "
+                                              method="GET"
+                                              action="{{ url_for("recherche_annonAvancee") }}"
+                                              id="navbar-search-main">
+                                                <div class="input-group input-group-merge search-bar col-4">
+                                                        <input type="text"
+                                                               class="form-control"
+                                                               name="searchAvance"
+                                                               style="background:#f8f9fa"
+                                                               id="topbarInputIconLeft"
+                                                               placeholder="Je recherche ..."
+                                                               aria-label="Search"
+                                                               aria-describedby="topbar-addon">
+                                                </div>
+                                        </form>
+                                </div>
+                                <div class="col-8"></div>
+                                <!--Fin Row-->
+                        </div>
+                        <br>
+                        {% for Item in annonces %}
+                                {% set img = Item.img_url %}
+                                {% if not Item.img_url : %}
+                                        {% set img = config['NO_PHOTO'] %}
+                                {% endif %}
+                                {% if Item.published == False : %}
+                                        {% set btn_class = "primary" %}
+                                        {% set tap = "" %}
+                                {% else: %}
+                                        {% set btn_class = "secondary" %}
+                                        {% set tap = "disabled" %}
+                                {% endif %}
+                                {% if Item.deleted == False : %}
+                                        {% set btn_class_del = "danger" %}
+                                        {% set tap_del = "" %}
+                                {% else: %}
+                                        {% set btn_class_del = "secondary" %}
+                                        {% set tap_del = "disabled" %}
+                                {% endif %}
+                                <div class="row shadow-lg p-4 mb-5 bg-light ">
+                                        <div class="row pb-3 ">
+                                                <div class="col-3">
+                                                        <img class="d-block w-100" src="{{ img }}" width="" height="" alt="{{ Item.img_title }}">
+                                                </div>
+                                                <div class="col-2">
+                                                        <h4>{{ Item.title }}</h4>
+                                                </div>
+                                                <div class="col-7"></div>
+                                        </div>
+                                        <div class="row pb-3 shadow mb-5 p-3 bg-secondary">
+                                                <div class="col-4">
+                                                        <div class="btn-group dropup">
+                                                                <button type="button"
+                                                                        class="btn btn-secondary dropdown-toggle"
+                                                                        data-bs-toggle="dropdown"
+                                                                        aria-expanded="false">
+                                                                        <i class="fa-brands fa-whatsapp"></i> 0 <i class="fa-solid fa-eye"></i>  {{ Item.nbreVues }} <i class="fa-solid fa-phone-volume"></i> 0
+                                                                </button>
+                                                                <ul class="dropdown-menu">
+                                                                        <li>appel Vue whatsapp</li>
+                                                                </ul>
+                                                        </div>
+                                                </div>
+                                                <div class="col-8"></div>
+                                        </div>
+                                        <div class="row pb-5 ">
+                                                <div class="col-4">
+                                                        <a href="{{ url_for('un_publishAnnonce',id_annonce=Item.id) }}"
+                                                           class="btn btn-{{ btn_class }} btn-sm {{ tap }}">Publication</a>
+                                                        <a href="{{ url_for('editAnnonce',id_annonce=Item.id) }}"
+                                                           class="btn btn-warning btn-sm"><i class="fa-solid fa-pen"></i></a>
+                                                        <a href="{{ url_for('un_deleteAnnonce',id_annonce=Item.id) }}"
+                                                           class="btn btn-{{ btn_class_del }} btn-sm {{ tap_del }}">Supprimer</a>
+                                                </div>
+                                                <div class="col-6"></div>
+                                                <div class="col-2">
+                                                        <div class="dropdown">
+                                                                <button class="btn btn-secondary btn-sm dropdown-toggle"
+                                                                        type="button"
+                                                                        data-bs-toggle="dropdown"
+                                                                        aria-expanded="false">
+                                                                        <i class="fa-solid fa-pen"></i>
+                                                                </button>
+                                                                <ul class="dropdown-menu">
+                                                                        <li>
+                                                                                <button class="dropdown-item" type="button">Supprimer</button>
+                                                                        </li>
+                                                                        <li>
+                                                                                <button class="dropdown-item" type="button">Modifier</button>
+                                                                        </li>
+                                                                </ul>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                        <!--FIn BOUCLE-->
+                                {% endfor %}
+                        </div>
+                </div>
+        </div>
+{% endblock %}

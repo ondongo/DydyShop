@@ -1,0 +1,115 @@
+ <!-- Page Preloder -->
+ <div id="preloder">
+  <div class="loader"></div>
+</div>
+
+<!-- Offcanvas Menu Begin -->
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+  <div class="offcanvas__close">+</div>
+  <div class="row">
+    
+      <div class="offcanvas__logo ">
+        <a href="./index.html"><img src="{{ url_for('static',filename='eldyCss/img/logo.png') }}"  width="150px" height="50px" alt="" /></a>
+      </div>
+    
+    
+      <ul class="offcanvas__widget mt-3">
+        <li><span class="icon_search search-switch"></span></li>
+        <li>
+          <a href="#">
+            <span class="icon_heart_alt"></span>
+            <div class="tip">2</div>
+          </a>
+        </li>
+        <li>
+          <a href="{{url_for('Panier')}}">
+            <span class="icon_bag_alt"></span>
+            <div class="tip">{{ session['panier']|length }}</div>
+          </a>
+        </li>
+      </ul>
+   
+  </div>
+  
+  <div id="mobile-menu-wrap"></div>
+  <div class="offcanvas__auth">
+    <a  href="{{url_for('login')}}">Connexion</a>
+    <a  href="{{url_for('login')}}">Inscription</a>
+  </div>
+</div>
+
+
+<header class="header">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-3 col-lg-2">
+        <div class="header__logo">
+          <a href="./index.html"
+            ><img src="{{ url_for('static',filename='eldyCss/img/logo.png') }}"  width="150px" height="45px" alt=""
+          /></a>
+        </div>
+      </div>
+      <div class="col-xl-6 col-lg-7">
+        <div class="row">
+            <nav class="header__menu col-lg-6 mt-2">
+                <ul>
+                    <li class="active"><a href="{{url_for('Article')}}">Accueil</a></li>
+                    <li><a href="{{url_for('Shop')}}">Shop</a></li>
+                    <li><a href="#">Sacs</a></li>
+                    <li><a href="#">Robes</a></li>
+                </ul>
+            </nav>
+
+
+            <style>
+              input[type="search"]:focus {
+                border: 1px solid #d85629;
+              }
+            </style>
+           
+            <form class="form-inline  header__menu col-lg-6"  method="GET" action="{{ url_for('recherche_annon') }}">
+              <input class="form-control mr-sm-2" type="search"   name="querygloire" placeholder="Cherchez un produit">
+              <button class="btn my-2 my-sm-0 pc" type="submit" style="background:#d85629; color:aliceblue">Rechercher</button>
+            </form>
+        </div>
+    </div>
+    
+      
+
+
+
+      <div class="col-lg-3">
+        <div class="header__right">
+          <div class="header__right__auth">
+            <a  href="{{url_for('login')}}">Connexion</a>
+            <a  href="{{url_for('login')}}">Inscription</a>
+          </div>
+          <ul class="header__right__widget">
+          
+            <li>
+              <a href="#"
+                ><span class="icon_heart_alt"></span>
+                <div class="tip" style="background-color: #d85629">2</div>
+              </a>
+            </li>
+            <li>
+              <a href="{{url_for('Panier')}}"
+                ><span class="icon_bag_alt"></span>
+                 <div class="tip"  style="background-color: #d85629">{{ session['panier']|length }}</div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+
+
+
+    </div>
+    <div class="canvas__open">
+      <i class="fa fa-bars"></i>
+    </div>
+  </div>
+</header>

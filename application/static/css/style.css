@@ -1,0 +1,35 @@
+a{
+  text-decoration: none;
+}
+
+.activex{
+  background-color:aliceblue;
+  color: #487fc1;
+}
+
+
+.activedGloire{
+  background-color:#487fc1;
+  color:aliceblue;
+}
+
+.activedGloire:hover{
+  background-color:#f0811d;
+}
+.colorEldy{
+  color:gray;
+}
+.colorEldy:hover{
+  color:#f0811d;
+}
+
+
+.colorNano{
+  color:#f0811d;
+}
+
+
+
+
+
+
