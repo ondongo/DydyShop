@@ -245,20 +245,26 @@ def un_deleteFavorite(favorite:Favorite):
 #========---------Mettre Au panier
 def transfer_session_cart_to_db_cart(user_id, session_cart):
     user_cart = CartItem.query.filter_by(user_id=user_id).first()
+    
+    # Si le panier de l'utilisateur n'existe pas, créez-en un nouveau
     if not user_cart:
         user_cart = CartItem(user_id=user_id)
         db.session.add(user_cart)
         db.session.commit()
 
     for product_id in session_cart:
-        cart_item = CartItem.query.filter_by(cart=user_cart, annonce_id=product_id).first()
+        cart_item = CartItem.query.filter_by(annonce_id=product_id, user_id=user_id).first()
+
+        # Si le produit est déjà dans le panier de l'utilisateur, augmentez la quantité
         if cart_item:
             cart_item.quantity += 1
         else:
-            cart_item = CartItem(cart=user_cart, annonce_id=product_id, quantity=1 )
+            # Sinon, ajoutez le produit au panier de l'utilisateur avec une quantité de 1
+            cart_item = CartItem(user_id=user_id, annonce_id=product_id, quantity=1)
             db.session.add(cart_item)
 
     db.session.commit()
+
 
 
 #************************************ USER REQUETES ***********************************
