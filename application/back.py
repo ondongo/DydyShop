@@ -109,6 +109,12 @@ def edit():
 
 
 #************************************Save ***********************************
+photos = UploadSet("photos", IMAGES)
+# Configurez Flask-Uploads pour gérer les téléchargements d'images
+configure_uploads(app, photos)
+
+
+
 @app.route("/save", methods=["POST"])
 def save():
     id_annonce = request.form.get("id_annonce")
@@ -126,6 +132,8 @@ def save():
     #     publish_form = True
 
     publish_form = False if not publish_form else True
+        # Vérifiez si l'utilisateur a téléchargé des images
+    images = request.files.getlist("images")
 
     # Creer un objet de type Item
     new_annonce = Item(
@@ -142,6 +150,10 @@ def save():
     )
     
     saveAnnonce(new_annonce)
+        for image in images:
+        if image and allowed_file(image.filename):
+            filename = photos.save(image)
+            new_annonce.img_urls.append(filename)
     return redirect(url_for("gestionArticle"))
     
 
@@ -377,7 +389,7 @@ def Panier():
 
 
 # ===================================================================
-# ============================= Gestion des commandes =========================================
+# ============================= Gestion des commandes ===============
 # =====================================================================
 @app.route('/checkout')
 def checkout():
