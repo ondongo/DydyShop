@@ -12,6 +12,12 @@ from application.models.EnumColorAndSize import EnumColor, EnumSize
 db = SQLAlchemy(app)
 
 
+class Image(db.Model):
+    __tablename__ = 'images'
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
+
 
 class Favorite(db.Model):
     __tablename__ = "favorites"
