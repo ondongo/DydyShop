@@ -374,6 +374,81 @@ def Panier():
     
     return render_template("/pages/panier.html", items_in_cart=items_in_cart)
 
+
+
+# ===================================================================
+# ============================= Gestion des commandes =========================================
+# =====================================================================
+@app.route('/checkout')
+def checkout():
+    # Obtenez les détails des articles dans le panier à partir de votre base de données
+    cart_items = get_cart_items()
+
+    # Créez un message de vérification en convertissant les détails du panier en texte
+    checkout_message = create_checkout_message(cart_items)
+
+    # Envoyez le message WhatsApp (utilisez vos propres informations Twilio)
+    send_whatsapp_message(checkout_message)
+
+    # Réinitialisez le panier après la commande
+    clear_cart()
+
+    flash('Votre commande a été passée avec succès!', 'success')
+    return redirect(url_for('index'))
+
+# Fonction pour obtenir les détails des articles dans le panier depuis la base de données
+def get_cart_items():
+    cart_items = CartItem.query.all()
+    cart_item_details = []
+
+    for cart_item in cart_items:
+        item = Item.query.get(cart_item.annonce_id)
+        if item:
+            item_details = {
+                'name': item.title,
+                'price': item.prix,
+                'quantity': cart_item.quantity,
+            }
+            cart_item_details.append(item_details)
+
+    return cart_item_details
+
+# Fonction pour créer un message de vérification en convertissant les détails du panier en texte
+def create_checkout_message(cart_items):
+    message = "Votre commande :\n"
+    total_price = 0
+    for item in cart_items:
+        item_name = item['name']
+        item_price = item['price']
+        item_quantity = item['quantity']
+        total_price += item_price * item_quantity
+        message += f"{item_name} x{item_quantity}: {item_price * item_quantity}€\n"
+    message += f"Total : {total_price}€"
+    return message
+
+# Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
+def send_whatsapp_message(message):
+    account_sid = 'votre_account_sid'
+    auth_token = 'votre_auth_token'
+    client = Client(account_sid, auth_token)
+
+    # Utilisez le numéro de téléphone du vendeur et du client (à adapter à votre cas)
+    from_number = 'whatsapp:+votre_numero'
+    to_number = 'whatsapp:+numero_du_vendeur'
+
+    message = client.messages.create(
+        body=message,
+        from_=from_number,
+        to=to_number
+    )
+
+# Fonction pour réinitialiser le panier après la commande
+def clear_cart():
+    CartItem.query.delete()
+    db.session.commit()
+
+
+
 # ===================================================================
 # =============================404 Error=========================================
 # =====================================================================
