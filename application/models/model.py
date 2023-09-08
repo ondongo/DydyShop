@@ -185,7 +185,7 @@ def getAllAnnonceA_La_Une():
 
 
 #============Save objet de type article====================
-def saveAnnonce(Item: Item):
+def saveAnnonce(Item: Item , images: List[FileStorage]):
     db.session.add(Item)
     db.session.commit()
     
