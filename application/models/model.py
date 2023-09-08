@@ -191,7 +191,7 @@ def saveAnnonce(Item: Item , images: List[FileStorage]):
     for image in images:
         if image and allowed_file(image.filename):
             filename = photos.save(image)
-            img = Image(filename=filename, item=item)
+            img = Image(filename=filename, item_id=item.id)
             db.session.add(img)
     db.session.commit()
     
