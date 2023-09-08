@@ -266,7 +266,7 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def custom_login():
     if request.method == 'POST':
         login = request.form['login']
         password = request.form['pass']
@@ -288,6 +288,55 @@ def login():
             return render_template('/back/login.html')
     else:
         return render_template("/back/login.html")
+
+
+#*****************************Connexion avec Google·*********************************** 
+@app.route('/google-login')
+def google_login():
+    return google.authorize(callback=url_for('authorized', _external=True))
+
+@app.route('/google-logout'')
+def google_logout():
+    session.pop('google_token', None)
+    return redirect(url_for('index'))
+
+@app.route('/google-login/authorized')
+def google_authorized():
+    response = google.authorized_response()
+    if response is None or response.get('access_token') is None:
+        return 'Accès refusé : raison={} erreur={}'.format(
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+
+    session['google_token'] = (response['access_token'], '')
+    user_info = google.get('userinfo')
+    
+    # Vérifiez si l'utilisateur existe déjà dans la base de données par e-mail Google
+    existing_user = User.query.filter_by(email=user_info.data['email']).first()
+
+    if existing_user:
+        # Mettez à jour les informations de l'utilisateur si nécessaire
+        existing_user.google_id = user_info.data['id']
+        existing_user.full_name = user_info.data['name']
+        existing_user.profile_image = user_info.data['picture']
+        db.session.commit()
+    else:
+        # Créez un nouvel utilisateur dans la base de données
+        new_user = User(google_id=user_info.data['id'],
+                        email=user_info.data['email'],
+                        full_name=user_info.data['name'],
+                        profile_image=user_info.data['picture'])
+         saveUser(new_user)
+
+    # Continuez avec votre logique d'application ou redirigez l'utilisateur
+    return 'Connecté en tant que: ' + user_info.data['email']
+
+
+
+
+
+
 
 # Deconnexion
 @app.route('/logout')
