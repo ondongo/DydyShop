@@ -187,6 +187,12 @@ def getAllAnnonceA_La_Une():
 #============Save objet de type article====================
 def saveAnnonce(Item: Item , images: List[FileStorage]):
     db.session.add(Item)
+    # Enregistrez les images liées à l'annonce en base de données
+    for image in images:
+        if image and allowed_file(image.filename):
+            filename = photos.save(image)
+            img = Image(filename=filename, item=item)
+            db.session.add(img)
     db.session.commit()
     
 
