@@ -149,11 +149,6 @@ def save():
         # datePub=datetim
     )
     
-   
-        for image in images:
-        if image and allowed_file(image.filename):
-            filename = photos.save(image)
-            new_annonce.img_urls.append(filename)
          saveAnnonce(new_annonce, images)
     return redirect(url_for("gestionArticle"))
     
