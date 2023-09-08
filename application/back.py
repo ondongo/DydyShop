@@ -312,8 +312,8 @@ def google_authorized():
     session['google_token'] = (response['access_token'], '')
     user_info = google.get('userinfo')
     
-    # Vérifiez si l'utilisateur existe déjà dans la base de données par e-mail Google
-    existing_user = User.query.filter_by(email=user_info.data['email']).first()
+    # Vérifiez si l'utilisateur existe déjà dans la base de données par login Google
+    existing_user = User.query.filter_by(google_login=user_info.data['login']).first()
 
     if existing_user:
         # Mettez à jour les informations de l'utilisateur si nécessaire
@@ -324,14 +324,10 @@ def google_authorized():
     else:
         # Créez un nouvel utilisateur dans la base de données
         new_user = User(google_id=user_info.data['id'],
-                        email=user_info.data['email'],
-                        full_name=user_info.data['name'],
-                        profile_image=user_info.data['picture'])
-         saveUser(new_user)
-
-    # Continuez avec votre logique d'application ou redirigez l'utilisateur
-    return 'Connecté en tant que: ' + user_info.data['email']
-
+                        google_login=user_info.data['login'],
+                        nom=user_info.data['name'])
+                        #profile_image=user_info.data['picture'])
+        SaveUser(new_user)
 
 
 
