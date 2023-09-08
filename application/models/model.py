@@ -136,7 +136,7 @@ def getAllAnnonceRecent():
 #Visit
 def getAllAnnoncePublier():
     return (
-        Item.query.filter(Item.published == 1, Item.deleted == 0)
+        Item.query.filter(Item.published == True, Item.deleted == False)
         .order_by(desc(Item.datePub))
         .all()
     )
@@ -147,7 +147,7 @@ def getAllAnnoncePublier():
 #=====-----RequeteCorbeille
 def getAllAnnonceDel():
     return  (
-        Item.query.filter(Item.deleted == 1,Item.user_id==current_user.id)
+        Item.query.filter(Item.deleted == True,Item.user_id==current_user.id)
         .order_by(desc(Item.datePub))
         .all()
     )
@@ -157,7 +157,7 @@ def getAllAnnonceDel():
 def getAllAnnonceBrouillon():
     return (
         
-        Item.query.filter(Item.published == 0, Item.deleted == 0,Item.user_id==current_user.id)
+        Item.query.filter(Item.published == False, Item.deleted == False,Item.user_id==current_user.id)
         .order_by(desc(Item.datePub))
         .all()
     )
