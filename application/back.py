@@ -436,6 +436,8 @@ def create_checkout_message(cart_items):
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
+
+    #Quand je vais trouver Une Api non Payante Pour Whatsapp
     account_sid = 'votre_account_sid'
     auth_token = 'votre_auth_token'
     client = Client(account_sid, auth_token)
