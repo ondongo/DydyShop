@@ -109,6 +109,12 @@ def edit():
 
 
 #************************************Save ***********************************
+photos = UploadSet("photos", IMAGES)
+# Configurez Flask-Uploads pour gérer les téléchargements d'images
+configure_uploads(app, photos)
+
+
+
 @app.route("/save", methods=["POST"])
 def save():
     id_annonce = request.form.get("id_annonce")
@@ -126,6 +132,8 @@ def save():
     #     publish_form = True
 
     publish_form = False if not publish_form else True
+        # Vérifiez si l'utilisateur a téléchargé des images
+    images = request.files.getlist("images")
 
     # Creer un objet de type Item
     new_annonce = Item(
@@ -141,7 +149,7 @@ def save():
         # datePub=datetim
     )
     
-    saveAnnonce(new_annonce)
+         saveAnnonce(new_annonce, images)
     return redirect(url_for("gestionArticle"))
     
 
@@ -266,7 +274,7 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def custom_login():
     if request.method == 'POST':
         login = request.form['login']
         password = request.form['pass']
@@ -288,6 +296,51 @@ def login():
             return render_template('/back/login.html')
     else:
         return render_template("/back/login.html")
+
+
+#*****************************Connexion avec Google·*********************************** 
+@app.route('/google-login')
+def google_login():
+    return google.authorize(callback=url_for('authorized', _external=True))
+
+@app.route('/google-logout'')
+def google_logout():
+    session.pop('google_token', None)
+    return redirect(url_for('index'))
+
+@app.route('/google-login/authorized')
+def google_authorized():
+    response = google.authorized_response()
+    if response is None or response.get('access_token') is None:
+        return 'Accès refusé : raison={} erreur={}'.format(
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+
+    session['google_token'] = (response['access_token'], '')
+    user_info = google.get('userinfo')
+    
+    # Vérifiez si l'utilisateur existe déjà dans la base de données par login Google
+    existing_user = User.query.filter_by(google_login=user_info.data['login']).first()
+
+    if existing_user:
+        # Mettez à jour les informations de l'utilisateur si nécessaire
+        existing_user.google_id = user_info.data['id']
+        existing_user.full_name = user_info.data['name']
+        existing_user.profile_image = user_info.data['picture']
+        db.session.commit()
+    else:
+        # Créez un nouvel utilisateur dans la base de données
+        new_user = User(google_id=user_info.data['id'],
+                        google_login=user_info.data['login'],
+                        nom=user_info.data['name'])
+                        #profile_image=user_info.data['picture'])
+        SaveUser(new_user)
+
+
+
+
+
 
 # Deconnexion
 @app.route('/logout')
@@ -328,6 +381,81 @@ def Panier():
         items_in_cart = [Item.query.get(item_id) for item_id in session['panier']]
     
     return render_template("/pages/panier.html", items_in_cart=items_in_cart)
+
+
+
+# ===================================================================
+# ============================= Gestion des commandes ===============
+# =====================================================================
+@app.route('/checkout')
+def checkout():
+    # Obtenez les détails des articles dans le panier à partir de votre base de données
+    cart_items = get_cart_items()
+
+    # Créez un message de vérification en convertissant les détails du panier en texte
+    checkout_message = create_checkout_message(cart_items)
+
+    # Envoyez le message WhatsApp (utilisez vos propres informations Twilio)
+    send_whatsapp_message(checkout_message)
+
+    # Réinitialisez le panier après la commande
+    clear_cart()
+
+    flash('Votre commande a été passée avec succès!', 'success')
+    return redirect(url_for('index'))
+
+# Fonction pour obtenir les détails des articles dans le panier depuis la base de données
+def get_cart_items():
+    cart_items = CartItem.query.all()
+    cart_item_details = []
+
+    for cart_item in cart_items:
+        item = Item.query.get(cart_item.annonce_id)
+        if item:
+            item_details = {
+                'name': item.title,
+                'price': item.prix,
+                'quantity': cart_item.quantity,
+            }
+            cart_item_details.append(item_details)
+
+    return cart_item_details
+
+# Fonction pour créer un message de vérification en convertissant les détails du panier en texte
+def create_checkout_message(cart_items):
+    message = "Votre commande :\n"
+    total_price = 0
+    for item in cart_items:
+        item_name = item['name']
+        item_price = item['price']
+        item_quantity = item['quantity']
+        total_price += item_price * item_quantity
+        message += f"{item_name} x{item_quantity}: {item_price * item_quantity}€\n"
+    message += f"Total : {total_price}€"
+    return message
+
+# Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
+def send_whatsapp_message(message):
+    account_sid = 'votre_account_sid'
+    auth_token = 'votre_auth_token'
+    client = Client(account_sid, auth_token)
+
+    # Utilisez le numéro de téléphone du vendeur et du client (à adapter à votre cas)
+    from_number = 'whatsapp:+votre_numero'
+    to_number = 'whatsapp:+numero_du_vendeur'
+
+    message = client.messages.create(
+        body=message,
+        from_=from_number,
+        to=to_number
+    )
+
+# Fonction pour réinitialiser le panier après la commande
+def clear_cart():
+    CartItem.query.delete()
+    db.session.commit()
+
+
 
 # ===================================================================
 # =============================404 Error=========================================

@@ -12,6 +12,12 @@ from application.models.EnumColorAndSize import EnumColor, EnumSize
 db = SQLAlchemy(app)
 
 
+class Image(db.Model):
+    __tablename__ = 'images'
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
+
 
 class Favorite(db.Model):
     __tablename__ = "favorites"
@@ -67,6 +73,8 @@ class User(db.Model, UserMixin):
     tel = db.Column(db.String(200), nullable=False)
     login = db.Column(db.String(200), nullable=False)
     password = db.Column(db.String(5000), nullable=False)
+    google_id = db.Column(db.String(200), unique=True)
+    google_login = db.Column(db.String(200), unique=True)
     active = db.Column(db.Boolean, default=True)
     NbreAnnoncePub = db.Column(db.Integer, default=0)
     favorites = db.relationship('Favorite', backref='user', lazy='dynamic')
@@ -136,7 +144,7 @@ def getAllAnnonceRecent():
 #Visit
 def getAllAnnoncePublier():
     return (
-        Item.query.filter(Item.published == 1, Item.deleted == 0)
+        Item.query.filter(Item.published == True, Item.deleted == False)
         .order_by(desc(Item.datePub))
         .all()
     )
@@ -147,7 +155,7 @@ def getAllAnnoncePublier():
 #=====-----RequeteCorbeille
 def getAllAnnonceDel():
     return  (
-        Item.query.filter(Item.deleted == 1,Item.user_id==current_user.id)
+        Item.query.filter(Item.deleted == True,Item.user_id==current_user.id)
         .order_by(desc(Item.datePub))
         .all()
     )
@@ -157,7 +165,7 @@ def getAllAnnonceDel():
 def getAllAnnonceBrouillon():
     return (
         
-        Item.query.filter(Item.published == 0, Item.deleted == 0,Item.user_id==current_user.id)
+        Item.query.filter(Item.published == False, Item.deleted == False,Item.user_id==current_user.id)
         .order_by(desc(Item.datePub))
         .all()
     )
@@ -183,8 +191,14 @@ def getAllAnnonceA_La_Une():
 
 
 #============Save objet de type article====================
-def saveAnnonce(Item: Item):
+def saveAnnonce(Item: Item , images: List[FileStorage]):
     db.session.add(Item)
+    # Enregistrez les images liées à l'annonce en base de données
+    for image in images:
+        if image and allowed_file(image.filename):
+            filename = photos.save(image)
+            img = Image(filename=filename, item_id=item.id)
+            db.session.add(img)
     db.session.commit()
     
 
@@ -243,20 +257,26 @@ def un_deleteFavorite(favorite:Favorite):
 #========---------Mettre Au panier
 def transfer_session_cart_to_db_cart(user_id, session_cart):
     user_cart = CartItem.query.filter_by(user_id=user_id).first()
+    
+    # Si le panier de l'utilisateur n'existe pas, créez-en un nouveau
     if not user_cart:
         user_cart = CartItem(user_id=user_id)
         db.session.add(user_cart)
         db.session.commit()
 
     for product_id in session_cart:
-        cart_item = CartItem.query.filter_by(cart=user_cart, annonce_id=product_id).first()
+        cart_item = CartItem.query.filter_by(annonce_id=product_id, user_id=user_id).first()
+
+        # Si le produit est déjà dans le panier de l'utilisateur, augmentez la quantité
         if cart_item:
             cart_item.quantity += 1
         else:
-            cart_item = CartItem(cart=user_cart, annonce_id=product_id, quantity=1 )
+            # Sinon, ajoutez le produit au panier de l'utilisateur avec une quantité de 1
+            cart_item = CartItem(user_id=user_id, annonce_id=product_id, quantity=1)
             db.session.add(cart_item)
 
     db.session.commit()
+
 
 
 #************************************ USER REQUETES ***********************************
