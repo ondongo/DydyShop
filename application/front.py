@@ -389,8 +389,8 @@ def afficher_annoncesTri():
 # =====================================================================
 # =============================Voiture===========================
 # =====================================================================
-@app.route('/Filtre_desNeuf_Voitures')
-def Filtre_desNeuf_Voitures():
+@app.route('/FilterByDescription')
+def FilterByDescriptions():
     recolte = request.args.get('recolteMarque')
     annonces = Item.query.filter(Item.description.ilike(f"%{recolte}%")).all()
     
@@ -404,25 +404,11 @@ def Filtre_desNeuf_Voitures():
 
 
 
-@app.route('/Filtre_All')
-def Filtre_Voitures_All():
-    
-    annonces = (Item.query.filter(Item.published == 1, Item.deleted == 0,Item.categorie==EnumCategorie.Vehicules.name)
-        .order_by(desc(Item.datePub))
-        .all())
-    count =len(annonces)
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
 
 
 
-
-@app.route("/FiltreVehicules")
-def vehicules():
+@app.route("/FilterAll")
+def allFilter():
     #sousCategorieRecup=request.args.get('sousCategorie')
     CategoryRecup=request.args.get('Categories')
     #lieuxRecup=request.args.get('region')
