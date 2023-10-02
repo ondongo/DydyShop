@@ -8,6 +8,9 @@ from sqlalchemy import desc
 from flask_login import UserMixin, current_user
 
 from application.models.EnumColorAndSize import EnumColor, EnumSize
+from typing import List
+from werkzeug.datastructures import FileStorage
+
 
 db = SQLAlchemy(app)
 
@@ -54,8 +57,6 @@ class Item(db.Model):
     prix = db.Column(db.Float, nullable=True)
     categorie = db.Column(db.String(200))
     sousCategorie = db.Column(db.String(200))
-    img_url = db.Column(db.String(255), nullable=True)
-    img_title = db.Column(db.String(100), nullable=True)
     datePub = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     published = db.Column(db.Boolean, default=True)
     deleted = db.Column(db.Boolean, default=False)
@@ -191,7 +192,7 @@ def getAllAnnonceA_La_Une():
 
 
 #============Save objet de type article====================
-def saveAnnonce(Item: Item , images: List[FileStorage]):
+def saveAnnoncePersistance(Item: Item , images: List[FileStorage]):
     db.session.add(Item)
     # Enregistrez les images liées à l'annonce en base de données
     for image in images:

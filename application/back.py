@@ -9,12 +9,15 @@ from .front import app
 from sqlalchemy import desc
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
+#from flask_oauthlib.client import OAuth
 #Hash password
 import hashlib
 from flask_login import LoginManager,  login_user, logout_user, login_required, current_user
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
+
+from twilio.rest import Client
 
 
 
@@ -28,10 +31,10 @@ from application.models.model import(
     Favorite,
     ajouter_favori,
     findAnnonceById,
-    saveAnnonce,
     getAllAnnoncePublier,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
+    saveAnnoncePersistance,
     transfer_session_cart_to_db_cart,
     un_delete,
     un_deleteFavorite,
@@ -109,10 +112,6 @@ def edit():
 
 
 #************************************Save ***********************************
-photos = UploadSet("photos", IMAGES)
-# Configurez Flask-Uploads pour gérer les téléchargements d'images
-configure_uploads(app, photos)
-
 
 
 @app.route("/save", methods=["POST"])
@@ -137,11 +136,12 @@ def save():
 
     # Creer un objet de type Item
     new_annonce = Item(
+        id= id_annonce,
         title=title_form,
         description=description_form ,
         prix=prix_form,
         published=publish_form,
-        img_url=img_url_form,
+        #img_url=img_url_form,
         img_title=img_title_form,
         categorie=categorie_form,
         user_id=current_user.id,
@@ -149,7 +149,7 @@ def save():
         # datePub=datetim
     )
     
-         saveAnnonce(new_annonce, images)
+    saveAnnoncePersistance(new_annonce, images)
     return redirect(url_for("gestionArticle"))
     
 
@@ -274,7 +274,7 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def custom_login():
+def login():
     if request.method == 'POST':
         login = request.form['login']
         password = request.form['pass']
@@ -299,11 +299,31 @@ def custom_login():
 
 
 #*****************************Connexion avec Google·*********************************** 
+''' oauth = OAuth(app)
+
+
+google = oauth.remote_app(
+    'google',
+    consumer_key='YOUR_GOOGLE_CLIENT_ID',
+    consumer_secret='YOUR_GOOGLE_CLIENT_SECRET',
+    request_token_params={
+        'scope': 'openid email profile',  # Spécifiez les autorisations nécessaires
+    },
+    base_url='https://www.googleapis.com/oauth2/v1/',
+    request_token_url=None,
+    access_token_method='POST',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+)
+
+
+
+
 @app.route('/google-login')
 def google_login():
     return google.authorize(callback=url_for('authorized', _external=True))
 
-@app.route('/google-logout'')
+@app.route('/google-logout')
 def google_logout():
     session.pop('google_token', None)
     return redirect(url_for('index'))
@@ -339,7 +359,7 @@ def google_authorized():
 
 
 
-
+ '''
 
 
 # Deconnexion
@@ -434,23 +454,24 @@ def create_checkout_message(cart_items):
     message += f"Total : {total_price}€"
     return message
 
+
+
+account_sid = 'ACda1a374fc048affd076363ebd0f1bb5d'
+auth_token = '008dda7a6424142308e6c538b44dcdea'
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
-    account_sid = 'votre_account_sid'
-    auth_token = 'votre_auth_token'
     client = Client(account_sid, auth_token)
 
-    # Utilisez le numéro de téléphone du vendeur et du client (à adapter à votre cas)
-    from_number = 'whatsapp:+votre_numero'
-    to_number = 'whatsapp:+numero_du_vendeur'
-
     message = client.messages.create(
-        body=message,
-        from_=from_number,
-        to=to_number
+
+    from_='whatsapp:+14155238886',
+    body=message,
+    to='whatsapp:+221784603783'
     )
 
-# Fonction pour réinitialiser le panier après la commande
+    
+    
+
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
@@ -520,5 +541,4 @@ def delete_favorite(favorite_id):
         un_deleteFavorite(favorite)
     # Rediriger vers la page des favoris après la suppression
     return redirect(url_for('articles_favoris'))
-
 

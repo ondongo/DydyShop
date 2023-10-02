@@ -77,6 +77,12 @@ def index():
 @app.route("/Article")
 def Article():
     items = getAllAnnoncePublier()
+    annoncesTuniques = Item.query.filter_by(categorie=SousCategorieHomme.tunique.name).all()
+    annoncesSac = Item.query.filter_by(categorie=SousCategorieFemmme.sac.name).all()
+    annoncesEnsemble = Item.query.filter_by(categorie=SousCategorieFemmme.ensemble.name).all()
+    countTuniques =len(annoncesTuniques)
+    countSac =len(annoncesSac)
+    countEnsemble =len(annoncesEnsemble)
     count = len(items)
     page = request.args.get(get_page_parameter(), type=int, default=1)
     NbreElementParPage = 2
@@ -84,18 +90,14 @@ def Article():
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=count)
     items = items[offset: offset + NbreElementParPage]
     
-    # liste pour stocker les numéros de téléphone
-    # stocker les numéros de téléphone par utilisateur
-    
-
-    # Boucle sur chaque Item pour récupérer le numéro de téléphone de son auteur    
-    #Bof Mon many to one m a gere ca   
-            
     return render_template("/pages/index.html",
                            items=items,
                            categories=categories,
                            icons=icons,
                            count=count,
+                           countTuniques=countTuniques,
+                           countSac= countSac,
+                           countEnsemble=countEnsemble,
                            pagination=pagination,
                            sous_categories=sous_categories,
                            listesCatFemmes=listesCatFemmes,listesCatHommes=listesCatHommes)
@@ -314,30 +316,6 @@ def articles_par_sous_categorie():
     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
 
 
-
-# =====================Search-----Lieu
-@app.route('/Ann_lieu')
-def articles_par_lieu():
-    lieu = request.args.get('lieu')
-    
-    if lieu is None:
-        # Si la catégorie n'est pas spécifiée, afficher toutes les annonces
-        annonces = Item.query.all()
-        count =len(annonces)
-    else:
-        # Si la catégorie est spécifiée, filtrer par catégorie
-        annonces = Item.query.filter_by(lieuPub=lieu).all()
-        count_lieu =Item.query.filter_by(lieuPub=lieu).count()
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-        
-    
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count_lieu=count_lieu,pagination=pagination)
-
-
 # =====================Search-----Lieu
 @app.route('/Ann_Prix')
 def annonces_par_Prix():
@@ -421,8 +399,8 @@ def Filtre_Voitures_All():
 
 
 
-@app.route("/FiltreVehicules")
-def vehicules():
+@app.route("/FiltreMultiple")
+def multiples():
     #sousCategorieRecup=request.args.get('sousCategorie')
     CategoryRecup=request.args.get('Categories')
     #lieuxRecup=request.args.get('region')
@@ -446,83 +424,5 @@ def vehicules():
     annonces = annonces[offset: offset + NbreElementParPage]
     
     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
-
-
-
-
-# ===================================================================
-# =============================Chat Envoye Recevoir Avec Socketio  =========================================
-# =====================================================================
-
-#====================je vais dans mon fichier special.py
-
-# messages = []  # Liste pour stocker les messages
-
-# @app.route('/chat/<int:article_id>')
-# def chat(article_id):
-#     Item = Item.query.get(article_id)
-#     if Item:
-#         article_author = Item.users.nom
-#         return render_template("/pages/chat.html", article_author=article_author)
-#     else:
-#         return "Article not found"
-
-# @socketio.on('connect')
-# def handle_connect():
-#     print('Client connected!')
-
-# @socketio.on('user_join')
-# def handle_user_join(username):
-#     print(f'User {username} joined!')
-
-# @socketio.on('new_message')
-# def handle_new_message(data):
-#     message = data['message']
-#     recipient = data['recipient']
-#     sender = None
-
-#     for sid, user in socketio.server.manager.rooms[''].items():
-#         if user == request.sid:
-#             sender = sid
-#             break
-
-#     if recipient == article_author:
-#         emit('chat', {'message': message, 'sender': sender, 'recipient': recipient}, room=recipient)
-#     else:
-#         emit('chat', {'message': message, 'sender': sender}, broadcast=True)
-
-#         # Ajouter le message à la liste
-#         messages.append({'sender': sender, 'message': message})
-
-
-
-# @app.route('/Item/Recent', methods=['POST'])
-# def process_form():
-#     selected_value = request.form['select_field']
-#     annonces = getAnnoncesByDate('2023-03-28 03:37:35.970126')
-#     # Do something with the selected value
-#     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons)
-    
-
-
-
-
-
-
-
-
-# @app.route('/')
-# def index():
-#     # Accessing Enum members:
-#     my_etat =EnumEtatArticle.Reconditione.name
-
-#     # return 'my_etat is {}'.format(my_etat.value)
-#     return 'my_etat is {}'.format(my_etat)
-
-
-# articles = Article.query.order_by(Article.prix.asc()).all()
-# articles = Article.query.order_by(Article.prix.desc()).all()
-# # récupère les 10 articles les plus récents
-# articles = Article.query.order_by(Article.date.desc()).limit(10).all()
 
 
