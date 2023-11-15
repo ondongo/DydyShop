@@ -29,28 +29,29 @@
         </a>
       </li>
 
-
-        <li>
-      <div class="btn-group">
-        <a class="btn btn-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%">
-          <i class="fas fa-users"></i>
-        </a>
-        <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
-          <li><a class="dropdown-item" href="#">Accueil</a></li>
-          <li><a class="dropdown-item" href="#">Gérer Annonces</a></li>
-          <li><hr class="dropdown-divider"></li>
-               <li><a href="{{url_for('logout')}}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">
-  Déconnexion
-</a>
-</li>
-     
-        </ul>
-      </div>
-    </li>
+      <li>
+        <div class="btn-group">
+          <a class="btn btn-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%"><i class="fas fa-users"></i></a>
+          <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="#">Compte/Profil</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Accueil</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Gérer Annonces</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+            <li>
+              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
+            </li>
+          </ul>
+        </div>
+      </li>
     </ul>
   </div>
 
@@ -58,21 +59,18 @@
 
   {% if current_user.is_authenticated %}
     <div class="offcanvas__auth d-none">
-      <a href="{{ url_for('login') }}">Connexion</a>
-      <a href="{{ url_for('login') }}">Inscription</a>
+      <a href="{{ url_for('connexion') }}">Connexion</a>
+      <a href="{{ url_for('connexion') }}">Inscription</a>
     </div>
   {% else %}
-    <div class="offcanvas__auth ">
-      <a href="{{ url_for('login') }}">Connexion</a>
-      <a href="{{ url_for('login') }}">Inscription</a>
+    <div class="offcanvas__auth">
+      <a href="{{ url_for('connexion') }}">Connexion</a>
+      <a href="{{ url_for('connexion') }}">Inscription</a>
     </div>
-
-  
   {% endif %}
- 
-   
 </div>
 
+<!-- Header -->
 <header class="header">
   <div class="container-fluid">
     <div class="row">
@@ -92,7 +90,7 @@
                 <a href="{{ url_for('Shop') }}">Shop</a>
               </li>
               <li>
-                <a href="{{('Whatssap')}}">Sacs</a>
+                <a href="Whatssap">Sacs</a>
               </li>
               <li>
                 <a href="#">Robes</a>
@@ -113,17 +111,17 @@
         </div>
       </div>
 
-      <div class="col-lg-3 ">
+      <div class="col-lg-3">
         <div class="header__right">
           {% if current_user.is_authenticated %}
             <div class="header__right__auth d-none">
-              <a href="{{ url_for('login') }}">Connexion</a>
-              <a href="{{ url_for('login') }}">Inscription</a>
+              <a href="{{ url_for('connexion') }}">Connexion</a>
+              <a href="{{ url_for('connexion') }}">Inscription</a>
             </div>
           {% else %}
             <div class="header__right__auth">
-              <a href="{{ url_for('login') }}">Connexion</a>
-              <a href="{{ url_for('login') }}">Inscription</a>
+              <a href="{{ url_for('connexion') }}">Connexion</a>
+              <a href="{{ url_for('connexion') }}">Inscription</a>
             </div>
           {% endif %}
           <ul class="header__right__widget">
@@ -141,25 +139,29 @@
             </li>
             <li>
               <div class="btn-group">
-                <a class="btn btn-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%">
-                  <i class="fas fa-users"></i>
-                </a>
-                <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  
-                </button>
+                <a class="btn btn-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%"><i class="fas fa-users"></i></a>
+                <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
-                  <li><a class="dropdown-item" href="#">Accueil</a></li>
-                  <li><a class="dropdown-item" href="#">Gérer Annonces</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a href="{{url_for('logout')}}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">
-  Déconnexion
-</a>
-</li>
+                  <li>
+                    <a class="dropdown-item" href="#">Compte/Profil</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">Accueil</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">Gérer Annonces</a>
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider" />
+                  </li>
+                  <li>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
+                  </li>
                 </ul>
               </div>
             </li>
-        
+          </ul>
+        </div>
       </div>
     </div>
     <div class="canvas__open">

@@ -80,12 +80,16 @@ class User(db.Model, UserMixin):
     NbreAnnoncePub = db.Column(db.Integer, default=0)
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
     items = db.relationship("Item", backref="user", lazy=True)
+    roles = db.Column(db.String(50))
 
     def __repr__(self):
         return f"<User: {self.login}>"
 
     def check_password(self, password):
         return hashlib.md5(password.encode("utf-8")).hexdigest() == self.password
+
+    def is_admin(self):
+        return "admin" in self.roles
 
 
 class CartItem(db.Model):

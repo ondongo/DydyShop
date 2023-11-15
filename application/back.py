@@ -25,19 +25,20 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
+from functools import wraps
 
-from flask_principal import Principal, Permission, identity_changed, Identity
+# from flask_principal import Principal, Permission, identity_changed, Identity, RoleNeed
 
 # Créez une instance de l'extension Principal
-principal = Principal(app)
+# Principal(app)
 
 # Définissez les rôles disponibles
-admin_role = principal.RoleNeed("admin")
-user_role = principal.RoleNeed("user")
+# admin_role = RoleNeed("admin")
+# user_role = RoleNeed("user")
 
 # Définissez des autorisations basées sur les rôles
-admin_permission = Permission(admin_role)
-user_permission = Permission(user_role)
+# admin_permission = Permission(admin_role)
+# user_permission = Permission(user_role)
 
 
 from twilio.rest import Client
@@ -71,6 +72,18 @@ from application.models.model import (
 
 listcategories = list(EnumCategorie)
 # listEtats=list(EnumEtatArticle)
+
+
+def admin_required(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if current_user.is_authenticated and "admin" in current_user.roles:
+            return func(*args, **kwargs)
+        else:
+            # Gérer le cas où l'utilisateur n'est pas autorisé (redirection, message d'erreur, etc.)
+            abort(403)
+
+    return decorated_view
 
 
 # =====================================================================
@@ -190,6 +203,7 @@ def save():
 
 @app.route("/admin/gestion")
 @login_required
+@admin_required
 def gestionArticle():
     annonces = (
         Item.query.filter(
@@ -209,6 +223,7 @@ def gestionArticle():
 
 @app.route("/admin/dashboard")
 @login_required
+@admin_required
 def gestiondash():
     annonces = (
         Item.query.filter(
@@ -308,13 +323,15 @@ def creation_compte():
         # Hasher le mot de passe dans la base de données
         hashed_password = hashlib.md5(password.encode("utf-8")).hexdigest()
 
-        # Créez un nouvel utilisateur et enregistrez-le dans la base de données
+        role = "admin" if login_recup == "eldy@gmail.com" else "user"
+
         nouvel_utilisateur = User(
             nom=nom,
             prenom=prenom,
             tel=tel_recup,
             login=login_recup,
             password=hashed_password,
+            roles=role,
         )
 
         test_existance = User.query.filter_by(tel=tel_recup, login=login_recup).first()
@@ -323,12 +340,13 @@ def creation_compte():
             return redirect(url_for("creation_compte"))
         else:
             saveUser(nouvel_utilisateur)
+            # identity_changed.send(app, identity=Identity(nouvel_utilisateur.id, role))
 
             flash(
                 "Votre compte a été créé avec succès! Veuillez vous connecter.",
                 "success",
             )
-            return redirect(url_for("login"))
+            return redirect(url_for("connexion"))
 
     return render_template("/back/creation_compte.html")
 
@@ -339,8 +357,25 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+""" def change_user_role(user, new_role):
+    try:
+        print(
+            "==============Current User here ============================:",
+            user.id,
+            user.roles,
+        )
+        identity_changed.send(app, identity=Identity(user.id, new_role))
+        print("==============identity ============================:", Identity)
+
+    except IdentityChanged as e:
+        # Gérer l'exception (par exemple, imprimer un avertissement ou journaliser l'erreur)
+        print(f"Erreur lors du changement d'identité : {e}")
+
+ """
+
+
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def connexion():
     if request.method == "POST":
         login = request.form["login"]
         password = request.form["pass"]
@@ -356,11 +391,16 @@ def login():
                 session.pop("panier")
                 session.pop("total")
 
-            if user.email == "eldy@gmail.com":
-                identity_changed.send(app, identity=Identity(user.id, "admin"))
+            # change_user_role(current_user, "admin")
+
+            print(
+                "==============User roles after login============================:",
+                current_user.roles,
+            )
+            # print("============== admin_permission.can():", admin_permission.can())
+            if "admin" in current_user.roles:
                 return redirect(url_for("admin_dashboard"))
             else:
-                identity_changed.send(app, identity=Identity(user.id, "user"))
                 return redirect(url_for("index"))
         else:
             flash("Login ou mot de passe incorrect")
@@ -370,7 +410,7 @@ def login():
 
 
 @app.route("/admin/dashboard")
-@admin_permission.require(http_exception=403)
+@admin_required
 def admin_dashboard():
     return render_template("/back/dashboard.html")
 
@@ -444,6 +484,7 @@ def google_authorized():
 @login_required
 def logout():
     logout_user()
+    # identity_changed.send(app, identity=Identity(None))
     return redirect(url_for("index"))
 
 
@@ -556,6 +597,11 @@ def send_whatsapp_message(message):
 @app.errorhandler(404)
 def page404(error):
     return render_template("errors/404.html")
+
+
+@app.errorhandler(403)
+def forbidden(error):
+    return render_template("errors/403.html"), 403
 
 
 # ===================================================================
