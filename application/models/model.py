@@ -6,6 +6,8 @@ import logging as log
 
 from sqlalchemy import desc
 from flask_login import UserMixin, current_user
+from typing import List
+from werkzeug.datastructures import FileStorage
 
 from application.models.EnumColorAndSize import EnumColor, EnumSize
 
@@ -191,7 +193,7 @@ def getAllAnnonceA_La_Une():
 
 
 #============Save objet de type article====================
-def saveAnnonce(Item: Item , images: List[FileStorage]):
+""" def saveAnnonce(Item: Item , images: List[FileStorage]):
     db.session.add(Item)
     # Enregistrez les images liées à l'annonce en base de données
     for image in images:
@@ -201,7 +203,16 @@ def saveAnnonce(Item: Item , images: List[FileStorage]):
             db.session.add(img)
     db.session.commit()
     
-
+     """
+def create_item(new_item: Item):
+    db.session.add(new_item)
+    db.session.commit()
+    
+def add_images_to_item(item, image_filenames):
+    for filename in image_filenames:
+        new_image = Image(filename=filename, item_id=item.id)
+        db.session.add(new_image)
+    db.session.commit()
 
 #==============================---------Modifier Item
 
@@ -277,7 +288,9 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 
     db.session.commit()
 
-
+def clear_cart():
+    CartItem.query.delete()
+    db.session.commit()
 
 #************************************ USER REQUETES ***********************************
 
@@ -301,56 +314,6 @@ def init_db():
         db.create_all()
         
         log.warning("Base de donnees actualisee")
-
-# ==================Test---------------
-
-#01 ========== insert 
-@app.cli.command('insert-user')
-def insert_user():
-    user=User()
-    user.nom = 'ONDONGO'
-    user.prenom = 'PrinceDeGloire'
-    user.tel = '771592145'
-    user.login = 'gloireondongo1205@gmail.com'
-    user.password = '1234'
-    
-# ============save
-    
-    
-    user3 = User(
-        nom="Eldy",
-        prenom="ODG",
-        tel="78555555",
-        login="Eldy@yahoo.com",
-        password="171295"
-    )
-    # db.session.add(user3)
-    db.session.add_all([user,user3])
-    db.session.commit()
-    log.warning(f"{user} est bien inséré")
-    log.warning(f"{user3} est bien inséré")
-
-
-#02 ========== select =======
-@app.cli.command('select-all-user')
-def selectAll_user():
-    users=User.query.all()
-    print(users)
-    
-#03 ========== select-where =======
-@app.cli.command('selectby-user')
-def selectwhere_user():
-    userby=User.query.filter(login="gloireondongo1205@gmail.com").all()
-    
-    print(userby)
-    
-#03 ========== select-like =======
-@app.cli.command('selectlike-user')
-def selectLike_user():
-    userbyLike=User.query.filter(User.login.like('%g%')).all()
-    
-    print(userbyLike)
-    
 
 
 

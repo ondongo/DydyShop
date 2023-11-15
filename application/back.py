@@ -1,4 +1,6 @@
 import dbm
+
+from werkzeug import Client
 from .front import app
 
 from flask import render_template, request, redirect, url_for, flash,session
@@ -9,6 +11,7 @@ from .front import app
 from sqlalchemy import desc
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
+from flask_uploads import UploadSet, configure_uploads, IMAGES
 #Hash password
 import hashlib
 from flask_login import LoginManager,  login_user, logout_user, login_required, current_user
@@ -26,7 +29,9 @@ from application.models.model import(
     CartItem,
     Item,
     Favorite,
+    add_images_to_item,
     ajouter_favori,
+    create_item,
     findAnnonceById,
     saveAnnonce,
     getAllAnnoncePublier,
@@ -126,19 +131,14 @@ def save():
     publish_form = request.form.get("publish")
     img_url_form = request.form.get("img_url")
     img_title_form = request.form.get("img_title")
-    # if not publish_form:
-    #     publish_form = False
-    # else:
-    #     publish_form = True
 
     publish_form = False if not publish_form else True
-        # Vérifiez si l'utilisateur a téléchargé des images
+
     images = request.files.getlist("images")
 
-    # Creer un objet de type Item
     new_annonce = Item(
         title=title_form,
-        description=description_form ,
+        description=description_form,
         prix=prix_form,
         published=publish_form,
         img_url=img_url_form,
@@ -146,13 +146,12 @@ def save():
         categorie=categorie_form,
         user_id=current_user.id,
         sousCategorie=sous_categorie_form
-        # datePub=datetim
     )
-    
-         saveAnnonce(new_annonce, images)
-    return redirect(url_for("gestionArticle"))
-    
 
+    create_item(new_annonce)
+    add_images_to_item(new_annonce, images)
+
+    return redirect(url_for("gestionArticle"))
 
 # =====================================================================
 # =============================Gerer Item Admin
@@ -299,11 +298,11 @@ def custom_login():
 
 
 #*****************************Connexion avec Google·*********************************** 
-@app.route('/google-login')
+""" @app.route('/google-login')
 def google_login():
     return google.authorize(callback=url_for('authorized', _external=True))
 
-@app.route('/google-logout'')
+@app.route('/google-logout')
 def google_logout():
     session.pop('google_token', None)
     return redirect(url_for('index'))
@@ -337,10 +336,7 @@ def google_authorized():
                         #profile_image=user_info.data['picture'])
         SaveUser(new_user)
 
-
-
-
-
+ """
 
 # Deconnexion
 @app.route('/logout')
@@ -453,9 +449,7 @@ def send_whatsapp_message(message):
     )
 
 # Fonction pour réinitialiser le panier après la commande
-def clear_cart():
-    CartItem.query.delete()
-    db.session.commit()
+
 
 
 
