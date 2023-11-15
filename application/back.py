@@ -1,7 +1,7 @@
 import dbm
 from .front import app
 
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import abort, render_template, request, redirect, url_for, flash, session
 from application.models.EnumColorAndSize import *
 from application.models.EnumCategorie import *
 from application.models.SousCategorie import *
@@ -26,6 +26,20 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
 
+from flask_principal import Principal, Permission, identity_changed, Identity
+
+# Créez une instance de l'extension Principal
+principal = Principal(app)
+
+# Définissez les rôles disponibles
+admin_role = principal.RoleNeed("admin")
+user_role = principal.RoleNeed("user")
+
+# Définissez des autorisations basées sur les rôles
+admin_permission = Permission(admin_role)
+user_permission = Permission(user_role)
+
+
 from twilio.rest import Client
 
 
@@ -39,12 +53,12 @@ from application.models.model import (
     Favorite,
     add_images_to_item,
     ajouter_favori,
+    clear_cart,
     create_item,
     findAnnonceById,
     getAllAnnoncePublier,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
-    saveAnnoncePersistance,
     transfer_session_cart_to_db_cart,
     un_delete,
     un_deleteFavorite,
@@ -130,6 +144,7 @@ def edit():
 
 photos = UploadSet("photos", IMAGES)
 # Configurez Flask-Uploads pour gérer les téléchargements d'images
+app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
@@ -341,12 +356,23 @@ def login():
                 session.pop("panier")
                 session.pop("total")
 
-            return redirect(url_for("index"))
+            if user.email == "eldy@gmail.com":
+                identity_changed.send(app, identity=Identity(user.id, "admin"))
+                return redirect(url_for("admin_dashboard"))
+            else:
+                identity_changed.send(app, identity=Identity(user.id, "user"))
+                return redirect(url_for("index"))
         else:
             flash("Login ou mot de passe incorrect")
             return render_template("/back/login.html")
     else:
         return render_template("/back/login.html")
+
+
+@app.route("/admin/dashboard")
+@admin_permission.require(http_exception=403)
+def admin_dashboard():
+    return render_template("/back/dashboard.html")
 
 
 # *****************************Connexion avec Google·***********************************
@@ -520,11 +546,6 @@ def send_whatsapp_message(message):
     message = client.messages.create(
         from_="whatsapp:+14155238886", body=message, to="whatsapp:+221784603783"
     )
-
-
-def clear_cart():
-    CartItem.query.delete()
-    db.session.commit()
 
 
 # ===================================================================
