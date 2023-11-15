@@ -592,7 +592,14 @@ def google_authorized():
 
  """
 
+# Deconnexion
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
+# Gestion du panier
 @app.route("/add_panier/<int:id>")
 def add_panier(id):
     if "panier" not in session:

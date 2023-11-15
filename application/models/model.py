@@ -197,15 +197,6 @@ def add_images_to_item(item, image_filenames):
         db.session.add(new_image)
     db.session.commit()
 
-def add_images_to_item(item, image_files):
-    for image_file in image_files:
-        # Sauvegardez le fichier dans le dossier défini par Flask-Uploads
-        filename = photos.save(image_file)
-        new_image = Image(filename=filename, item_id=item.id)
-        db.session.add(new_image)
-    db.session.commit()
-
-
 def editAnnonceModel(Item: Item):
     old_annonce = Item.query.get(Item.id)
     #
@@ -278,7 +269,6 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
-
 
 def saveUser(user: User):
     db.session.add(user)
