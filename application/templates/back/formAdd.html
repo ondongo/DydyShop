@@ -1,171 +1,195 @@
-<!--affiche parent-->
 {% extends "./layout/baseAdmin.html" %}
- 
-{%block title%}
-{{super() }}|New annonces
-{%endblock%}
+
+{% block title %}
+    {{ super() }} | Nouvelles annonces
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12 col-xl-12">
+            <div class="card card-body border-0 shadow mb-4">
+                <h4 class="h5 mb-4">Informations nécessaires qui rendront votre Item intéressante et unique</h4>
+                <form method="POST" action="{{ url_for('save') }}" enctype="multipart/form-data">
+                    <!-- Section: Informations générales -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <!-- Image URL -->
+                            <div>
+                                <label for="img">URL de l'image</label>
+                                <input type="text" class="form-control" id="img" oninput="this.className = ''" name="img_url" placeholder="Titre de l'image" value="{{ Item.img_url }}">
+                            </div>
+                            <!-- Titre de l'image -->
+                            <div>
+                                <label for="img_title">Titre de l'image</label>
+                                <input type="text" class="form-control" id="img_title" oninput="this.className = ''" name="img_title" placeholder="Titre de l'image" value="{{ Item.img_title }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <!-- Titre -->
+                            <div>
+                                <label for="title">Titre</label>
+                                <input class="form-control" id="title" type="text" placeholder="Entrez votre titre" name="title" value="{{ Item.title }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <!-- Quantité -->
+                            <div class="form-group">
+                                <label for="quantity">Quantité</label>
+                                <input class="form-control" id="quantity" type="number" placeholder="0" required>
+                            </div>
+                        </div>
 
 
-
-{%block content%}
-<div class="row">
-  <div class="col-12 col-xl-8">
-      <div class="card card-body border-0 shadow mb-4">
-          <h4 class="h5 mb-4">Informations nécessaires qui rendront votre Item intéressante et unique</h4>
-          <form  method="POST" action="{{ url_for('save') }}" enctype="multipart/form-data">
-
-            <div class="row">
-                <div class="col-md-12 mb-3">
-            <div >
-              <label for="inputAddress">url l'image</label>
-            <input type="text" class="form-control" id="img" oninput="this.className = ''"  name="img_url" placeholder="titre image" value="{{Item.img_url}}">
-            </div>
-
-            <div>
-              <label for="inputAddress">Titre l'image</label>
-            <input type="text" class="form-control" id="img_title" oninput="this.className = ''" name="img_title" placeholder="titre image" value="{{Item.img_title}}" >
-            </div>
-
-             </div>
-            </div>
-
-              <div class="row">
-                  <div class="col-md-6 mb-3">
-                      <div>
-                          <label for="first_name">Titre</label>
-                          <input class="form-control" id="first_name" type="text" placeholder="Enter your first name" name="title" value="{{Item.title}}" required>
-                      </div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="form-group">
-                        <label for="phone">Quantite</label>
-                        <input class="form-control" id="phone" type="number" placeholder="0" required>
-                    </div>
-                </div>
-              </div>
-              <div class="row align-items-center">
-                  <div class="col-md-6 mb-3">
-                      <label for="birthday">Categorie</label>
-                      <select class="form-select mb-0" id="categorie"  name="categorie" aria-label="Gender select example">
-                        <option selected disabled>Choix {{recupcategories}}</option>
-                        {% for cat in listcategories %}
-                        <option value="{{ cat.name }}">{{ cat.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                  <div class="col-md-6 mb-3">
-                      <label for="gender">Sous categorie</label>
-                      <select class="form-select mb-0"  aria-label="Gender select example"
-                              name="sous_categorie" id="sous_categorie" >
-                      {% for sous_categorie in sous_categories %}
-                      <option value="{{ sous_categorie.value }}">{{ sous_categorie.name }}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-              </div>
-              <div class="row">
-
-                 <div class="col-md-6 mb-3">
-                    <div class="form-group">
-                        <label for="phone">Prix</label>
-                        <input class="form-control" id="phone" type="number" placeholder="0" required step="500" name="prix" value="{{Item.prix}}">
-                    </div>
-                </div>
-                 
-                  <div class="col-md-6 mb-3">
-                      <div class="form-group">
-                          <label for="email">Description</label>
-                          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description" value="{{Item.description}}"></textarea>
-                      </div>
-                  </div>
-                  
-              </div>
-              <h2 class="h5 my-2">Supplementaire</h2>
-        
-
-
-              <div class="row">
-                  
-                  <div class="col-sm-4 mb-3">
-                      <label for="state">Couleur</label>
-                      <select class="form-select w-100 mb-0" id="state" name="state" aria-label="State select example">
-                          <option selected>State</option>
-                          <option value="AL">Alabama</option>
-                          <option value="AK">Alaska</option>
-                          <option value="AZ">Arizona</option>
-                          <option value="AR">Arkansas</option>
-                          <option value="CA">California</option>
-                          <option value="CO">Colorado</option>
-                          <option value="CT">Connecticut</option>
-                          <option value="DE">Delaware</option>
-                          <option value="DC">District Of Columbia</option>
-                          <option value="FL">Florida</option>
-                      </select>
-                  </div>
-                  <div class="col-sm-4">
-                    <label for="state">Taille</label>
-                    <select class="form-select w-100 mb-0" id="state" name="state" aria-label="State select example">
-                        <option selected>State</option>
-                        <option value="AL">Alabama</option>
-                        <option value="AK">Alaska</option>
-                        <option value="AZ">Arizona</option>
-                        <option value="AR">Arkansas</option>
-                        <option value="CA">California</option>
-                        <option value="CO">Colorado</option>
-                        <option value="CT">Connecticut</option>
-                        <option value="DE">Delaware</option>
-                        <option value="DC">District Of Columbia</option>
-                        <option value="FL">Florida</option>
-                    </select>
-                  </div>
-              </div>
-              
-          <div class="form-check mb-4 col-1">
-            <label for="publish">Publier</label>
-            <input {% if Item.published %} checked {% endif %} type="checkbox" class="form-check-input" name="publish" id="publish ">
-          </div>
-              <div class="mt-3">
-                  <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Save all</button>
-              </div>
-          </form>
-      </div>
-     
-  </div>
-  <div class="col-12 col-xl-4">
-      <div class="row">
-         
-          <div class="col-12">
-              <div class="card card-body border-0 shadow mb-4">
-
-                    <h2 class="h5 mb-4">Télécharger des photos de votre Item </h2>
-                              <p class="text-center mb-4">Une Item avec une image de qualité obtient plus de visibilité et augmente <br>vos chances de vendre plus rapidement.
-                                Les annonces avec photo attirent 5 fois plus de clients.</p>
-      
-                  <div class="d-flex align-items-center">
-                      <div class="me-3">
-                          <!-- Avatar -->
-                          <img class="rounded " src="{{url_for('static',filename='eldyCss/img/eldy.png')}}" width="80px" alt="change avatar">
-                      </div>
-                      <div class="file-field">
-                          <div class="d-flex justify-content-xl-center ms-xl-3">
-                              <div class="d-flex">
-                                  <svg class="icon text-gray-500 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"></path></svg>
-                                  <input type="file">
-                                  <div class="d-md-block text-left">
-                                      <div class="fw-normal text-dark mb-1">Choisir Image</div>
-                                      <div class="text-gray small">JPG, GIF or PNG. Max size of 800K</div>
-                                  </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-6 mb-3">
+                                <label for="birthday">Categorie</label>
+                                <select class="form-select mb-0" id="categorie"  name="categorie" aria-label="Gender select example">
+                                  <option selected disabled>Choix {{recupcategories}}</option>
+                                  {% for cat in listcategories %}
+                                  <option value="{{ cat.name }}">{{ cat.name }}</option>
+                                  {% endfor %}
+                              </select>
+                          </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender">Sous categorie</label>
+                                <select class="form-select mb-0"  aria-label="Gender select example"
+                                        name="sous_categorie" id="sous_categorie" >
+                                {% for sous_categorie in sous_categories %}
+                                <option value="{{ sous_categorie.value }}">{{ sous_categorie.name }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                        </div>
+                        <div class="row">
+          
+                           <div class="col-md-6 mb-3">
+                              <div class="form-group">
+                                  <label for="phone">Prix</label>
+                                  <input class="form-control" id="phone" type="number" placeholder="0" required step="500" name="prix" value="{{Item.prix}}">
                               </div>
                           </div>
-                       </div>                                        
-                  </div>
-              </div>
-          </div>
-        
-      </div>
-  </div>
+                           
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="email">Description</label>
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description" value="{{Item.description}}"></textarea>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <h2 class="h5 my-2">Supplementaire</h2>
+                  
+          
+          
+                        <div class="row">
+                            
+                            <div class="col-sm-4 mb-3">
+                                <label for="state">Couleur</label>
+                                <select class="form-select w-100 mb-0" id="state" name="state" aria-label="State select example">
+                                    <option selected>State</option>
+                                    <option value="AL">Alabama</option>
+                                    <option value="AK">Alaska</option>
+                                    <option value="AZ">Arizona</option>
+                                    <option value="AR">Arkansas</option>
+                                    <option value="CA">California</option>
+                                    <option value="CO">Colorado</option>
+                                    <option value="CT">Connecticut</option>
+                                    <option value="DE">Delaware</option>
+                                    <option value="DC">District Of Columbia</option>
+                                    <option value="FL">Florida</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                              <label for="state">Taille</label>
+                              <select class="form-select w-100 mb-0" id="state" name="state" aria-label="State select example">
+                                  <option selected>State</option>
+                                  <option value="AL">Alabama</option>
+                                  <option value="AK">Alaska</option>
+                                  <option value="AZ">Arizona</option>
+                                  <option value="AR">Arkansas</option>
+                                  <option value="CA">California</option>
+                                  <option value="CO">Colorado</option>
+                                  <option value="CT">Connecticut</option>
+                                  <option value="DE">Delaware</option>
+                                  <option value="DC">District Of Columbia</option>
+                                  <option value="FL">Florida</option>
+                              </select>
+                            </div>
+                        </div>
+                        
+                    <div class="form-check mb-4 col-1">
+                      <label for="publish">Publier</label>
+                      <input {% if {{Item.published}} %} checked {% endif %} type="checkbox" class="form-check-input" name="publish" id="publish" />
+                    </div>
+
+                    </div>
+
+                        <!-- ... Autres sections ... -->
+
+                        <!-- Section: Bouton de soumission -->
+                        <div class="col-12 mt-3">
+                            <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Enregistrer tout</button>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="row">
+                        <div class="col-12">
+                            <form action="/" method="post" class="dropzone" id="myAwesomeDropzone" data-plugin="dropzone" data-previews-container="#file-previews" data-upload-preview-template="#uploadPreviewTemplate">
+                                          <!-- File Upload -->
+<form action="/" method="post" class="dropzone" id="myAwesomeDropzone" data-plugin="dropzone" data-previews-container="#file-previews"
+data-upload-preview-template="#uploadPreviewTemplate">
+<div class="fallback">
+    <input name="file" type="file" multiple />
 </div>
 
+<div class="dz-message needsclick">
+    <i class="h1 text-muted ri-upload-cloud-2-line"></i>
+    <h3>Drop files here or click to upload.</h3>
+    <span class="text-muted font-13">(This is just a demo dropzone. Selected files are
+        <strong>not</strong> actually uploaded.)</span>
+</div>
+</form>
+
+<!-- Preview -->
+<div class="dropzone-previews mt-3" id="file-previews"></div>
+
+<!-- file preview template -->
+<div class="d-none" id="uploadPreviewTemplate">
+<div class="card mt-1 mb-0 shadow-none border">
+    <div class="p-2">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <img data-dz-thumbnail src="#" class="avatar-sm rounded bg-light" alt="">
+            </div>
+            <div class="col ps-0">
+                <a href="javascript:void(0);" class="text-muted fw-bold" data-dz-name></a>
+                <p class="mb-0" data-dz-size></p>
+            </div>
+            <div class="col-auto">
+                <!-- Button -->
+                <a href="" class="btn btn-link btn-lg text-muted" data-dz-remove>
+                    <i class="ri-close-line"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+                            </form>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- plugin js -->
+    <script src="assets/vendor/dropzone/min/dropzone.min.js"></script>
+    <!-- init js -->
+    <script src="assets/js/ui/component.fileupload.js"></script>
 
     <!-- Core -->
     <script type="text/javascript">
@@ -177,15 +201,11 @@
         });
     </script>
 
-      <script type="text/javascript">
+    <script type="text/javascript">
         function loadSousCategoriesEdit() {
-          var categorie = $('#categorie').val();
-          event.preventDefault();
-          window.location.href = "/admin/edit/" + categorie + id_annonce;
+            var categorie = $('#categorie').val();
+            event.preventDefault();
+            window.location.href = "/admin/edit/" + categorie + id_annonce;
         }
-      </script>
-
-  
-  
-  
-{%endblock%}
+    </script>
+{% endblock %}

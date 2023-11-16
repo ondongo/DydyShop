@@ -4,7 +4,8 @@ from wtforms import StringField, EmailField, PasswordField
 
 from wtforms.validators import InputRequired, Length, Email
 
-#===============> Je prefere utiliser Mes propres Formulaires 
+
+# ===============> Je prefere utiliser Mes propres Formulaires
 class RegisterForm(FlaskForm):
     firstname = StringField(
         "Prénom",
