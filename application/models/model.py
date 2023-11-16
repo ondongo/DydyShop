@@ -6,6 +6,10 @@ import logging as log
 
 from sqlalchemy import desc
 from flask_login import UserMixin, current_user
+
+from typing import List
+from werkzeug.datastructures import FileStorage
+
 from application.models.EnumColorAndSize import EnumColor, EnumSize
 
 db = SQLAlchemy(app)
@@ -179,30 +183,21 @@ def getAllAnnonceA_La_Une():
     return Item.query.order_by(desc(Item.nbreVues)).limit(5).all()
 
 
+
 # ============Save objet de type article====================
-""" def saveAnnonce(Item: Item , images: List[FileStorage]):
-    db.session.add(Item)
-    # Enregistrez les images liées à l'annonce en base de données
-    for image in images:
-        if image and allowed_file(image.filename):
-            filename = photos.save(image)
-            img = Image(filename=filename, item_id=item.id)
-            db.session.add(img)
-    db.session.commit()
-    
-     """
+
 
 
 def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
-
-
+    
 def add_images_to_item(item, image_filenames):
     for filename in image_filenames:
         new_image = Image(filename=filename, item_id=item.id)
         db.session.add(new_image)
     db.session.commit()
+
 
 
 # ==============================---------Modifier Item
@@ -284,6 +279,7 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
     db.session.commit()
 
 
+
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
@@ -316,3 +312,4 @@ def init_db():
         db.create_all()
 
         log.warning("Base de donnees actualisee")
+

@@ -1,4 +1,6 @@
 import dbm
+
+from werkzeug import Client
 from .front import app
 
 from flask import abort, render_template, request, redirect, url_for, flash, session
@@ -7,11 +9,13 @@ from application.models.EnumCategorie import *
 from application.models.SousCategorie import *
 from .front import app
 from sqlalchemy import desc
-from flask_login import login_required
+
 from flask_paginate import Pagination, get_page_parameter
 
+
 # from flask_oauthlib.client import OAuth
-# Hash password
+
+#Hash password
 import hashlib
 from flask_login import (
     LoginManager,
@@ -140,10 +144,9 @@ def save():
     publish_form = request.form.get("publish")
     img_url_form = request.form.get("img_url")
     img_title_form = request.form.get("img_title")
+
     quantity_form = request.form.get("quantity")
-
     publish_form = False if not publish_form else True
-
     images = request.files.getlist("images")
 
     new_annonce = Item(
@@ -155,6 +158,7 @@ def save():
         img_title=img_title_form,
         categorie=categorie_form,
         user_id=current_user.id,
+
         sousCategorie=sous_categorie_form,
         quantity=quantity_form,
     )
@@ -163,7 +167,6 @@ def save():
     add_images_to_item(new_annonce, images)
 
     return redirect(url_for("gestionArticle"))
-
 
 @app.route("/admin/edit/<int:id_annonce>", methods=["GET", "POST"])
 @login_required
@@ -434,6 +437,7 @@ def connexion():
         return render_template("/back/login.html")
 
 
+
 @app.route("/admin/dashboard")
 @admin_required
 def admin_dashboard():
@@ -494,6 +498,9 @@ google = oauth.remote_app(
 
 
 @app.route('/google-login')
+=======
+#*****************************Connexion avec Google·*********************************** 
+""" @app.route('/google-login')
 def google_login():
     return google.authorize(callback=url_for('authorized', _external=True))
 
@@ -531,8 +538,6 @@ def google_authorized():
                         #profile_image=user_info.data['picture'])
         SaveUser(new_user)
 
-
-
  """
 
 
@@ -540,6 +545,9 @@ def google_authorized():
 # ============================= Gestion du panier========================================================================
 # =======================================================================================================================
 #
+=======
+ """
+
 
 
 @app.route("/add_panier/<int:id>")
@@ -667,11 +675,15 @@ auth_token = "008dda7a6424142308e6c538b44dcdea"
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
+
+    #Quand je vais trouver Une Api non Payante Pour Whatsapp
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
         from_="whatsapp:+14155238886", body=message, to="whatsapp:+221784603783"
     )
+
+# Fonction pour réinitialiser le panier après la commande
 
 
 #

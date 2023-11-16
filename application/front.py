@@ -396,9 +396,13 @@ def afficher_annoncesTri():
 # =====================================================================
 # =============================Voiture===========================
 # =====================================================================
+
 @app.route("/Filtre_desNeuf_Voitures")
 def Filtre_desNeuf_Voitures():
     recolte = request.args.get("recolteMarque")
+@app.route('/FilterByDescription')
+def FilterByDescriptions():
+    recolte = request.args.get('recolteMarque')
     annonces = Item.query.filter(Item.description.ilike(f"%{recolte}%")).all()
 
     count = len(annonces)
@@ -460,7 +464,25 @@ def multiples():
         annonces = Item.query.filter(
             Item.prix.between(prixminRecup, prixmaxRecup)
         ).all()
+    annonces = annonces[offset: offset + NbreElementParPage]
+    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
 
+
+
+
+
+
+@app.route("/FilterAll")
+def allFilter():
+    #sousCategorieRecup=request.args.get('sousCategorie')
+    CategoryRecup=request.args.get('Categories')
+    #lieuxRecup=request.args.get('region')
+    prixmaxRecup=request.args.get('max-price')
+    prixminRecup=request.args.get('min-price')
+    sousCategorieRecup=request.args.get('sousCategorie')
+    if prixmaxRecup is not None and prixminRecup is not None and sousCategorieRecup is None :
+        annonces=Item.query.filter(Item.prix.between(prixminRecup,prixmaxRecup)).all()
+        
     if sousCategorieRecup is not None and prixmaxRecup is None and prixminRecup is None:
         annonces = Item.query.filter(Item.sousCategorie == sousCategorieRecup).all()
     annonces = Item.query.filter(
