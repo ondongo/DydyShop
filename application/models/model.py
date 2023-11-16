@@ -2,10 +2,11 @@ import hashlib
 from flask_sqlalchemy import SQLAlchemy
 from application.front import app
 import datetime
-import logging as log 
+import logging as log
 
 from sqlalchemy import desc
 from flask_login import UserMixin, current_user
+
 from typing import List
 from werkzeug.datastructures import FileStorage
 
@@ -15,39 +16,40 @@ db = SQLAlchemy(app)
 
 
 class Image(db.Model):
-    __tablename__ = 'images'
+    __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
 
 
 class Favorite(db.Model):
     __tablename__ = "favorites"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    annonce_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
+
 
 class Size(db.Model):
     __tablename__ = "sizes"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Enum(EnumSize), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey("items.id"))
+
 
 class Color(db.Model):
     __tablename__ = "colors"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Enum(EnumColor), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey("items.id"))
 
 
 class Category(db.Model):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    #item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
-    
-    
-    
+    # item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+
+
 class Item(db.Model):
     __tablename__ = "items"
     id = db.Column(db.Integer, primary_key=True)
@@ -62,13 +64,16 @@ class Item(db.Model):
     published = db.Column(db.Boolean, default=True)
     deleted = db.Column(db.Boolean, default=False)
     nbreVues = db.Column(db.Integer, default=0)
-    favorites = db.relationship('Favorite', backref='item', lazy='dynamic')
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    sizes = db.relationship('Size', backref='item')
-    colors = db.relationship('Color', backref='item')
+    favorites = db.relationship("Favorite", backref="item", lazy="dynamic")
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    sizes = db.relationship("Size", backref="item")
+    colors = db.relationship("Color", backref="item")
+    quantity = db.Column(db.Integer, default=0)
+    
+
 
 class User(db.Model, UserMixin):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(200), nullable=False)
     prenom = db.Column(db.String(200), nullable=False)
@@ -79,71 +84,58 @@ class User(db.Model, UserMixin):
     google_login = db.Column(db.String(200), unique=True)
     active = db.Column(db.Boolean, default=True)
     NbreAnnoncePub = db.Column(db.Integer, default=0)
-    favorites = db.relationship('Favorite', backref='user', lazy='dynamic')
-    items = db.relationship('Item', backref='user', lazy=True)
+    favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
+    items = db.relationship("Item", backref="user", lazy=True)
+    roles = db.Column(db.String(50))
 
     def __repr__(self):
         return f"<User: {self.login}>"
 
     def check_password(self, password):
-        return hashlib.md5(password.encode('utf-8')).hexdigest() == self.password
+        return hashlib.md5(password.encode("utf-8")).hexdigest() == self.password
+
+    def is_admin(self):
+        return "admin" in self.roles
+
 
 class CartItem(db.Model):
     __tablename__ = "cart_items"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    annonce_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
-    item = db.relationship('Item')
+    item = db.relationship("Item")
+
 
 class Order(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
-    items = db.relationship('OrderItem', backref='order', lazy=True)
+    items = db.relationship("OrderItem", backref="order", lazy=True)
+
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    annonce_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    item = db.relationship('Item')
+    item = db.relationship("Item")
 
 
-# =====================================================================
-# =============================Fin Classe ==============
-# =====================================================================
-
-
-
-
-# =====================================================================
-# =============================Requetes complexes dans back.py et front.py ==============
-# =====================================================================
-
-
-
-
-
-
-
-# ****************************************************************************
-# =*****************************Debut Requetes Query Simples***********************************
-# **********************************************************************
-
-
-#************************************Annonces ***********************************
+# ************************************Annonces ***********************************
 # ========-----Afficher tous les articles
 def getAllAnnonce():
     return Item.query.all()
 
+
 def getAllAnnonceRecent():
     return Item.query.order_by(desc(Item.datePub)).all()
 
-#========-------Publish
-#Visit
+
+# ========-------Publish
+# Visit
 def getAllAnnoncePublier():
     return (
         Item.query.filter(Item.published == True, Item.deleted == False)
@@ -152,28 +144,29 @@ def getAllAnnoncePublier():
     )
 
 
-
-
-#=====-----RequeteCorbeille
+# =====-----RequeteCorbeille
 def getAllAnnonceDel():
-    return  (
-        Item.query.filter(Item.deleted == True,Item.user_id==current_user.id)
+    return (
+        Item.query.filter(Item.deleted == True, Item.user_id == current_user.id)
         .order_by(desc(Item.datePub))
         .all()
     )
 
 
-#========== Non---------Publish
+# ========== Non---------Publish
 def getAllAnnonceBrouillon():
     return (
-        
-        Item.query.filter(Item.published == False, Item.deleted == False,Item.user_id==current_user.id)
+        Item.query.filter(
+            Item.published == False,
+            Item.deleted == False,
+            Item.user_id == current_user.id,
+        )
         .order_by(desc(Item.datePub))
         .all()
     )
 
 
-#=======-------------Afficher l'article qui a cet id
+# =======-------------Afficher l'article qui a cet id
 def findAnnonceById(id_annonce):
     item = Item.query.get(id_annonce)
     if Item is not None:
@@ -181,29 +174,20 @@ def findAnnonceById(id_annonce):
         db.session.commit()
     return item
 
+
 # def solution(id_annonce):
 #     return Item.query.get(id_annonce)
 
 
 def getAllAnnonceA_La_Une():
-    return (
-            Item.query.order_by(desc(Item.nbreVues)).limit(5).all()
-        )
+    return Item.query.order_by(desc(Item.nbreVues)).limit(5).all()
 
 
 
-#============Save objet de type article====================
-""" def saveAnnonce(Item: Item , images: List[FileStorage]):
-    db.session.add(Item)
-    # Enregistrez les images liées à l'annonce en base de données
-    for image in images:
-        if image and allowed_file(image.filename):
-            filename = photos.save(image)
-            img = Image(filename=filename, item_id=item.id)
-            db.session.add(img)
-    db.session.commit()
-    
-     """
+# ============Save objet de type article====================
+
+
+
 def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
@@ -214,9 +198,12 @@ def add_images_to_item(item, image_filenames):
         db.session.add(new_image)
     db.session.commit()
 
-#==============================---------Modifier Item
 
-def editAnnonceModel(Item:Item):
+
+# ==============================---------Modifier Item
+
+
+def editAnnonceModel(Item: Item):
     old_annonce = Item.query.get(Item.id)
     #
     old_annonce.title = Item.title
@@ -230,7 +217,9 @@ def editAnnonceModel(Item:Item):
     old_annonce.etat = Item.etat
     db.session.commit()
 
-#==========---------Faire passer à publier
+
+# ==========---------Faire passer à publier
+
 
 def un_published(id_annonce):
     Item = Item.query.get(id_annonce)
@@ -243,32 +232,30 @@ def un_published(id_annonce):
     db.session.commit()
 
 
-
-#=======---------Mettre à la Corbeille=======CoteModel
+# =======---------Mettre à la Corbeille=======CoteModel
 def un_delete(id_annonce):
     Item = Item.query.get(id_annonce)
 
     Item.deleted = not Item.deleted
     db.session.commit()
-    
-    
-def un_deleteFavorite(favorite:Favorite):
+
+
+def un_deleteFavorite(favorite: Favorite):
     db.session.delete(favorite)
     db.session.commit()
 
 
-#========---------Mettre Favori
+# ========---------Mettre Favori
 # def ajouter_favori(user_id, annonce_id):
 #     favori = Favorite(user_id=user_id, annonce_id=annonce_id)
 #     db.session.add(favori)
 #     db.session.commit()
 
 
-
-#========---------Mettre Au panier
+# ========---------Mettre Au panier
 def transfer_session_cart_to_db_cart(user_id, session_cart):
     user_cart = CartItem.query.filter_by(user_id=user_id).first()
-    
+
     # Si le panier de l'utilisateur n'existe pas, créez-en un nouveau
     if not user_cart:
         user_cart = CartItem(user_id=user_id)
@@ -276,7 +263,10 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
         db.session.commit()
 
     for product_id in session_cart:
-        cart_item = CartItem.query.filter_by(annonce_id=product_id, user_id=user_id).first()
+        if product_id is not None:
+            cart_item = CartItem.query.filter_by(
+                annonce_id=product_id, user_id=user_id
+            ).first()
 
         # Si le produit est déjà dans le panier de l'utilisateur, augmentez la quantité
         if cart_item:
@@ -288,11 +278,15 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 
     db.session.commit()
 
+
+
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
 
-#************************************ USER REQUETES ***********************************
+
+# ************************************ USER REQUETES ***********************************
+
 
 def saveUser(user: User):
     db.session.add(user)
@@ -304,44 +298,18 @@ def ajouter_favori(favorite: Favorite):
     db.session.commit()
 
 
+
+
+
+
 # =====================================================================
 # ============Création de commande(Excution au lancement)==============
 # ========================decorators init==============================
-@app.cli.command('EldyDb')
+@app.cli.command("EldyDb")
 def init_db():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        
+
         log.warning("Base de donnees actualisee")
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
