@@ -86,9 +86,11 @@ def admin_required(func):
     return decorated_view
 
 
-# =====================================================================
-# =============================Publier Item Flask + JS===========================
-# =====================================================================
+#
+# =======================================================================================================================
+# ============================= Gestion Du Crud Dashboard ===================================================================
+# =======================================================================================================================
+#
 
 
 @app.route(
@@ -121,9 +123,46 @@ def publierAnnonce(id_annonce, categorie):
     )
 
 
-# =====================================================================
-# =============================Edit Item===========================
-# =====================================================================
+photos = UploadSet("photos", IMAGES)
+# Configurez Flask-Uploads pour gérer les téléchargements d'images
+app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
+configure_uploads(app, photos)
+
+
+@app.route("/save", methods=["POST"])
+def save():
+    id_annonce = request.form.get("id_annonce")
+    title_form = request.form.get("title")
+    categorie_form = request.form.get("categorie")
+    sous_categorie_form = request.form.get("sous_categorie")
+    description_form = request.form.get("description")
+    prix_form = request.form.get("prix")
+    publish_form = request.form.get("publish")
+    img_url_form = request.form.get("img_url")
+    img_title_form = request.form.get("img_title")
+    quantity_form = request.form.get("quantity")
+
+    publish_form = False if not publish_form else True
+
+    images = request.files.getlist("images")
+
+    new_annonce = Item(
+        title=title_form,
+        description=description_form,
+        prix=prix_form,
+        published=publish_form,
+        img_url=img_url_form,
+        img_title=img_title_form,
+        categorie=categorie_form,
+        user_id=current_user.id,
+        sousCategorie=sous_categorie_form,
+        quantity=quantity_form,
+    )
+
+    create_item(new_annonce)
+    add_images_to_item(new_annonce, images)
+
+    return redirect(url_for("gestionArticle"))
 
 
 @app.route("/admin/edit/<int:id_annonce>", methods=["GET", "POST"])
@@ -148,57 +187,9 @@ def edit():
         Item.published = False if not request.form.get("publish") else True
         Item.img_url = request.form.get("img_url")
         Item.img_title = request.form.get("img_title")
+        Item.quantity = request.form.get("quantity")
         editAnnonceModel(Item)
     return redirect(url_for("gestionAnnonce"))
-
-
-# ************************************Save ***********************************
-
-
-photos = UploadSet("photos", IMAGES)
-# Configurez Flask-Uploads pour gérer les téléchargements d'images
-app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
-configure_uploads(app, photos)
-
-
-@app.route("/save", methods=["POST"])
-def save():
-    id_annonce = request.form.get("id_annonce")
-    title_form = request.form.get("title")
-    categorie_form = request.form.get("categorie")
-    sous_categorie_form = request.form.get("sous_categorie")
-    description_form = request.form.get("description")
-    prix_form = request.form.get("prix")
-    publish_form = request.form.get("publish")
-    img_url_form = request.form.get("img_url")
-    img_title_form = request.form.get("img_title")
-
-    publish_form = False if not publish_form else True
-
-    images = request.files.getlist("images")
-
-    new_annonce = Item(
-        title=title_form,
-        description=description_form,
-        prix=prix_form,
-        published=publish_form,
-        img_url=img_url_form,
-        img_title=img_title_form,
-        categorie=categorie_form,
-        user_id=current_user.id,
-        sousCategorie=sous_categorie_form,
-    )
-
-    create_item(new_annonce)
-    add_images_to_item(new_annonce, images)
-
-    return redirect(url_for("gestionArticle"))
-
-
-# =====================================================================
-# =============================Gerer Item Admin
-# -===========================
-# =====================================================================
 
 
 @app.route("/admin/gestion")
@@ -241,6 +232,13 @@ def gestiondash():
     )
 
 
+#
+# =======================================================================================================================
+# ============================= Gestion Mise hors ligne , en ligne et suppression ========================================================================
+# =======================================================================================================================
+#
+
+
 # ************************************ListCorbeille***********************************
 @app.route("/admin/listings/Corbeille")
 @login_required
@@ -255,7 +253,6 @@ def gestionAnnonce_Corbeille():
     )
 
 
-# ************************************Brouillon ***********************************
 @app.route("/admin/listings/Brouillon")
 @login_required
 def gestionAnnonce_Brouillon():
@@ -283,6 +280,11 @@ def un_publishAnnonce(id_annonce):
     return redirect(url_for("gestionAnnonce"))
 
 
+#
+# =======================================================================================================================
+# ============================= Gestion de la recherche dashboard ========================================================================
+# =======================================================================================================================
+#
 # **********************Recherche Avancee ***********************************
 @app.route("/recherche-annonceAvancee")
 def recherche_annonAvancee():
@@ -298,12 +300,53 @@ def recherche_annonAvancee():
     return render_template("/back/gestionAnnonce.html", annonces=annonces, count=count)
 
 
-# =====================================================================
-# =============================Gestion de la connexion===========================
-# =====================================================================
+#
+# =======================================================================================================================
+# ============================= Gestion de la Authentification Simple===================================================================
+# =======================================================================================================================
+#
+
+import secrets
+from flask_mail import Message
 
 
-# *****************************Creer Compte***********************************
+def generate_confirmation_token():
+    return secrets.token_urlsafe(30)
+
+
+
+def send_confirmation_email(user):
+    token = generate_confirmation_token()
+    user.confirmation_token = token
+    db.session.commit()
+
+    confirmation_link = url_for('confirm_email', token=token, _external=True)
+    msg = Message('Confirmation d\'e-mail', recipients=[user.email])
+    msg.body = 'Cliquez sur le lien suivant pour confirmer votre adresse e-mail: {0}'.format(confirmation_link)
+    mail.send(msg)
+
+
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    user = User.query.filter_by(confirmation_token=token).first()
+
+    if user:
+        user.confirmed = True
+        user.confirmation_token = None  # Optionnel : effacer le jeton après confirmation
+        db.session.commit()
+        flash('Votre adresse e-mail a été confirmée avec succès!', 'success')
+    else:
+        flash('Le lien de confirmation n\'est pas valide ou a expiré.', 'danger')
+
+    return redirect(url_for('connexion'))
+
+
+
+
+
+
+
 @app.route("/compte/creation", methods=["POST", "GET"])
 def creation_compte():
     if request.method == "POST":
@@ -351,27 +394,9 @@ def creation_compte():
     return render_template("/back/creation_compte.html")
 
 
-# *****************************Connexion ***********************************
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-""" def change_user_role(user, new_role):
-    try:
-        print(
-            "==============Current User here ============================:",
-            user.id,
-            user.roles,
-        )
-        identity_changed.send(app, identity=Identity(user.id, new_role))
-        print("==============identity ============================:", Identity)
-
-    except IdentityChanged as e:
-        # Gérer l'exception (par exemple, imprimer un avertissement ou journaliser l'erreur)
-        print(f"Erreur lors du changement d'identité : {e}")
-
- """
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -415,7 +440,39 @@ def admin_dashboard():
     return render_template("/back/dashboard.html")
 
 
-# *****************************Connexion avec Google·***********************************
+# Deconnexion
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    # identity_changed.send(app, identity=Identity(None))
+    return redirect(url_for("index"))
+
+
+""" def change_user_role(user, new_role):
+    try:
+        print(
+            "==============Current User here ============================:",
+            user.id,
+            user.roles,
+        )
+        identity_changed.send(app, identity=Identity(user.id, new_role))
+        print("==============identity ============================:", Identity)
+
+    except IdentityChanged as e:
+        # Gérer l'exception (par exemple, imprimer un avertissement ou journaliser l'erreur)
+        print(f"Erreur lors du changement d'identité : {e}")
+
+ """
+
+
+
+#
+# =======================================================================================================================
+# ============================= Gestion Authentification Google ===================================================================
+# =======================================================================================================================
+#
+
 """ oauth = OAuth(app)
 
 
@@ -479,38 +536,61 @@ def google_authorized():
  """
 
 
-# Deconnexion
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    # identity_changed.send(app, identity=Identity(None))
-    return redirect(url_for("index"))
+# =======================================================================================================================
+# ============================= Gestion du panier========================================================================
+# =======================================================================================================================
+#
 
 
-# Gestion du panier
 @app.route("/add_panier/<int:id>")
 def add_panier(id):
     if "panier" not in session:
         session["panier"] = []
+        session["quantite"] = 0
         session["total"] = 0.0
 
     product = Item.query.get(id)
     if product:
-        session["panier"].append(id)
+        if id in session["panier"]:
+            session["quantite"] += 1
+        else:
+            session["panier"].append(id)
+            session["quantity"] += 1
         session["total"] += float(product.prix)
 
-    return redirect(url_for("index"))
+    return redirect(url_for("Panier"))
 
 
 @app.route("/remove_from_cart/<int:id>")
 def remove_from_cart(id):
     if "panier" in session:
-        session["panier"].remove(id)
-        product = Item.query.get(id)
-        if product:
-            session["total"] -= float(product.prix)
-        return redirect(url_for("cart"))
+        if id in session["panier"]:
+            index = session["panier"].index(id)
+
+            # Si la clé "quantite" existe et la quantité est supérieure à 0
+            if (
+                "quantity" in session
+                and len(session["quantity"]) > index
+                and session["quantity"][index] > 0
+            ):
+                # Décrémenter la quantité
+                session["quantity"][index] -= 1
+
+                # Si la quantité est égale à 0, supprimer le produit du panier
+                if session["quantity"][index] == 0:
+                    session["panier"].remove(id)
+                    session["quantity"].pop(index)
+
+            else:
+                # Si la clé "quantite" n'existe pas, supprimer le produit du panier
+                session["panier"].remove(id)
+
+            # Mettre à jour le total
+            product = Item.query.get(id)
+            if product:
+                session["total"] -= float(product.prix)
+
+        return redirect(url_for("Panier"))
     return redirect(url_for("index"))
 
 
@@ -520,13 +600,18 @@ def Panier():
     if "panier" in session:
         items_in_cart = [Item.query.get(item_id) for item_id in session["panier"]]
 
+    print("=========Contenu de la session:=============", session)
+
     return render_template("/pages/panier.html", items_in_cart=items_in_cart)
 
 
-# ===================================================================
-# ============================= Gestion des commandes ===============
-# =====================================================================
+#
+# =======================================================================================================================
+# ============================= Gestion des commandes ===================================================================
+# =======================================================================================================================
+#
 @app.route("/checkout")
+@login_required
 def checkout():
     # Obtenez les détails des articles dans le panier à partir de votre base de données
     cart_items = get_cart_items()
@@ -589,9 +674,11 @@ def send_whatsapp_message(message):
     )
 
 
-# ===================================================================
-# =============================404 Error=========================================
-# =====================================================================
+#
+# =======================================================================================================================
+# ============================= Gestion Errors Handlers =================================================================
+# =======================================================================================================================
+#
 
 
 @app.errorhandler(404)
@@ -604,9 +691,11 @@ def forbidden(error):
     return render_template("errors/403.html"), 403
 
 
-# ===================================================================
-# =============================Gestion des favoris  =========================================
-# =====================================================================
+#
+# =======================================================================================================================
+# ============================= Gestion des favoris =====================================================================
+# =======================================================================================================================
+#
 
 
 @app.route("/favoris")

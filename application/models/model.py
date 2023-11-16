@@ -64,6 +64,8 @@ class Item(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     sizes = db.relationship("Size", backref="item")
     colors = db.relationship("Color", backref="item")
+    quantity = db.Column(db.Integer, default=0)
+    
 
 
 class User(db.Model, UserMixin):
@@ -266,9 +268,10 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
         db.session.commit()
 
     for product_id in session_cart:
-        cart_item = CartItem.query.filter_by(
-            annonce_id=product_id, user_id=user_id
-        ).first()
+        if product_id is not None:
+            cart_item = CartItem.query.filter_by(
+                annonce_id=product_id, user_id=user_id
+            ).first()
 
         # Si le produit est déjà dans le panier de l'utilisateur, augmentez la quantité
         if cart_item:
@@ -297,6 +300,10 @@ def saveUser(user: User):
 def ajouter_favori(favorite: Favorite):
     db.session.add(favorite)
     db.session.commit()
+
+
+
+
 
 
 # =====================================================================
