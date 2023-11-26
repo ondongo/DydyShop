@@ -69,13 +69,13 @@
         {% if current_user.is_authenticated %}
             <a class="nav-link d-none"   href="{{url_for('login')}}" 
            id="navbarDropdown" role="button"  aria-expanded="false">
-           Connexion/Inscription
+           login/Inscription
             </a>
         {% else %}
 
         <a class="nav-link "   href="{{url_for('login')}}" 
         id="navbarDropdown" role="button"  aria-expanded="false">
-        Connexion/Inscription
+        login/Inscription
          </a>
         {% endif %}
            
@@ -141,7 +141,7 @@
                 <li><a class="dropdown-item" href="">Historique d'achats</a></li>
                 <li><a class="dropdown-item" href="{{url_for('afficher_favoris')}}">Mes Favoris</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{{url_for('logout')}}">Deconnexion</a></li>
+                <li><a class="dropdown-item" href="{{url_for('logout')}}">Delogin</a></li>
                 
               </ul>
             
@@ -162,7 +162,7 @@
                 <li><a class="dropdown-item" href="">Historique d'achats</a></li>
                 <li><a class="dropdown-item" href="#">Mes Favoris</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{{url_for('logout')}}">Deconnexion</a></li>
+                <li><a class="dropdown-item" href="{{url_for('logout')}}">Delogin</a></li>
                 
               </ul>
           

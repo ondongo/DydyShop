@@ -47,7 +47,7 @@
               <hr class="dropdown-divider" />
             </li>
             <li>
-              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
+              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Délogin</a>
             </li>
           </ul>
         </div>
@@ -59,13 +59,13 @@
 
   {% if current_user.is_authenticated %}
     <div class="offcanvas__auth d-none">
-      <a href="{{ url_for('connexion') }}">Connexion</a>
-      <a href="{{ url_for('connexion') }}">Inscription</a>
+      <a href="{{ url_for('login') }}">login</a>
+      <a href="{{ url_for('login') }}">Inscription</a>
     </div>
   {% else %}
     <div class="offcanvas__auth">
-      <a href="{{ url_for('connexion') }}">Connexion</a>
-      <a href="{{ url_for('connexion') }}">Inscription</a>
+      <a href="{{ url_for('login') }}">login</a>
+      <a href="{{ url_for('login') }}">Inscription</a>
     </div>
   {% endif %}
 </div>
@@ -115,13 +115,13 @@
         <div class="header__right">
           {% if current_user.is_authenticated %}
             <div class="header__right__auth d-none">
-              <a href="{{ url_for('connexion') }}">Connexion</a>
-              <a href="{{ url_for('connexion') }}">Inscription</a>
+              <a href="{{ url_for('login') }}">login</a>
+              <a href="{{ url_for('login') }}">Inscription</a>
             </div>
           {% else %}
             <div class="header__right__auth">
-              <a href="{{ url_for('connexion') }}">Connexion</a>
-              <a href="{{ url_for('connexion') }}">Inscription</a>
+              <a href="{{ url_for('login') }}">login</a>
+              <a href="{{ url_for('login') }}">Inscription</a>
             </div>
           {% endif %}
           <ul class="header__right__widget">
@@ -157,7 +157,7 @@
                     <hr class="dropdown-divider" />
                   </li>
                   <li>
-                    <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Délogin</a>
                   </li>
                   {% endif %}
                 </ul>

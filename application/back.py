@@ -135,7 +135,7 @@ def add_item():
             flash(f"Erreur lors de l'enregistrement de l'annonce : {str(e)}", "danger")
             print(f"Erreur lors de l'enregistrement de l'annonce : {str(e)}")
 
-        return redirect(url_for("gestionArticle"))
+        return redirect(url_for("gestiondash"))
 
     # Si la méthode est GET, simplement afficher la page d'ajout d'article
     return render_template("back/AddItem.html", subcategories=subcategories)
@@ -144,19 +144,28 @@ def add_item():
 def validate_and_save_annonce(request):
     id_annonce = request.form.get("id_annonce")
     title_form = request.form.get("title")
-    sous_categorie_form = request.form.get("sub_categorie")
+    sous_categorie_form = request.form.get("sous_categorie")
+    categorie_form = request.form.get("categorie_hidden")
     description_form = request.form.get("description")
     prix_form = request.form.get("price")
     # publish_form = bool(request.form.get("publish"))
     quantity_form = request.form.get("quantity")
-    size1 = request.form.getlist("sizes")
-    size2 = request.form.getlist("sizes")
-    size3 = request.form.getlist("sizes")
+    size1_form = request.form.get("size1")
+    size2_form = request.form.get("size2")
+    size3_form = request.form.get("size3")
 
-    color1 = request.form.get("color1")
-    color2 = request.form.get("color2")
-    color3 = request.form.get("color3")
+    color1_form = request.form.get("color1")
+    color2_form = request.form.get("color2")
+    color3_form = request.form.get("color3")
 
+    if size1_form:
+        size1_result="Petite"
+        
+    if size2_form:
+        size2_result="Moyenne"
+        
+    if size3_form:
+        size3_result="Grande"
     # Vérifiez chaque image téléchargée
     for image in request.files.getlist("images"):
         if image:
@@ -169,21 +178,20 @@ def validate_and_save_annonce(request):
                 raise UploadNotAllowed("L'image dépasse la taille maximale autorisée.")
             image.seek(0)
 
-    # colors_list = [
-    # Color(name=color, item_id=id_annonce)
-    # for i, color in enumerate(colors_form, start=1)
-    # if request.form.get(f"colorCheckbox{i}")
-    # ]
-
     new_annonce = Item(
         title=title_form,
         description=description_form,
         prix=prix_form,
         user_id=current_user.id,
-        sousCategorie=sous_categorie_form,
+        subcategory_id=sous_categorie_form,
+        category_id=categorie_form,
         quantity=quantity_form,
-        # izes=[Size(name=size) for size in sizes_form],
-        # colors=colors_list,
+        color1=color1_form,
+        color2=color2_form,
+        color3=color3_form,
+        size1=size1_result,
+        size2=size2_result,
+        size3=size3_result,
     )
 
     create_item(new_annonce)
@@ -389,7 +397,7 @@ def confirm_email(token):
     else:
         flash("Le lien de confirmation n'est pas valide ou a expiré.", "danger")
 
-    return redirect(url_for("connexion"))
+    return redirect(url_for("login"))
 
 
 @app.route("/compte/creation", methods=["POST", "GET"])
@@ -439,7 +447,7 @@ def creation_compte():
                 "Veuillez confirmer votre mail pour vous connecter.",
                 "info",
             )
-            return redirect(url_for("connexion"))
+            return redirect(url_for("login"))
 
     return render_template("/back/creation_compte.html")
 
@@ -450,7 +458,7 @@ def load_user(user_id):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def connexion():
+def login():
     if request.method == "POST":
         login = request.form["login"]
         password = request.form["pass"]
@@ -489,7 +497,7 @@ def admin_dashboard():
     return render_template("/back/dashboard.html")
 
 
-# Deconnexion
+# Delogin
 @app.route("/logout")
 @login_required
 def logout():
@@ -546,7 +554,7 @@ def reset_password(token):
             updateSession()
 
             flash("Votre mot de passe a été réinitialisé avec succès!", "success")
-            return redirect(url_for("connexion"))
+            return redirect(url_for("login"))
         return render_template("reset_password.html", token=token)
     else:
         flash("Le lien de réinitialisation n'est pas valide ou a expiré.", "danger")

@@ -60,29 +60,31 @@
             </div>
             <div class="row align-items-center">
               <div class="col-md-6 mb-3">
-                <label for="categorie">Sous Catégorie</label>
-                <select class="form-select mb-0" id="sous_categorie" name="sous_categorie" aria-label="Catégorie select example">
+                <label for="sous_categorie">Sous Catégorie</label>
+                <select class="form-select mb-0" id="sous_categorie" name="sous_categorie" aria-label="Sous Catégorie select example">
                   <option selected disabled>Choix</option>
                   {% for sous_categorie in subcategories %}
-                    <option value="{{ sous_categorie.id }}">{{ sous_categorie.name }}</option>
+                    <option value="{{ sous_categorie.id }}" data-category="{{ sous_categorie.category.id }}">{{ sous_categorie.name }}</option>
                   {% endfor %}
                 </select>
               </div>
 
               <div class="col-md-6 mb-3">
                 <label for="categorie">Catégorie</label>
-                <select class="form-select mb-0" id="categorie" name="categorie" aria-label="Catégorie select example" disabled>
+                <select class="form-select mb-0 categorie-select" id="categorie" name="categorie" aria-label="Catégorie select example" disabled>
                   {% for sous_categorie in subcategories %}
-                    <option value="{{ sous_categorie.category.id }}" selected >{{ sous_categorie.category.name }}</option>
+                    <option value="{{ sous_categorie.category.id }}" selected>{{ sous_categorie.category.name }}</option>
                   {% endfor %}
                 </select>
+                <!-- Ajoutez un champ caché pour la catégorie -->
+                <input type="hidden" name="categorie_hidden" id="categorie_hidden"/>
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="form-group">
                   <label for="phone">Prix</label>
-                  <input class="form-control" type="number" placeholder="0" required step="500" name="prix" />
+                  <input class="form-control" type="number" placeholder="0" required step="500" name="price" />
                 </div>
               </div>
             </div>
@@ -134,16 +136,16 @@
               <div class="col-sm-6">
                 <label for="state">Taille(Facultatif)</label>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" name="size1" />
+                  <input class="form-check-input" type="checkbox" id="flexCheckDefault" name="size1" />
                   <label class="form-check-label" for="flexCheckDefault" value="Petite">Taille Petite</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" name="size2" />
+                  <input class="form-check-input" type="checkbox" id="flexCheckChecked" name="size2" />
                   <label class="form-check-label" for="flexCheckChecked" value="Moyenne">Taille Moyenne</label>
                 </div>
 
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" name="size3" />
+                  <input class="form-check-input" type="checkbox" id="flexCheckChecked" name="size3" />
                   <label class="form-check-label" for="flexCheckChecked" value="Grande">Taille Grande</label>
                 </div>
               </div>
@@ -166,15 +168,15 @@
   <!-- init js -->
   <script src="assets/js/ui/component.fileupload.js"></script>
 
-
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+ 
   <script>
     $(document).ready(function() {
-      $("#sous_categorie").change(function() {
-        var selectedCategoryId = $("#sous_categorie option:selected").data("category");
-        $("#categorie").val(selectedCategoryId).prop('disabled', false);
-      });
+        $("#sous_categorie").change(function() {
+            var selectedCategoryId = $("#sous_categorie option:selected").data("category");
+            $(".categorie-select").val(selectedCategoryId);
+            $("#categorie_hidden").val(selectedCategoryId);
+        });
     });
-  </script>
-
- 
+</script>
 {% endblock %}
