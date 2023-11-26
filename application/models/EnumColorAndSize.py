@@ -1,12 +1,10 @@
 from enum import Enum
 
 class EnumSize(Enum):
-   xxs=1
-   xs=2
-   s=3
-   m=4
-   l=5
-   xl =6
+   petite =1
+   moyenne=2
+   grande=3
+
 
    
 class EnumColor(Enum):

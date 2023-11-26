@@ -46,7 +46,7 @@
         >
 
          
-        <a href="{{url_for('publierAnnonce')}}" class="btn  " role="button "style="
+        <a href="{{url_for('add_item')}}" class="btn  " role="button "style="
         background-color: #f29541; color:white; margin-right:20px;">
             <!--<i class="fas fa-shopping-cart text-primary"></i>
             <span class="badge">0</span> -->
@@ -56,11 +56,11 @@
 
         {% if current_user.is_authenticated %}
         <!-- Cacher les boutons ici -->
-        <a class="btn  mx-2 " href="{{url_for('publierAnnonce')}}" role="button" style="
+        <a class="btn  mx-2 " href="{{url_for('add_item')}}" role="button" style="
         background-color: blue;color:white;">Crédit</a>
       {% else %}
         <!-- Afficher les boutons ici -->
-        <a class="btn  mx-2 d-none" href="{{url_for('publierAnnonce')}}" role="button" style="
+        <a class="btn  mx-2 d-none" href="{{url_for('add_item')}}" role="button" style="
         background-color: blue; color:white;">Crédit</a>
       {% endif %}
         
@@ -139,7 +139,7 @@
                 <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
                 <li><a class="dropdown-item" href="#">Accueil</a></li>
                 <li><a class="dropdown-item" href="{{url_for('gestionAnnonce')}}">Gérer Annonces</a></li>
-                <li><a class="dropdown-item" href="{{url_for('publierAnnonce')}}">Publier Annonces</a></li>
+                <li><a class="dropdown-item" href="{{url_for('add_item')}}">Publier Annonces</a></li>
                 <li><a class="dropdown-item" href="">Historique d'achats</a></li>
                 <li><a class="dropdown-item" href="{{url_for('articles_favoris')}}">Mes Favoris</a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -160,7 +160,7 @@
                 <li><a class="dropdown-item" href="#">Compte/Profil</a></li>
                 <li><a class="dropdown-item" href="#">Accueil</a></li>
                 <li><a class="dropdown-item" href="{{url_for('gestionAnnonce')}}">Gérer Annonces</a></li>
-                <li><a class="dropdown-item" href="{{url_for('publierAnnonce')}}">Publier Annonces</a></li>
+                <li><a class="dropdown-item" href="{{url_for('add_item')}}">Publier Annonces</a></li>
                 <li><a class="dropdown-item" href="">Historique d'achats</a></li>
                 <li><a class="dropdown-item" href="{{url_for('articles_favoris')}}">Mes Favoris</a></li>
                 <li><hr class="dropdown-divider"></li>

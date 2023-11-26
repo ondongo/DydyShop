@@ -1,0 +1,180 @@
+{% extends './layout/baseAdmin.html' %}
+
+{% block title %}
+  {{ super() }} | Nouvelles annonces
+{% endblock %}
+
+{% block content %}
+  <div class="row mt-3">
+    <div class="col-12 col-xl-12">
+      <div class="card card-body border-0 shadow mb-4">
+        <h4 class="h4 text-center mb-3">Saisir les informations nécessaires qui rendront votre Produit intéressant et unique</h4>
+        <form method="POST" action="{{ url_for('add_item') }}" enctype="multipart/form-data">
+          <!-- Section: Informations générales -->
+          <div class="row">
+            <div class="col-12">
+              <h1 class="h5 text-center mb-4s">Téléchargement des images</h1>
+
+              <fieldset class="upload_dropZone text-center mb-3 p-4">
+                <legend class="visually-hidden">uploader Image</legend>
+
+                <svg class="upload_svg" width="60" height="60" aria-hidden="true">
+                  <use href="#icon-imageUpload"></use>
+                </svg>
+
+                <p class="small my-2">
+                  Faites glisser et déposez un maximum de 3 images à l'intérieur de la zone en pointillés<br /><i>ou</i>
+                </p>
+                <div class="upload_errorMessage text-danger"></div>
+                <input id="upload_image_logo" data-post-name="image_logo" data-post-url="https://someplace.com/image/uploads/logos/" class="position-absolute invisible" type="file" multiple accept="image/jpeg, image/png, image/svg+xml" name="images" />
+
+                <label class="btn btn-upload mb-3" for="upload_image_logo">Choose file(s)</label>
+
+                <div class="upload_gallery d-flex flex-wrap justify-content-center gap-3 mb-0"></div>
+              </fieldset>
+
+              <svg style="display:none">
+                <defs>
+                  <symbol id="icon-imageUpload" clip-rule="evenodd" viewBox="0 0 96 96">
+                    <path d="M47 6a21 21 0 0 0-12.3 3.8c-2.7 2.1-4.4 5-4.7 7.1-5.8 1.2-10.3 5.6-10.3 10.6 0 6 5.8 11 13 11h12.6V22.7l-7.1 6.8c-.4.3-.9.5-1.4.5-1 0-2-.8-2-1.7 0-.4.3-.9.6-1.2l10.3-8.8c.3-.4.8-.6 1.3-.6.6 0 1 .2 1.4.6l10.2 8.8c.4.3.6.8.6 1.2 0 1-.9 1.7-2 1.7-.5 0-1-.2-1.3-.5l-7.2-6.8v15.6h14.4c6.1 0 11.2-4.1 11.2-9.4 0-5-4-8.8-9.5-9.4C63.8 11.8 56 5.8 47 6Zm-1.7 42.7V38.4h3.4v10.3c0 .8-.7 1.5-1.7 1.5s-1.7-.7-1.7-1.5Z M27 49c-4 0-7 2-7 6v29c0 3 3 6 6 6h42c3 0 6-3 6-6V55c0-4-3-6-7-6H28Zm41 3c1 0 3 1 3 3v19l-13-6a2 2 0 0 0-2 0L44 79l-10-5a2 2 0 0 0-2 0l-9 7V55c0-2 2-3 4-3h41Z M40 62c0 2-2 4-5 4s-5-2-5-4 2-4 5-4 5 2 5 4Z" />
+                  </symbol>
+                </defs>
+              </svg>
+            </div>
+
+            <div class="row align-items-center">
+              <div class="col-md-6 mb-3">
+                <!-- Titre -->
+                <div>
+                  <label for="title">Titre</label>
+                  <input class="form-control" id="title" type="text" placeholder="Entrez votre titre" name="title" required />
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <!-- Quantité -->
+                <div class="form-group">
+                  <label for="quantity">Quantité</label>
+                  <input class="form-control" id="quantity" type="number" name="quantity" placeholder="0" required />
+                </div>
+              </div>
+            </div>
+            <div class="row align-items-center">
+              <div class="col-md-6 mb-3">
+                <label for="categorie">Sous Catégorie</label>
+                <select class="form-select mb-0" id="sous_categorie" name="sous_categorie" aria-label="Catégorie select example">
+                  <option selected disabled>Choix</option>
+                  {% for sous_categorie in subcategories %}
+                    <option value="{{ sous_categorie.id }}">{{ sous_categorie.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="categorie">Catégorie</label>
+                <select class="form-select mb-0" id="categorie" name="categorie" aria-label="Catégorie select example" disabled>
+                  {% for sous_categorie in subcategories %}
+                    <option value="{{ sous_categorie.category.id }}" selected >{{ sous_categorie.category.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="form-group">
+                  <label for="phone">Prix</label>
+                  <input class="form-control" type="number" placeholder="0" required step="500" name="prix" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <div class="form-group">
+                  <label for="email">Description</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="description"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 mb-3">
+                <label for="state">Couleur(Choisir au moins une)</label>
+
+                <!-- First set -->
+                <div class="form-group d-flex align-items-center mb-1">
+                  <div class="col-sm-10">
+                    <div class="color-input-container">
+                      <input type="color" id="colorField1" name="color1" class="form-control color-input" />
+                      <label class="color-label" for="head1"></label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2 set -->
+                <div class="form-group d-flex align-items-center mb-1">
+                  <div class="col-sm-10">
+                    <div class="color-input-container">
+                      <input type="color" id="colorField2" name="color2" class="form-control color-input" />
+                      <label class="color-label" for="head1"></label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3 set -->
+                <div class="form-group d-flex align-items-center mb-1">
+                  <div class="col-sm-10">
+                    <div class="color-input-container">
+                      <input type="color" id="colorField3" name="color3" class="form-control color-input" />
+                      <label class="color-label" for="head1"></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <label for="state">Taille(Facultatif)</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" name="size1" />
+                  <label class="form-check-label" for="flexCheckDefault" value="Petite">Taille Petite</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" name="size2" />
+                  <label class="form-check-label" for="flexCheckChecked" value="Moyenne">Taille Moyenne</label>
+                </div>
+
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" name="size3" />
+                  <label class="form-check-label" for="flexCheckChecked" value="Grande">Taille Grande</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ... Autres sections ... -->
+
+          <!-- Section: Bouton de soumission -->
+          <div class="col-12 mt-3 d-flex justify-content-end">
+            <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Enregistrer tout</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- plugin js -->
+  <script src="assets/vendor/dropzone/min/dropzone.min.js"></script>
+  <!-- init js -->
+  <script src="assets/js/ui/component.fileupload.js"></script>
+
+
+  <script>
+    $(document).ready(function() {
+      $("#sous_categorie").change(function() {
+        var selectedCategoryId = $("#sous_categorie option:selected").data("category");
+        $("#categorie").val(selectedCategoryId).prop('disabled', false);
+      });
+    });
+  </script>
+
+ 
+{% endblock %}

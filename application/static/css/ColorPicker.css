@@ -1,0 +1,17 @@
+.color-input-container {
+    position: relative;
+  }
+  
+.color-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000; 
+    font-size: 14px; 
+    pointer-events: none;
+}
+  
+.color-input {
+    padding-right: 30px;
+}

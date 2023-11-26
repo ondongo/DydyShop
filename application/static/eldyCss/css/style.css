@@ -1442,6 +1442,7 @@ ol {
 
 .filter-range-wrap .range-slider .price-input {
 	position: relative;
+	background: red;
 }
 
 .filter-range-wrap .range-slider .price-input p {
@@ -3736,3 +3737,16 @@ ol {
 	transition: background 0.3s ease;
 	color:rgba(0, 0, 0, 0.50); 
 }
+
+  /* Appliquer une couleur différente à la poignée du slider (facultatif) */
+  .form-range::-webkit-slider-thumb {
+	background: #d85629; /* Couleur de la poignée du slider en blanc */
+  }
+  
+  .form-range::-moz-range-thumb {
+	background: #d85629; /* Couleur de la poignée du slider en blanc */
+  }
+  
+  .form-range::-ms-thumb {
+	background: #d85629; /* Couleur de la poignée du slider en blanc */
+  }

@@ -20,27 +20,12 @@ from flask_login import (
     login_required,
     current_user,
 )
-from flask_uploads import UploadSet, configure_uploads, IMAGES
+from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
 from functools import wraps
-
-# from flask_principal import Principal, Permission, identity_changed, Identity, RoleNeed
-
-# Créez une instance de l'extension Principal
-# Principal(app)
-
-# Définissez les rôles disponibles
-# admin_role = RoleNeed("admin")
-# user_role = RoleNeed("user")
-
-# Définissez des autorisations basées sur les rôles
-# admin_permission = Permission(admin_role)
-# user_permission = Permission(user_role)
-
-
 from twilio.rest import Client
 
 
@@ -50,8 +35,10 @@ from twilio.rest import Client
 
 from application.models.model import (
     CartItem,
+    Category,
     Item,
     Favorite,
+    SubCategory,
     add_images_to_item,
     ajouter_favori,
     clear_cart,
@@ -67,11 +54,13 @@ from application.models.model import (
     editAnnonceModel,
     User,
     saveUser,
+    updateSession,
+    updatecategory,
+    updatesubcategory,
 )
 
 
 listcategories = list(EnumCategorie)
-# listEtats=list(EnumEtatArticle)
 
 
 def admin_required(func):
@@ -93,76 +82,126 @@ def admin_required(func):
 #
 
 
-@app.route(
-    "/admin/add/<categorie>",
-    methods=["GET", "POST"],
-    defaults={"id_annonce": 0, "categorie": None},
-)
-@app.route(
-    "/admin/add/<categorie>", methods=["GET", "POST"], defaults={"id_annonce": 0}
-)
-@login_required
-def publierAnnonce(id_annonce, categorie):
-    Item = findAnnonceById(id_annonce)
-    sous_categories = []
-    recupcategories = categorie
-    if request.method == "GET":
-        # ============01
-        if categorie == "hommes":
-            sous_categories = SousCategorieHomme.__members__.values()
-        # ===========02
-        elif categorie == "femmes":
-            sous_categories = SousCategorieFemmme.__members__.values()
+@app.route("/add_category", methods=["GET", "POST"])
+def add_category():
+    categories = Category.query.all()
+    if request.method == "POST":
+        name = request.form.get("name")
+        if name:
+            category = Category(name=name)
+            updatecategory(category)
+            flash("Catégorie ajoutée avec succès.", "success")
+            return redirect(url_for("add_category"))
+
+    return render_template("/back/AddCategory.html", categories=categories)
+
+
+@app.route("/add_subcategory", methods=["GET", "POST"])
+def add_subcategory():
+    categories = Category.query.all()
+    subcategories = SubCategory.query.all()
+    if request.method == "POST":
+        name = request.form.get("name")
+        category_id = request.form.get("category")
+        if name and category_id:
+            subcategory = SubCategory(name=name, category_id=category_id)
+            updatesubcategory(subcategory)
+            flash("Sous-catégorie ajoutée avec succès.", "success")
+            return redirect(url_for("add_subcategory"))
 
     return render_template(
-        "/back/formAdd.html",
-        Item=Item,
-        listcategories=listcategories,
-        sous_categories=sous_categories,
-        recupcategories=recupcategories,
+        "/back/AddSubcategory.html", categories=categories, subcategories=subcategories
     )
 
 
+# Configuration Flask-Uploads
 photos = UploadSet("photos", IMAGES)
-# Configurez Flask-Uploads pour gérer les téléchargements d'images
 app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
-@app.route("/save", methods=["POST"])
-def save():
+@app.route("/add_item", methods=["GET", "POST"])
+def add_item():
+    subcategories = SubCategory.query.all()
+    if request.method == "POST":
+        # Traitement du formulaire d'ajout d'article ici
+        try:
+            validate_and_save_annonce(request)
+            print("Annonce enregistrée avec succès.")
+            flash("Annonce enregistrée avec succès.", "success")
+        except UploadNotAllowed as e:
+            flash(f"Type de fichier non autorisé : {str(e)}", "danger")
+        except Exception as e:
+            flash(f"Erreur lors de l'enregistrement de l'annonce : {str(e)}", "danger")
+            print(f"Erreur lors de l'enregistrement de l'annonce : {str(e)}")
+
+        return redirect(url_for("gestionArticle"))
+
+    # Si la méthode est GET, simplement afficher la page d'ajout d'article
+    return render_template("back/AddItem.html", subcategories=subcategories)
+
+
+def validate_and_save_annonce(request):
     id_annonce = request.form.get("id_annonce")
     title_form = request.form.get("title")
-    categorie_form = request.form.get("categorie")
-    sous_categorie_form = request.form.get("sous_categorie")
+    sous_categorie_form = request.form.get("sub_categorie")
     description_form = request.form.get("description")
-    prix_form = request.form.get("prix")
-    publish_form = request.form.get("publish")
-    img_url_form = request.form.get("img_url")
-    img_title_form = request.form.get("img_title")
+    prix_form = request.form.get("price")
+    # publish_form = bool(request.form.get("publish"))
     quantity_form = request.form.get("quantity")
+    size1 = request.form.getlist("sizes")
+    size2 = request.form.getlist("sizes")
+    size3 = request.form.getlist("sizes")
 
-    publish_form = False if not publish_form else True
+    color1 = request.form.get("color1")
+    color2 = request.form.get("color2")
+    color3 = request.form.get("color3")
 
-    images = request.files.getlist("images")
+    # Vérifiez chaque image téléchargée
+    for image in request.files.getlist("images"):
+        if image:
+            # Vérifiez le format de l'image
+            if not allowed_file(image.filename):
+                raise UploadNotAllowed("Format d'image non autorisé.")
+
+            # Vérifiez la taille de l'image
+            if len(image.read()) > MAX_IMAGE_SIZE_BYTES:
+                raise UploadNotAllowed("L'image dépasse la taille maximale autorisée.")
+            image.seek(0)
+
+    # colors_list = [
+    # Color(name=color, item_id=id_annonce)
+    # for i, color in enumerate(colors_form, start=1)
+    # if request.form.get(f"colorCheckbox{i}")
+    # ]
 
     new_annonce = Item(
         title=title_form,
         description=description_form,
         prix=prix_form,
-        published=publish_form,
-        img_url=img_url_form,
-        img_title=img_title_form,
-        categorie=categorie_form,
         user_id=current_user.id,
         sousCategorie=sous_categorie_form,
         quantity=quantity_form,
+        # izes=[Size(name=size) for size in sizes_form],
+        # colors=colors_list,
     )
 
     create_item(new_annonce)
-    add_images_to_item(new_annonce, images)
+    add_images_to_item(new_annonce, request.files.getlist("images"))
 
-    return redirect(url_for("gestionArticle"))
+    print(">>>>>>>>>>>>>>>>>>>>>", new_annonce)
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in {
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+    }
+
+
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 
 
 @app.route("/admin/edit/<int:id_annonce>", methods=["GET", "POST"])
@@ -200,7 +239,7 @@ def gestionArticle():
         Item.query.filter(
             Item.published == 1, Item.deleted == 0, Item.user_id == current_user.id
         )
-        .order_by((Item.datePub))
+        .order_by((Item.date_pub))
         .all()
     )
     count_publier = len(annonces)
@@ -220,7 +259,7 @@ def gestiondash():
         Item.query.filter(
             Item.published == 1, Item.deleted == 0, Item.user_id == current_user.id
         )
-        .order_by((Item.datePub))
+        .order_by((Item.date_pub))
         .all()
     )
     count_publier = len(annonces)
@@ -293,7 +332,7 @@ def recherche_annonAvancee():
         Item.query.filter(
             Item.user_id == current_user.id, Item.title.ilike(f"%{query}%")
         )
-        .order_by(desc(Item.datePub))
+        .order_by(desc(Item.date_pub))
         .all()
     )
     count = len(annonces)
@@ -307,44 +346,50 @@ def recherche_annonAvancee():
 #
 
 import secrets
-from flask_mail import Message
+from flask_mail import Message, Mail
+
+
+# Ce sont des informations Test
+app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
+app.config["MAIL_PORT"] = 2525
+app.config["MAIL_USERNAME"] = "966afbb985ad95"
+app.config["MAIL_PASSWORD"] = "1bdae0667ba459"
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_DEFAULT_SENDER"] = "gloireondongo1205@gmail.com"
+mail = Mail(app)
 
 
 def generate_confirmation_token():
     return secrets.token_urlsafe(30)
 
 
-
 def send_confirmation_email(user):
     token = generate_confirmation_token()
     user.confirmation_token = token
-    db.session.commit()
+    updateSession()
 
-    confirmation_link = url_for('confirm_email', token=token, _external=True)
-    msg = Message('Confirmation d\'e-mail', recipients=[user.email])
-    msg.body = 'Cliquez sur le lien suivant pour confirmer votre adresse e-mail: {0}'.format(confirmation_link)
+    confirmation_link = url_for("confirm_email", token=token, _external=True)
+    msg = Message("Confirmation d'e-mail", recipients=[user.login])
+    msg.body = "Cliquez sur le lien suivant pour confirmer votre adresse e-mail sur DyDyShop: {0}".format(
+        confirmation_link
+    )
     mail.send(msg)
 
 
-
-@app.route('/confirm_email/<token>')
+@app.route("/confirm_email/<token>")
 def confirm_email(token):
     user = User.query.filter_by(confirmation_token=token).first()
 
     if user:
         user.confirmed = True
-        user.confirmation_token = None  # Optionnel : effacer le jeton après confirmation
-        db.session.commit()
-        flash('Votre adresse e-mail a été confirmée avec succès!', 'success')
+        user.confirmation_token = None
+        updateSession()
+        flash("Votre adresse e-mail a été confirmée avec succès!", "success")
     else:
-        flash('Le lien de confirmation n\'est pas valide ou a expiré.', 'danger')
+        flash("Le lien de confirmation n'est pas valide ou a expiré.", "danger")
 
-    return redirect(url_for('connexion'))
-
-
-
-
-
+    return redirect(url_for("connexion"))
 
 
 @app.route("/compte/creation", methods=["POST", "GET"])
@@ -384,10 +429,15 @@ def creation_compte():
         else:
             saveUser(nouvel_utilisateur)
             # identity_changed.send(app, identity=Identity(nouvel_utilisateur.id, role))
+            send_confirmation_email(nouvel_utilisateur)
+            flash(
+                "Votre compte a été créé avec succès!",
+                "success",
+            )
 
             flash(
-                "Votre compte a été créé avec succès! Veuillez vous connecter.",
-                "success",
+                "Veuillez confirmer votre mail pour vous connecter.",
+                "info",
             )
             return redirect(url_for("connexion"))
 
@@ -408,25 +458,24 @@ def connexion():
         user = User.query.filter_by(login=login, tel=tel).first()
 
         if user and user.check_password(password):
-            login_user(user)
+            if user.confirmed:
+                login_user(user)
 
-            # Check for and transfer session cart to database cart
-            if "panier" in session:
-                transfer_session_cart_to_db_cart(user.id, session["panier"])
-                session.pop("panier")
-                session.pop("total")
+                if "panier" in session:
+                    transfer_session_cart_to_db_cart(user.id, session["panier"])
+                    session.pop("panier")
+                    session.pop("total")
 
-            # change_user_role(current_user, "admin")
-
-            print(
-                "==============User roles after login============================:",
-                current_user.roles,
-            )
-            # print("============== admin_permission.can():", admin_permission.can())
-            if "admin" in current_user.roles:
-                return redirect(url_for("admin_dashboard"))
+                if "admin" in current_user.roles:
+                    return redirect(url_for("admin_dashboard"))
+                else:
+                    return redirect(url_for("index"))
             else:
-                return redirect(url_for("index"))
+                flash(
+                    "Votre adresse e-mail n'est pas confirmée. Veuillez vérifier votre boîte de réception.",
+                    "info",
+                )
+                return render_template("/back/login.html")
         else:
             flash("Login ou mot de passe incorrect")
             return render_template("/back/login.html")
@@ -449,6 +498,61 @@ def logout():
     return redirect(url_for("index"))
 
 
+def generate_reset_token():
+    return secrets.token_urlsafe(30)
+
+
+def send_reset_email(user):
+    reset_token = generate_reset_token()
+    user.reset_token = reset_token
+    updateSession()
+
+    reset_link = url_for("reset_password", token=reset_token, _external=True)
+    msg = Message("Réinitialisation de mot de passe", recipients=[user.login])
+    msg.body = f"Cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+    mail.send(msg)
+
+
+@app.route("/reset_password", methods=["POST"])
+def reset_password_request():
+    login = request.form.get("email")
+
+    if login:
+        user = User.query.filter_by(login=login).first()
+
+        if user:
+            send_reset_email(user)
+            flash(
+                "Un e-mail de réinitialisation a été envoyé à votre adresse.", "success"
+            )
+        else:
+            flash("Aucun utilisateur trouvé avec cette adresse e-mail.", "danger")
+    else:
+        flash("Veuillez fournir une adresse e-mail.", "danger")
+
+    return redirect(url_for("login"))
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+
+    if user:
+        if request.method == "POST":
+            new_password = request.form.get("new_password")
+            # Mettez à jour le mot de passe dans la base de données et supprimez le token de réinitialisation
+            user.password = hashlib.md5(new_password.encode("utf-8")).hexdigest()
+            user.reset_token = None
+            updateSession()
+
+            flash("Votre mot de passe a été réinitialisé avec succès!", "success")
+            return redirect(url_for("connexion"))
+        return render_template("reset_password.html", token=token)
+    else:
+        flash("Le lien de réinitialisation n'est pas valide ou a expiré.", "danger")
+        return redirect(url_for("mot_de_passe_oublie"))
+
+
 """ def change_user_role(user, new_role):
     try:
         print(
@@ -464,7 +568,6 @@ def logout():
         print(f"Erreur lors du changement d'identité : {e}")
 
  """
-
 
 
 #
@@ -614,16 +717,20 @@ def Panier():
 @login_required
 def checkout():
     # Obtenez les détails des articles dans le panier à partir de votre base de données
-    cart_items = get_cart_items()
+    # cart_items = get_cart_items()
 
     # Créez un message de vérification en convertissant les détails du panier en texte
-    checkout_message = create_checkout_message(cart_items)
+
+    # checkout_message = create_checkout_message(cart_items)
+    checkout_message = (
+        "Une commande de chaussure a été passé sur le site de DydyShop  prix:5000FCFA"
+    )
 
     # Envoyez le message WhatsApp (utilisez vos propres informations Twilio)
     send_whatsapp_message(checkout_message)
 
     # Réinitialisez le panier après la commande
-    clear_cart()
+    # clear_cart()
 
     flash("Votre commande a été passée avec succès!", "success")
     return redirect(url_for("index"))
@@ -661,17 +768,28 @@ def create_checkout_message(cart_items):
     return message
 
 
-account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
-auth_token = "008dda7a6424142308e6c538b44dcdea"
+# account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
+# auth_token = "008dda7a6424142308e6c538b44dcdea"
 
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
+    account_sid = "AC133734595c6e3326b9cf8aae0dd5d1dd"
+    auth_token = "d285e0f4a064345a8521d4d7f3518207"
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
-        from_="whatsapp:+14155238886", body=message, to="whatsapp:+221784603783"
+        from_="whatsapp:+14155238886",
+        body=message,
+        to="whatsapp:+221771592145",
     )
+
+    print(message.sid)
+
+
+@app.route("/listes-commandes")
+def orderListing():
+    return render_template("/back/OrderListing.html")
 
 
 #
@@ -746,3 +864,37 @@ def delete_favorite(favorite_id):
         un_deleteFavorite(favorite)
     # Rediriger vers la page des favoris après la suppression
     return redirect(url_for("articles_favoris"))
+
+
+import requests
+import re
+
+
+def get_color_name_from_hex_api(hex_color):
+    hex_color_without_hash = re.sub(r"#", "", hex_color)
+    hex_color_upper = hex_color_without_hash.upper()
+    url = f"https://www.thecolorapi.com/id?hex={hex_color_upper}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            color_name = data["name"]["value"]
+            return color_name
+        else:
+            print(f"Erreur: {data['error']['message']}")
+
+    except Exception as e:
+        print(f"Erreur lors de la requête à l'API : {e}")
+
+
+# Exemple d'utilisation :
+hex_color = "7F00FF"
+color_name = get_color_name_from_hex_api(hex_color)
+
+if color_name:
+    print(f"Le nom de la couleur pour {hex_color} est : {color_name}")
+
+else:
+    print(f"Aucune correspondance trouvée pour {hex_color}")

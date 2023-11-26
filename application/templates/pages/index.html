@@ -32,7 +32,7 @@
                   chez DydyShop : votre destination fashion africaine<br />
                   incontournable pour être à la pointe de la mode !".
                 </p>
-                <a href="#" style="display: inline-block; background-color: #d85629; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                <a href="{{ url_for('Shop') }}"  style="display: inline-block; background-color: #d85629; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
                     Decouvrir</a>
 
 
@@ -49,7 +49,7 @@
                   <div class="categories__text">
                     <h4 style="color: aliceblue">Sac Africain</h4>
                     <p>{{countSac}} items</p>
-                    <a href="#" style="color: aliceblue">Acheter</a>
+                    <a  href="{{ url_for('display_Shop', subcategory='Sac') }}" style="color: aliceblue">Acheter</a>
                   </div>
                 </div>
               </div>
@@ -85,7 +85,7 @@
                   <div class="categories__text">
                     <h4 style="color: aliceblue">Tous</h4>
                     <p>{{count}} items</p>
-                    <a href="#" style="color: aliceblue">Acheter</a>
+                    <a href="{{ url_for('Shop') }}" style="color: aliceblue">Acheter</a>
                   </div>
                 </div>
               </div>
