@@ -17,7 +17,7 @@
         <span class="icon_search search-switch"></span>
       </li>
       <li>
-        <a href="#">
+        <a href="{{url_for('wishlist')}}">
           <span class="icon_heart_alt"></span>
           <div class="tip">2</div>
         </a>
@@ -47,7 +47,7 @@
               <hr class="dropdown-divider" />
             </li>
             <li>
-              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Délogin</a>
+              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
             </li>
           </ul>
         </div>
@@ -90,10 +90,10 @@
                 <a href="{{ url_for('Shop') }}">Shop</a>
               </li>
               <li>
-                <a href="{{ url_for('display_Shop', subcategory='Sac') }}">Sacs</a>
+                <a href="{{ url_for('display_Shop', subcategory=1) }}">Sacs</a>
               </li>
               <li>
-                <a href="{{ url_for('display_Shop', subcategory='Robe') }}">Robes</a>
+                <a href="{{ url_for('display_Shop', subcategory=3) }}">Robes</a>
               </li>
             </ul>
           </nav>
@@ -126,7 +126,7 @@
           {% endif %}
           <ul class="header__right__widget">
             <li>
-              <a href="#">
+              <a href="{{url_for('wishlist')}}">
                 <span class="icon_heart_alt"></span>
                 <div class="tip" style="background-color: #d85629">2</div>
               </a>

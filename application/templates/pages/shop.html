@@ -95,15 +95,15 @@
                 </div>
                 <div class="size__list color__list">
                   <label for="black">
-                    Noir<input type="checkbox" id="black" value="yellows" name="color" />
+                    Noir<input type="checkbox" id="black" value="black" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="whites">
-                    Blanc<input type="checkbox" id="whites" value="yellows" name="color" />
+                    Blanc<input type="checkbox" id="whites" value="white" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="reds">
-                    Rouge<input type="checkbox" id="reds" value="yellows" name="color" />
+                    Rouge<input type="checkbox" id="reds" value="red" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="greys">
@@ -111,19 +111,19 @@
                     <span class="checkmark"></span>
                   </label>
                   <label for="blues">
-                    Bleu<input type="checkbox" id="blues" value="yellows" name="color" />
+                    Bleu<input type="checkbox" id="blues" value="blue" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="beige">
-                    Beige<input type="checkbox" id="beige" value="yellows" name="color" />
+                    Beige<input type="checkbox" id="beige" value="beige" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="greens">
-                    vert<input type="checkbox" id="greens" value="yellows" name="color" />
+                    vert<input type="checkbox" id="greens" value="green" name="color" />
                     <span class="checkmark"></span>
                   </label>
                   <label for="yellows">
-                    jaune<input type="checkbox" id="yellows" value="yellows" name="color" />
+                    jaune<input type="checkbox" id="yellows" value="yellow" name="color" />
                     <span class="checkmark"></span>
                   </label>
                 </div>
@@ -160,12 +160,12 @@
                   </div>
                   <div class="product__item__text">
                     <h6><a href="#">{{ item.title }}</a></h6>
-                    <div class="rating">
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
-                      <i class="fa fa-star"></i>
+                    <div>
+                      <span class="fa fa-star checked"></span>
+                      <span class="fa fa-star checked"></span>
+                      <span class="fa fa-star checked"></span>
+                      <span class="fa fa-star"></span>
+                      <span class="fa fa-star"></span>
                     </div>
                     <div class="product__price">{{ item.prix }} FrancsCFA</div>
                   </div>
@@ -178,13 +178,13 @@
                 {% for page in pagination.pages %}
                   {% if page %}
                     {% if page == pagination.page %}
-                      <a class="active" style="background-color: #ca1515;
-                                        border-color: #ca1515;
+                      <a class="active" style="background-color: #d85629;
+                                        border-color: #d85629;
                                         color: #fff;
                                         z-index: 3;" href="#">{{ page }}</a>
                     {% else %}
                       <a href="#" style="
-                        color: #ca1515;">{{ page }}</a>
+                        color: #d85629;">{{ page }}</a>
                     {% endif %}
                   {% else %}
                     <span class="ellipsis">&hellip;</span>

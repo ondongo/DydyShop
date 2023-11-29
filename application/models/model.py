@@ -4,7 +4,7 @@ from application.front import app
 import datetime
 import logging as log
 from datetime import datetime
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from flask_login import UserMixin, current_user
 from application.models.EnumColorAndSize import EnumSize
 from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
@@ -59,7 +59,7 @@ class Item(db.Model):
     favorites = db.relationship("Favorite", backref="item", lazy="dynamic")
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     quantity = db.Column(db.Integer, default=0)
-    images = db.relationship("Image", backref="item")
+    images = db.relationship("Image", backref="item", lazy=True)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     subcategory_id = db.Column(db.Integer, db.ForeignKey("sub_categories.id"))
     color1 = db.Column(db.String(100), nullable=True)
@@ -133,6 +133,11 @@ def getAllAnnonceRecent():
     return Item.query.order_by(desc(Item.date_pub)).limit(5).all()
 
 
+
+def getAllAnnonceA_La_Une():
+    return Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
+
+
 def getAllAnnoncePublier():
     return (
         Item.query.filter(Item.published == True, Item.deleted == False)
@@ -163,27 +168,27 @@ def getAllAnnonceBrouillon():
 
 def findAnnonceById(id_annonce):
     item = Item.query.get(id_annonce)
-    if Item is not None:
-        Item.nbre_vues += 1
+    if item is not None:
+        item.nbre_vues += 1
         db.session.commit()
     return item
 
 
-def getAllAnnonceA_La_Une():
-    return Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
+
+def getBestSellingItems():
+    best_selling_items = (
+        db.session.query(Item, func.sum(OrderItem.quantity).label("total_sold"))
+        .join(OrderItem, Item.id == OrderItem.annonce_id)
+        .group_by(Item.id)
+        .order_by(desc("total_sold"))
+        .limit(3) 
+        .all()
+    )
+
+    return best_selling_items
 
 
-""" def saveAnnonce(Item: Item , images: List[FileStorage]):
-    db.session.add(Item)
-    # Enregistrez les images liées à l'annonce en base de données
-    for image in images:
-        if image and allowed_file(image.filename):
-            filename = photos.save(image)
-            img = Image(filename=filename, item_id=item.id)
-            db.session.add(img)
-    db.session.commit()
-    
-     """
+
 
 
 def create_item(new_item: Item):

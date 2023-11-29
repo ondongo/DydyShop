@@ -1,4 +1,6 @@
+import re
 from flask import Flask, abort, render_template, redirect, url_for, request
+import requests
 from sqlalchemy import desc
 from application.models.EnumColorAndSize import *
 from application.models.EnumCategorie import *
@@ -19,12 +21,14 @@ app.config.from_object("config")
 
 from application.models.model import (
     Category,
+    Image,
     SubCategory,
     findAnnonceById,
     Item,
     getAllAnnoncePublier,
     getAllAnnonceA_La_Une,
     getAllAnnonceRecent,
+    getBestSellingItems,
 )
 
 categories = list(EnumCategorie)
@@ -69,10 +73,9 @@ def Article():
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=count)
     items = items[offset : offset + NbreElementParPage]
 
-    tendances = getAllAnnonceA_La_Une()
-    low_price = getAllAnnonceA_La_Une()
-    best_sales = getAllAnnonceA_La_Une()
-    recents = getAllAnnonceRecent()
+    trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
+    three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
+    best_sales = getBestSellingItems()
 
     return render_template(
         "/pages/index.html",
@@ -83,6 +86,9 @@ def Article():
         countTuniques=0,
         countSac=0,
         countEnsemble=0,
+        three_lowest_price_items=three_lowest_price_items,
+        trending_products=trending_products,
+        best_sales=best_sales,
         pagination=pagination,
     )
 
@@ -99,7 +105,7 @@ def Shop():
 
     count = len(items)
     page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
+    NbreElementParPage = 10
     offset = (page - 1) * NbreElementParPage
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=count)
     items = items[offset : offset + NbreElementParPage]
@@ -193,6 +199,10 @@ def display_Shop():
 def recherche_annon():
     query = request.args.get("querygloire")
     items = Item.query.filter(Item.title.ilike(f"%{query}%")).all()
+    # Récupérez la liste des sous-catégories (vous pouvez ajuster cela en fonction de votre modèle de données)
+    sous_categories_femmes = SubCategory.query.filter_by(category_id=1).all()
+    sous_categories_hommes = SubCategory.query.filter_by(category_id=2).all()
+    categories = Category.query.all()
 
     count = len(items)
     if count == 0:
@@ -211,8 +221,8 @@ def recherche_annon():
         count=count,
         pagination=pagination,
         sous_categories=sous_categories,
-        listesCatFemmes=listesCatFemmes,
-        listesCatHommes=listesCatHommes,
+        sous_categories_femmes=sous_categories_femmes,
+        sous_categories_hommes=sous_categories_hommes,
     )
 
 
@@ -224,14 +234,63 @@ def NoFilterFound():
 # =====================================================================
 # =============================Details Annonces===========================
 # =====================================================================
-# Test
+
+def get_color_name_from_hex_api(hex_color):
+    hex_color_without_hash = re.sub(r"#", "", hex_color)
+    hex_color_upper = hex_color_without_hash.upper()
+    url = f"https://www.thecolorapi.com/id?hex={hex_color_upper}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            color_name = data["name"]["value"]
+            return color_name
+        else:
+            print(f"Erreur: {data['error']['message']}")
+
+    except Exception as e:
+        print(f"Erreur lors de la requête à l'API : {e}")
+
+
+""" # Exemple d'utilisation :
+hex_color = "7F00FF"
+color_name = get_color_name_from_hex_api(hex_color)
+
+if color_name:
+    print(f"Le nom de la couleur pour {hex_color} est : {color_name}")
+
+else:
+    print(f"Aucune correspondance trouvée pour {hex_color}")
+ """
+ 
+ 
 @app.route("/Item/<int:id_item>")
 def annonce_Id(id_item):
     item = findAnnonceById(id_item)
     # nbreEtoiles = Item.query(func.avg(Ratings.rating)).filter_by(annonce_id=id_annonce).scalar()
+    unique_colors = list(set([item.color1, item.color2, item.color3]))
+    color_names = [get_color_name_from_hex_api(color) for color in unique_colors if color]
+
+    unique_colors_with_names = list(zip(unique_colors, color_names))
+    
+    similar_items = (
+        Item.query.filter(
+            Item.subcategory_id == item.subcategory_id,
+            Item.id != item.id, 
+            Item.deleted == False,  
+        )
+        .order_by(Item.date_pub.desc())
+        .limit(4)
+        .all()
+    )
+
     if not item:
         return redirect(url_for("/"))
-    return render_template("/pages/detailsArticles.html", item=item)
+    return render_template(
+        "/pages/detailsArticles.html", item=item, unique_colors_with_names=unique_colors_with_names ,similar_items=similar_items
+    )
 
 
 @app.route("/Contact")
@@ -239,9 +298,6 @@ def Contact():
     return render_template("/pages/contact.html")
 
 
-@app.route("/details")
-def Details():
-    return render_template("/pages/detailsArticles.html")
 
 
 # =====================================================================

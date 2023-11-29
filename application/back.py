@@ -121,6 +121,7 @@ configure_uploads(app, photos)
 
 
 @app.route("/add_item", methods=["GET", "POST"])
+@admin_required
 def add_item():
     subcategories = SubCategory.query.all()
     if request.method == "POST":
@@ -157,15 +158,15 @@ def validate_and_save_annonce(request):
     color1_form = request.form.get("color1")
     color2_form = request.form.get("color2")
     color3_form = request.form.get("color3")
-
+    img_form = request.form.get("img_url")
     if size1_form:
-        size1_result="Petite"
-        
+        size1_result = "Petite"
+
     if size2_form:
-        size2_result="Moyenne"
-        
+        size2_result = "Moyenne"
+
     if size3_form:
-        size3_result="Grande"
+        size3_result = "Grande"
     # Vérifiez chaque image téléchargée
     for image in request.files.getlist("images"):
         if image:
@@ -192,6 +193,7 @@ def validate_and_save_annonce(request):
         size1=size1_result,
         size2=size2_result,
         size3=size3_result,
+        img_url=img_form,
     )
 
     create_item(new_annonce)
@@ -214,6 +216,7 @@ MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 
 @app.route("/admin/edit/<int:id_annonce>", methods=["GET", "POST"])
 @login_required
+@admin_required
 def editAnnonce(id_annonce):
     Item = Item.query.get(id_annonce)
     return render_template(
@@ -289,6 +292,7 @@ def gestiondash():
 # ************************************ListCorbeille***********************************
 @app.route("/admin/listings/Corbeille")
 @login_required
+@admin_required
 def gestionAnnonce_Corbeille():
     annonces = getAllAnnonceDel()
     count_corbeille = len(annonces)
@@ -302,6 +306,7 @@ def gestionAnnonce_Corbeille():
 
 @app.route("/admin/listings/Brouillon")
 @login_required
+@admin_required
 def gestionAnnonce_Brouillon():
     annonces = getAllAnnonceBrouillon()
     count_brouillon = len(annonces)
@@ -315,6 +320,7 @@ def gestionAnnonce_Brouillon():
 
 # ************************************Delete ***********************************
 @app.route("/admin/Item/<int:id_annonce>/delete")
+@admin_required
 def un_deleteAnnonce(id_annonce):
     un_delete(id_annonce)
     return redirect(url_for("gestionAnnonce"))
@@ -322,6 +328,7 @@ def un_deleteAnnonce(id_annonce):
 
 # ************************************Publish ***********************************
 @app.route("/admin/Item/<int:id_annonce>/publish")
+@admin_required
 def un_publishAnnonce(id_annonce):
     un_published(id_annonce)
     return redirect(url_for("gestionAnnonce"))
@@ -823,6 +830,11 @@ def forbidden(error):
 # =======================================================================================================================
 #
 
+@app.route("/wishlist")
+def wishlist():
+    return render_template(
+        "/pages/favori.html"
+    )
 
 @app.route("/favoris")
 @login_required
@@ -878,31 +890,3 @@ import requests
 import re
 
 
-def get_color_name_from_hex_api(hex_color):
-    hex_color_without_hash = re.sub(r"#", "", hex_color)
-    hex_color_upper = hex_color_without_hash.upper()
-    url = f"https://www.thecolorapi.com/id?hex={hex_color_upper}"
-
-    try:
-        response = requests.get(url)
-        data = response.json()
-
-        if response.status_code == 200:
-            color_name = data["name"]["value"]
-            return color_name
-        else:
-            print(f"Erreur: {data['error']['message']}")
-
-    except Exception as e:
-        print(f"Erreur lors de la requête à l'API : {e}")
-
-
-# Exemple d'utilisation :
-hex_color = "7F00FF"
-color_name = get_color_name_from_hex_api(hex_color)
-
-if color_name:
-    print(f"Le nom de la couleur pour {hex_color} est : {color_name}")
-
-else:
-    print(f"Aucune correspondance trouvée pour {hex_color}")

@@ -1,0 +1,87 @@
+{% extends './layout/baseEldy.html' %}
+
+{% block title %}
+  {{ super() }} | Article
+{% endblock %}
+
+{% block content %}
+  <!-- Breadcrumb Begin -->
+  <div class="breadcrumb-option">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="breadcrumb__links">
+            <a href="./index.html"><i class="fa fa-home"></i> Home</a>
+            <span>Wishlist</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Breadcrumb End -->
+
+  <!-- Shop Cart Section Begin -->
+  <section class="shop-cart spad">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h6 class="coupon__link"><span class="icon_heart_alt"></span>  Votre liste d'envies</h6>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 ">
+         
+          <div class="cart__total__procced">
+
+            <div class="shop__cart__table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produit</th>
+                      <th>Prix</th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cart__product__item">
+                        <img src="" width="90px" height="90px" alt="" />
+                        <div class="cart__product__item__title">
+                          <h6>SMART TECHNOLOGY SMART TV 32" </h6>
+                          <div>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="cart__price">19999 FCFA</td>
+                      
+                   
+                      <td class="cart__close">
+                        <a href=""><span class="icon_close"></span></a>
+                       
+                      </td>
+
+                      <td class="cart__close">
+                        <a href="#" ><span class="icon_bag_alt"></span></a>
+                       
+                      </td>
+                     
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+           
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Shop Cart Section End -->
+{% endblock %}
