@@ -10,6 +10,12 @@ from application.models.EnumColorAndSize import EnumSize
 from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
+
+from application.models.EnumColorAndSize import EnumColor, EnumSize
+
+
+
+
 db = SQLAlchemy(app)
 photos = UploadSet("photos", IMAGES)
 app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
