@@ -117,7 +117,11 @@
               <a href="#" class="cart-btn"><span class="icon_bag_alt"></span> Ajouter au panier</a>
               <ul>
                 <li>
-                    <a href="{{url_for('wishlist')}}"><span class="icon_heart_alt"></span></a>
+                  {% if item.id in annonces_favoris_ids %}
+                    <a href="{{ url_for('remove_wishlistBack', id_annonce = item.id, next = request.path) }}"><i class="fa-solid fa-heart" style="color: #d85629;"></i></a>
+                  {% else %}
+                    <a href="{{ url_for('add_wishlistBack', id_annonce = item.id, next = request.path) }}"><i class="fa-regular fa-heart" style="color: #d5d5d5;"></i></a>
+                  {% endif %}
                 </li>
                 <li>
                   <a href="#"><span class="icon_adjust-horiz"></span></a>

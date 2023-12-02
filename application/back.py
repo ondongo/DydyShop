@@ -39,12 +39,9 @@ from application.models.model import (
     Item,
     Favorite,
     SubCategory,
+    add_favori,
     add_images_to_item,
-    ajouter_favori,
-    clear_cart,
     create_item,
-    findAnnonceById,
-    getAllAnnoncePublier,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
     transfer_session_cart_to_db_cart,
@@ -830,63 +827,62 @@ def forbidden(error):
 # =======================================================================================================================
 #
 
-@app.route("/wishlist")
-def wishlist():
-    return render_template(
-        "/pages/favori.html"
-    )
 
-@app.route("/favoris")
+@app.route("/wishlist")
 @login_required
-def articles_favoris():
+def wishlist():
     user = User.query.get(current_user.id)
     annonces_favoris = user.favorites
-    list_favoris = []
-    for Item in annonces_favoris:
-        list_favoris.append(Item.id)
-    # Retrieve the information of the articles in the ids_articles_favoris list
-    annonce_favoris_info = Item.query.filter(Item.id.in_(list_favoris)).all()
-    count_fav = len(annonce_favoris_info)
-    # Render the template with the list of articles in favoris
-    return render_template(
-        "/back/favori.html", annonces_favoris=annonce_favoris_info, count_fav=count_fav
-    )
+    annonces_favoris_ids = [fav.annonce_id for fav in user.favorites]
+    return render_template("/pages/favori.html", annonces_favoris=annonces_favoris)
 
 
-# ******************Ajouter Favori***********************************
-@app.route("/ajouter_favoriBack/<int:id_annonce>", methods=["GET", "POST"])
-@login_required
-def ajouter_favoriBack(id_annonce):
-    Item = Item.query.get(id_annonce)
+class WishlistOperation(Enum):
+    ADD = "ajouter"
+    REMOVE = "retirer"
+
+
+def manage_wishlist(item, operation):
     user = User.query.get(current_user.id)
-    if Item not in user.favorites:
-        favorite = Favorite(annonce_id=Item.id, user_id=current_user.id)
-        ajouter_favori(favorite)
-        flash("L'Item a été ajoutée à vos favoris avec succès", "success")
-        return redirect(url_for("articles_favoris"))
+
+    if item and operation == WishlistOperation.ADD and item not in user.favorites:
+        favorite = Favorite(annonce_id=item.id, user_id=current_user.id)
+        add_favori(favorite)
+        flash("L'article a été ajouté à vos favoris avec succès", "success")
+    elif item and operation == WishlistOperation.REMOVE:
+        favorite = Favorite.query.filter_by(
+            user_id=current_user.id, annonce_id=item.id
+        ).first()
+        if favorite:
+            un_deleteFavorite(favorite)
+            flash("L'article a été retiré de vos favoris avec succès", "success")
+        else:
+            flash("L'article n'est pas dans vos favoris", "error")
     else:
-        flash("Impossible Deja en favori")
+        flash("Opération non autorisée ou l'article n'existe pas en favori", "error")
+
+
+@app.route("/add_wishlistBack/<int:id_annonce>", methods=["GET", "POST"])
+@login_required
+def add_wishlistBack(id_annonce):
+    item = Item.query.get(id_annonce)
+    manage_wishlist(item, operation=WishlistOperation.ADD)
+
+    next_page = request.args.get("next")
+
+    return redirect(next_page or url_for("wishlist"))
 
 
 @app.route("/retirer_favoriBack/<int:id_annonce>", methods=["GET", "POST"])
 @login_required
-def retirer_favoriBack(id_annonce):
-    return redirect(url_for("articles_favoris"))
+def remove_wishlistBack(id_annonce):
+    item = Item.query.get(id_annonce)
+    manage_wishlist(item, operation=WishlistOperation.REMOVE)
 
+    next_page = request.args.get("next")
 
-# ====>Favori G
-@app.route("/favorites/delete/<int:favorite_id>", methods=["POST", "GET"])
-def delete_favorite(favorite_id):
-    # Récupérer le favori à supprimer de la base de données
-    favorite = Favorite.query.get(favorite_id)
-    # Vérifier si le favori existe
-    if favorite:
-        un_deleteFavorite(favorite)
-    # Rediriger vers la page des favoris après la suppression
-    return redirect(url_for("articles_favoris"))
+    return redirect(next_page or url_for("wishlist"))
 
 
 import requests
 import re
-
-

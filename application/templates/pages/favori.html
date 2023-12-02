@@ -30,57 +30,47 @@
       </div>
 
       <div class="row">
-        <div class="col-lg-12 ">
-         
-          <div class="cart__total__procced">
-
-            <div class="shop__cart__table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Produit</th>
-                      <th>Prix</th>
-                      <th></th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="cart__product__item">
-                        <img src="" width="90px" height="90px" alt="" />
-                        <div class="cart__product__item__title">
-                          <h6>SMART TECHNOLOGY SMART TV 32" </h6>
-                          <div>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star checked"></span>
-                            <span class="fa fa-star"></span>
-                            <span class="fa fa-star"></span>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="cart__price">19999 FCFA</td>
-                      
-                   
-                      <td class="cart__close">
-                        <a href=""><span class="icon_close"></span></a>
-                       
-                      </td>
-
-                      <td class="cart__close">
-                        <a href="#" ><span class="icon_bag_alt"></span></a>
-                       
-                      </td>
-                     
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-           
-           
-          </div>
+        <div class="col-lg-12">
+            <div class="cart__total__procced">
+                <div class="shop__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Prix</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in annonces_favoris %}
+                                <tr>
+                                    <td class="cart__product__item">
+                                        <img src="{{ item.img_url }}" width="90px" height="90px" alt="{{ item.title }}" />
+                                        <div class="cart__product__item__title">
+                                            <h6>{{ item.title }}</h6>
+                                            <div>
+                                             
+                                                    <span class="fa fa-star checked"></span>
+                                                    <span class="fa fa-star checked"></span>
+                                                    <span class="fa fa-star checked"></span>
+                                                    <span class="fa fa-star checked"></span>
+                                                    <span class="fa fa-star checked"></span>
+                                             
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="cart__price">{{ item.prix }} FCFA</td>
+                                    <td class="cart__close">
+                                        <a href="{{ url_for('remove_wishlistBack', id_annonce=item.annonce_id) }}"><span class="icon_close"></span></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
+    </div>
     </div>
   </section>
   <!-- Shop Cart Section End -->

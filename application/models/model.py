@@ -243,11 +243,9 @@ def un_deleteFavorite(favorite: Favorite):
     db.session.commit()
 
 
-# ========---------Mettre Favori
-# def ajouter_favori(user_id, annonce_id):
-#     favori = Favorite(user_id=user_id, annonce_id=annonce_id)
-#     db.session.add(favori)
-#     db.session.commit()
+def add_favori(favorite):
+    db.session.add(favorite)
+    db.session.commit()
 
 
 # ========---------Mettre Au panier

@@ -1,5 +1,6 @@
 import re
 from flask import Flask, abort, render_template, redirect, url_for, request
+from flask_login import current_user
 import requests
 from sqlalchemy import desc
 from application.models.EnumColorAndSize import *
@@ -23,6 +24,7 @@ from application.models.model import (
     Category,
     Image,
     SubCategory,
+    User,
     findAnnonceById,
     Item,
     getAllAnnoncePublier,
@@ -235,6 +237,7 @@ def NoFilterFound():
 # =============================Details Annonces===========================
 # =====================================================================
 
+
 def get_color_name_from_hex_api(hex_color):
     hex_color_without_hash = re.sub(r"#", "", hex_color)
     hex_color_upper = hex_color_without_hash.upper()
@@ -264,22 +267,26 @@ if color_name:
 else:
     print(f"Aucune correspondance trouvée pour {hex_color}")
  """
- 
- 
+
+
 @app.route("/Item/<int:id_item>")
 def annonce_Id(id_item):
     item = findAnnonceById(id_item)
     # nbreEtoiles = Item.query(func.avg(Ratings.rating)).filter_by(annonce_id=id_annonce).scalar()
     unique_colors = list(set([item.color1, item.color2, item.color3]))
-    color_names = [get_color_name_from_hex_api(color) for color in unique_colors if color]
+    color_names = [
+        get_color_name_from_hex_api(color) for color in unique_colors if color
+    ]
 
     unique_colors_with_names = list(zip(unique_colors, color_names))
-    
+    user = User.query.get(current_user.id)
+    annonces_favoris = user.favorites
+    annonces_favoris_ids = [fav.annonce_id for fav in user.favorites]
     similar_items = (
         Item.query.filter(
             Item.subcategory_id == item.subcategory_id,
-            Item.id != item.id, 
-            Item.deleted == False,  
+            Item.id != item.id,
+            Item.deleted == False,
         )
         .order_by(Item.date_pub.desc())
         .limit(4)
@@ -289,15 +296,18 @@ def annonce_Id(id_item):
     if not item:
         return redirect(url_for("/"))
     return render_template(
-        "/pages/detailsArticles.html", item=item, unique_colors_with_names=unique_colors_with_names ,similar_items=similar_items
+        "/pages/detailsArticles.html",
+        item=item,
+        unique_colors_with_names=unique_colors_with_names,
+        similar_items=similar_items,
+        annonces_favoris=annonces_favoris,
+        annonces_favoris_ids=annonces_favoris_ids,
     )
 
 
 @app.route("/Contact")
 def Contact():
     return render_template("/pages/contact.html")
-
-
 
 
 # =====================================================================
