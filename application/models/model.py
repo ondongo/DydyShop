@@ -6,8 +6,8 @@ import logging as log
 from datetime import datetime
 from sqlalchemy import desc, func
 from flask_login import UserMixin, current_user
-from typing import List
-from werkzeug.datastructures import FileStorage
+from application.models.EnumColorAndSize import EnumSize
+from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
 db = SQLAlchemy(app)
@@ -175,27 +175,35 @@ def findAnnonceById(id_annonce):
 
 
 
-#============Save objet de type article====================
-""" def saveAnnonce(Item: Item , images: List[FileStorage]):
-    db.session.add(Item)
-    # Enregistrez les images liées à l'annonce en base de données
-    for image in images:
-        if image and allowed_file(image.filename):
-            filename = photos.save(image)
-            img = Image(filename=filename, item_id=item.id)
-            db.session.add(img)
-    db.session.commit()
-    
-     """
+def getBestSellingItems():
+    best_selling_items = (
+        db.session.query(Item, func.sum(OrderItem.quantity).label("total_sold"))
+        .join(OrderItem, Item.id == OrderItem.annonce_id)
+        .group_by(Item.id)
+        .order_by(desc("total_sold"))
+        .limit(3) 
+        .all()
+    )
+
+    return best_selling_items
+
+
+
+
+
 def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
-    
-def add_images_to_item(item, image_filenames):
-    for filename in image_filenames:
+
+
+def add_images_to_item(item, image_files):
+    for image_file in image_files:
+        # Sauvegardez le fichier dans le dossier défini par Flask-Uploads
+        filename = photos.save(image_file)
         new_image = Image(filename=filename, item_id=item.id)
         db.session.add(new_image)
     db.session.commit()
+
 
 def editAnnonceModel(Item: Item):
     old_annonce = Item.query.get(Item.id)
@@ -266,9 +274,14 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 
     db.session.commit()
 
+
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
+
+
+# ************************************ USER REQUETES ***********************************
+
 
 def saveUser(user: User):
     db.session.add(user)
@@ -304,34 +317,4 @@ def init_db():
         db.create_all()
 
         log.warning("Base de donnees actualisee")
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
