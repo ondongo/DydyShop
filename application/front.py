@@ -389,6 +389,7 @@ def afficher_annoncesTri():
 # =====================================================================
 # =============================Voiture===========================
 # =====================================================================
+
 @app.route('/FilterByDescription')
 def FilterByDescriptions():
     recolte = request.args.get('recolteMarque')
@@ -401,7 +402,6 @@ def FilterByDescriptions():
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
     annonces = annonces[offset: offset + NbreElementParPage]
     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
-
 
 
 

@@ -1,6 +1,4 @@
 import dbm
-
-from werkzeug import Client
 from .front import app
 
 from flask import abort, render_template, request, redirect, url_for, flash, session
@@ -11,13 +9,6 @@ from .front import app
 from sqlalchemy import desc
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
-from flask_uploads import UploadSet, configure_uploads, IMAGES
-#Hash password
-import hashlib
-from flask_login import LoginManager,  login_user, logout_user, login_required, current_user
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
-login_manager.login_message_category = 'info'
 
 # from flask_oauthlib.client import OAuth
 # Hash password
@@ -47,12 +38,10 @@ from application.models.model import (
     Category,
     Item,
     Favorite,
+    SubCategory,
+    add_favori,
     add_images_to_item,
-    ajouter_favori,
     create_item,
-    findAnnonceById,
-    saveAnnonce,
-    getAllAnnoncePublier,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
     transfer_session_cart_to_db_cart,
@@ -250,52 +239,7 @@ def edit():
     return redirect(url_for("gestionAnnonce"))
 
 
-#************************************Save ***********************************
-photos = UploadSet("photos", IMAGES)
-# Configurez Flask-Uploads pour gérer les téléchargements d'images
-configure_uploads(app, photos)
-
-
-
-@app.route("/save", methods=["POST"])
-def save():
-    id_annonce = request.form.get("id_annonce")
-    title_form = request.form.get("title")
-    categorie_form = request.form.get("categorie")
-    sous_categorie_form = request.form.get("sous_categorie")
-    description_form = request.form.get("description")
-    prix_form = request.form.get("prix")
-    publish_form = request.form.get("publish")
-    img_url_form = request.form.get("img_url")
-    img_title_form = request.form.get("img_title")
-
-    publish_form = False if not publish_form else True
-
-    images = request.files.getlist("images")
-
-    new_annonce = Item(
-        title=title_form,
-        description=description_form,
-        prix=prix_form,
-        published=publish_form,
-        img_url=img_url_form,
-        img_title=img_title_form,
-        categorie=categorie_form,
-        user_id=current_user.id,
-        sousCategorie=sous_categorie_form
-    )
-
-    create_item(new_annonce)
-    add_images_to_item(new_annonce, images)
-
-    return redirect(url_for("gestionArticle"))
-
-# =====================================================================
-# =============================Gerer Item Admin
-# -===========================
-# =====================================================================  
- 
-@app.route('/admin/gestion')
+@app.route("/admin/gestion")
 @login_required
 @admin_required
 def gestionArticle():
@@ -551,8 +495,120 @@ def login():
         return render_template("/back/login.html")
 
 
-#*****************************Connexion avec Google·*********************************** 
-""" @app.route('/google-login')
+@app.route("/admin/dashboard")
+@admin_required
+def admin_dashboard():
+    return render_template("/back/dashboard.html")
+
+
+# Delogin
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    # identity_changed.send(app, identity=Identity(None))
+    return redirect(url_for("index"))
+
+
+def generate_reset_token():
+    return secrets.token_urlsafe(30)
+
+
+def send_reset_email(user):
+    reset_token = generate_reset_token()
+    user.reset_token = reset_token
+    updateSession()
+
+    reset_link = url_for("reset_password", token=reset_token, _external=True)
+    msg = Message("Réinitialisation de mot de passe", recipients=[user.login])
+    msg.body = f"Cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+    mail.send(msg)
+
+
+@app.route("/reset_password", methods=["POST"])
+def reset_password_request():
+    login = request.form.get("email")
+
+    if login:
+        user = User.query.filter_by(login=login).first()
+
+        if user:
+            send_reset_email(user)
+            flash(
+                "Un e-mail de réinitialisation a été envoyé à votre adresse.", "success"
+            )
+        else:
+            flash("Aucun utilisateur trouvé avec cette adresse e-mail.", "danger")
+    else:
+        flash("Veuillez fournir une adresse e-mail.", "danger")
+
+    return redirect(url_for("login"))
+
+
+@app.route("/reset_password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+
+    if user:
+        if request.method == "POST":
+            new_password = request.form.get("new_password")
+            # Mettez à jour le mot de passe dans la base de données et supprimez le token de réinitialisation
+            user.password = hashlib.md5(new_password.encode("utf-8")).hexdigest()
+            user.reset_token = None
+            updateSession()
+
+            flash("Votre mot de passe a été réinitialisé avec succès!", "success")
+            return redirect(url_for("login"))
+        return render_template("reset_password.html", token=token)
+    else:
+        flash("Le lien de réinitialisation n'est pas valide ou a expiré.", "danger")
+        return redirect(url_for("mot_de_passe_oublie"))
+
+
+""" def change_user_role(user, new_role):
+    try:
+        print(
+            "==============Current User here ============================:",
+            user.id,
+            user.roles,
+        )
+        identity_changed.send(app, identity=Identity(user.id, new_role))
+        print("==============identity ============================:", Identity)
+
+    except IdentityChanged as e:
+        # Gérer l'exception (par exemple, imprimer un avertissement ou journaliser l'erreur)
+        print(f"Erreur lors du changement d'identité : {e}")
+
+ """
+
+
+#
+# =======================================================================================================================
+# ============================= Gestion Authentification Google ===================================================================
+# =======================================================================================================================
+#
+
+""" oauth = OAuth(app)
+
+
+google = oauth.remote_app(
+    'google',
+    consumer_key='YOUR_GOOGLE_CLIENT_ID',
+    consumer_secret='YOUR_GOOGLE_CLIENT_SECRET',
+    request_token_params={
+        'scope': 'openid email profile',  # Spécifiez les autorisations nécessaires
+    },
+    base_url='https://www.googleapis.com/oauth2/v1/',
+    request_token_url=None,
+    access_token_method='POST',
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+)
+
+
+
+
+@app.route('/google-login')
 def google_login():
     return google.authorize(callback=url_for('authorized', _external=True))
 
@@ -590,7 +646,15 @@ def google_authorized():
                         #profile_image=user_info.data['picture'])
         SaveUser(new_user)
 
+
+
  """
+
+
+# =======================================================================================================================
+# ============================= Gestion du panier========================================================================
+# =======================================================================================================================
+#
 
 
 @app.route("/add_panier/<int:id>")
@@ -722,10 +786,8 @@ def create_checkout_message(cart_items):
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
-
-    #Quand je vais trouver Une Api non Payante Pour Whatsapp
-    account_sid = 'votre_account_sid'
-    auth_token = 'votre_auth_token'
+    account_sid = "AC133734595c6e3326b9cf8aae0dd5d1dd"
+    auth_token = "d285e0f4a064345a8521d4d7f3518207"
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
@@ -734,8 +796,7 @@ def send_whatsapp_message(message):
         to="whatsapp:+221771592145",
     )
 
-# Fonction pour réinitialiser le panier après la commande
-
+    print(message.sid)
 
 
 @app.route("/listes-commandes")
