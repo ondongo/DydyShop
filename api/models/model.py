@@ -9,6 +9,8 @@ from flask_login import UserMixin, current_user
 
 from typing import List
 from werkzeug.datastructures import FileStorage
+from application.models.EnumColorAndSize import EnumSize
+from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
 
@@ -191,6 +193,7 @@ def create_item(new_item: Item):
     
 
 
+
 def editAnnonceModel(Item: Item):
     old_annonce = Item.query.get(Item.id)
     #
@@ -264,6 +267,10 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
+
+
+# ************************************ USER REQUETES ***********************************
+
 
 def saveUser(user: User):
     db.session.add(user)
