@@ -1,7 +1,5 @@
 from enum import Enum
 
-
-
 class SousCategorieFemmme(Enum):
     sac=1
     robe=2

@@ -168,24 +168,43 @@ GLOIRE JS
     /*-------------------
 		Range Slider
 	--------------------- */
-	var rangeSlider = $(".price-range"),
+    var rangeSlider = $(".form-range"),
     minamount = $("#minamount"),
-    maxamount = $("#maxamount"),
-    minPrice = rangeSlider.data('min'),
-    maxPrice = rangeSlider.data('max');
+    maxamount = $("#maxamount");
+
     rangeSlider.slider({
-    range: true,
-    min: minPrice,
-    max: maxPrice,
-    values: [minPrice, maxPrice],
-    slide: function (event, ui) {
-        minamount.val('$' + ui.values[0]);
-        maxamount.val('$' + ui.values[1]);
+        range: true,
+        min: parseInt(minamount.attr('min')),
+        max: parseInt(maxamount.attr('max')),
+        values: [parseInt(minamount.val()), parseInt(maxamount.val())],
+        slide: function (event, ui) {
+            minamount.val(ui.values[0]);
+            maxamount.val(ui.values[1]);
+
+            // Mettre à jour les valeurs à côté du titre H4
+            $("#min-value").text(ui.values[0]);
+            $("#max-value").text(ui.values[1]);
         }
     });
-    minamount.val('$' + rangeSlider.slider("values", 0));
-    maxamount.val('$' + rangeSlider.slider("values", 1));
 
+    // Mettre à jour les valeurs à côté du titre H4 lors du changement dans les entrées de texte
+    minamount.on('input', function () {
+        rangeSlider.slider("values", 0, parseInt(minamount.val()));
+        $("#min-value").text(parseInt(minamount.val()));
+    });
+
+    maxamount.on('input', function () {
+        rangeSlider.slider("values", 1, parseInt(maxamount.val()));
+        $("#max-value").text(parseInt(maxamount.val()));
+    });
+
+    // Mettre à jour les valeurs à côté du titre H4 au chargement de la page
+    $("#min-value").text(rangeSlider.slider("values", 0));
+    $("#max-value").text(rangeSlider.slider("values", 1));
+
+
+
+    
     /*------------------
 		Single Product
 	--------------------*/

@@ -1,0 +1,67 @@
+:root {
+--colorPrimaryNormal: #d85629;
+--colorPrimaryDark: #d85629;
+--colorPrimaryGlare: #d85629;
+--colorPrimaryHalf: #d85629;
+--colorPrimaryQuarter: #bfecee;
+--colorPrimaryEighth: #dff5f7;
+--colorPrimaryPale: #f3f5f7;
+--colorPrimarySeparator: #f3f5f7;
+--colorPrimaryOutline: #dff5f7;
+--colorButtonNormal: #d85629;
+--colorButtonHover: #d85629;
+--colorLinkNormal: #d85629;
+--colorLinkHover: #d85629;
+}
+
+body {
+margin: 24px;
+}
+
+
+.upload_dropZone {
+color: #0f3c4b;
+background-color: var(--colorPrimaryPale, #c8dadf);
+outline: 2px dashed var(--colorPrimaryHalf, #c1ddef);
+outline-offset: -12px;
+transition:
+outline-offset 0.2s ease-out,
+outline-color 0.3s ease-in-out,
+background-color 0.2s ease-out;
+}
+.upload_dropZone.highlight {
+outline-offset: -4px;
+outline-color: var(--colorPrimaryNormal, #d85629);
+background-color: var(--colorPrimaryEighth, #c8dadf);
+}
+.upload_svg {
+fill: var(--colorPrimaryNormal, #d85629);
+}
+.btn-upload {
+color: #fff;
+background-color: var(--colorPrimaryNormal);
+}
+.btn-upload:hover,
+.btn-upload:focus {
+color: #fff;
+background-color: var(--colorPrimaryGlare);
+}
+.upload_img {
+width: calc(33.333% - (2rem / 3));
+object-fit: contain;
+}
+
+
+.remove-button {
+    background-color: #d85629; 
+    color: #fff; 
+    border: none; 
+    padding: 5px 10px; 
+    margin-left: 5px; 
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  
+.remove-button:hover {
+    background-color: #cd632b;
+}

@@ -3,23 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from application.front import app
 import datetime
 import logging as log
-
-from sqlalchemy import desc
+from datetime import datetime
+from sqlalchemy import desc, func
 from flask_login import UserMixin, current_user
 
 from typing import List
 from werkzeug.datastructures import FileStorage
 
+
+
 from application.models.EnumColorAndSize import EnumColor, EnumSize
 
+
+
+
 db = SQLAlchemy(app)
-
-
-class Image(db.Model):
-    __tablename__ = "images"
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(255), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
+photos = UploadSet("photos", IMAGES)
+app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
+configure_uploads(app, photos)
 
 
 class Favorite(db.Model):
@@ -29,25 +30,25 @@ class Favorite(db.Model):
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
 
 
-class Size(db.Model):
-    __tablename__ = "sizes"
+class Image(db.Model):
+    __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Enum(EnumSize), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey("items.id"))
-
-
-class Color(db.Model):
-    __tablename__ = "colors"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Enum(EnumColor), nullable=False)
-    item_id = db.Column(db.Integer, db.ForeignKey("items.id"))
+    filename = db.Column(db.String(255), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
 
 
 class Category(db.Model):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
-    # item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    subcategories = db.relationship("SubCategory", backref="category")
+
+
+class SubCategory(db.Model):
+    __tablename__ = "sub_categories"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
 
 
 class Item(db.Model):
@@ -56,20 +57,24 @@ class Item(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     prix = db.Column(db.Float, nullable=True)
-    categorie = db.Column(db.String(200))
-    sousCategorie = db.Column(db.String(200))
     img_url = db.Column(db.String(255), nullable=True)
     img_title = db.Column(db.String(100), nullable=True)
-    datePub = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    date_pub = db.Column(db.DateTime, default=datetime.utcnow)
     published = db.Column(db.Boolean, default=True)
     deleted = db.Column(db.Boolean, default=False)
-    nbreVues = db.Column(db.Integer, default=0)
+    nbre_vues = db.Column(db.Integer, default=0)
     favorites = db.relationship("Favorite", backref="item", lazy="dynamic")
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    sizes = db.relationship("Size", backref="item")
-    colors = db.relationship("Color", backref="item")
     quantity = db.Column(db.Integer, default=0)
-    
+    images = db.relationship("Image", backref="item", lazy=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    subcategory_id = db.Column(db.Integer, db.ForeignKey("sub_categories.id"))
+    color1 = db.Column(db.String(100), nullable=True)
+    color2 = db.Column(db.String(100), nullable=True)
+    color3 = db.Column(db.String(100), nullable=True)
+    size1 = db.Column(db.String(100), nullable=True)
+    size2 = db.Column(db.String(100), nullable=True)
+    size3 = db.Column(db.String(100), nullable=True)
 
 
 class User(db.Model, UserMixin):
@@ -87,6 +92,9 @@ class User(db.Model, UserMixin):
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
     items = db.relationship("Item", backref="user", lazy=True)
     roles = db.Column(db.String(50))
+    confirmation_token = db.Column(db.String, unique=True)
+    confirmed = db.Column(db.Boolean, default=False)
+    # reset_token = db.Column(db.String(200), unique=True)
 
     def __repr__(self):
         return f"<User: {self.login}>"
@@ -124,36 +132,35 @@ class OrderItem(db.Model):
     item = db.relationship("Item")
 
 
-# ************************************Annonces ***********************************
-# ========-----Afficher tous les articles
 def getAllAnnonce():
     return Item.query.all()
 
 
 def getAllAnnonceRecent():
-    return Item.query.order_by(desc(Item.datePub)).all()
+    return Item.query.order_by(desc(Item.date_pub)).limit(5).all()
 
 
-# ========-------Publish
-# Visit
+
+def getAllAnnonceA_La_Une():
+    return Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
+
+
 def getAllAnnoncePublier():
     return (
         Item.query.filter(Item.published == True, Item.deleted == False)
-        .order_by(desc(Item.datePub))
+        .order_by(desc(Item.date_pub))
         .all()
     )
 
 
-# =====-----RequeteCorbeille
 def getAllAnnonceDel():
     return (
         Item.query.filter(Item.deleted == True, Item.user_id == current_user.id)
-        .order_by(desc(Item.datePub))
+        .order_by(desc(Item.date_pub))
         .all()
     )
 
 
-# ========== Non---------Publish
 def getAllAnnonceBrouillon():
     return (
         Item.query.filter(
@@ -161,30 +168,17 @@ def getAllAnnonceBrouillon():
             Item.deleted == False,
             Item.user_id == current_user.id,
         )
-        .order_by(desc(Item.datePub))
+        .order_by(desc(Item.date_pub))
         .all()
     )
 
 
-# =======-------------Afficher l'article qui a cet id
 def findAnnonceById(id_annonce):
     item = Item.query.get(id_annonce)
-    if Item is not None:
-        Item.nbreVues += 1
+    if item is not None:
+        item.nbre_vues += 1
         db.session.commit()
     return item
-
-
-# def solution(id_annonce):
-#     return Item.query.get(id_annonce)
-
-
-def getAllAnnonceA_La_Une():
-    return Item.query.order_by(desc(Item.nbreVues)).limit(5).all()
-
-
-
-# ============Save objet de type article====================
 
 
 
@@ -192,15 +186,15 @@ def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
     
-def add_images_to_item(item, image_filenames):
-    for filename in image_filenames:
+
+
+def add_images_to_item(item, image_files):
+    for image_file in image_files:
+        # Sauvegardez le fichier dans le dossier défini par Flask-Uploads
+        filename = photos.save(image_file)
         new_image = Image(filename=filename, item_id=item.id)
         db.session.add(new_image)
     db.session.commit()
-
-
-
-# ==============================---------Modifier Item
 
 
 def editAnnonceModel(Item: Item):
@@ -218,9 +212,6 @@ def editAnnonceModel(Item: Item):
     db.session.commit()
 
 
-# ==========---------Faire passer à publier
-
-
 def un_published(id_annonce):
     Item = Item.query.get(id_annonce)
 
@@ -232,7 +223,6 @@ def un_published(id_annonce):
     db.session.commit()
 
 
-# =======---------Mettre à la Corbeille=======CoteModel
 def un_delete(id_annonce):
     Item = Item.query.get(id_annonce)
 
@@ -245,11 +235,9 @@ def un_deleteFavorite(favorite: Favorite):
     db.session.commit()
 
 
-# ========---------Mettre Favori
-# def ajouter_favori(user_id, annonce_id):
-#     favori = Favorite(user_id=user_id, annonce_id=annonce_id)
-#     db.session.add(favori)
-#     db.session.commit()
+def add_favori(favorite):
+    db.session.add(favorite)
+    db.session.commit()
 
 
 # ========---------Mettre Au panier
@@ -279,13 +267,9 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
     db.session.commit()
 
 
-
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
-
-
-# ************************************ USER REQUETES ***********************************
 
 
 def saveUser(user: User):
@@ -298,8 +282,18 @@ def ajouter_favori(favorite: Favorite):
     db.session.commit()
 
 
+def updateSession():
+    db.session.commit()
 
 
+def updatecategory(category: Category):
+    db.session.add(category)
+    db.session.commit()
+
+
+def updatesubcategory(subcategory: SubCategory):
+    db.session.add(subcategory)
+    db.session.commit()
 
 
 # =====================================================================
