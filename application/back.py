@@ -10,8 +10,7 @@ from sqlalchemy import desc
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
 
-# from flask_oauthlib.client import OAuth
-# Hash password
+
 import hashlib
 from flask_login import (
     LoginManager,
@@ -72,10 +71,22 @@ def admin_required(func):
     return decorated_view
 
 
+maintenance_mode = True
+
+@app.before_request
+def check_for_maintenance():
+    if maintenance_mode and request.endpoint not in ['maintenance']:
+        return redirect(url_for('maintenance'))
+
+@app.route('/maintenance')
+def maintenance():
+    return render_template('/maintenance/maintenance.html')
+
+
 #
-# =======================================================================================================================
-# ============================= Gestion Du Crud Dashboard ===================================================================
-# =======================================================================================================================
+# ===========================================================================
+# ============================= Gestion Du Crud Dashboard ===================
+# ===========================================================================
 #
 
 
@@ -420,7 +431,7 @@ def creation_compte():
             )
             return redirect(url_for("creation_compte"))
 
-        # Hasher le mot de passe dans la base de données
+
         hashed_password = hashlib.md5(password.encode("utf-8")).hexdigest()
 
         role = "admin" if login_recup == "eldy@gmail.com" else "user"
@@ -552,7 +563,6 @@ def reset_password(token):
     if user:
         if request.method == "POST":
             new_password = request.form.get("new_password")
-            # Mettez à jour le mot de passe dans la base de données et supprimez le token de réinitialisation
             user.password = hashlib.md5(new_password.encode("utf-8")).hexdigest()
             user.reset_token = None
             updateSession()
@@ -783,13 +793,13 @@ def create_checkout_message(cart_items):
 # account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
 # auth_token = "008dda7a6424142308e6c538b44dcdea"
 
+from decouple import config
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
-    account_sid = "AC133734595c6e3326b9cf8aae0dd5d1dd"
-    auth_token = "d285e0f4a064345a8521d4d7f3518207"
+    account_sid = config('TWILIO_ACCOUNT_SID')
+    auth_token = config('TWILIO_AUTH_TOKEN')
     client = Client(account_sid, auth_token)
-
     message = client.messages.create(
         from_="whatsapp:+14155238886",
         body=message,
