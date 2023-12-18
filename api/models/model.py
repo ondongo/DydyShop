@@ -10,6 +10,11 @@ from application.models.EnumColorAndSize import EnumSize
 from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
+from typing import List
+from werkzeug.datastructures import FileStorage
+
+
+
 
 from api.models.EnumColorAndSize import EnumColor, EnumSize
 
@@ -204,6 +209,12 @@ def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
 
+def create_item(new_item: Item):
+    db.session.add(new_item)
+    db.session.commit()
+    
+
+
 
 def add_images_to_item(item, image_files):
     for image_file in image_files:
@@ -287,6 +298,7 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
+
 
 
 # ************************************ USER REQUETES ***********************************
