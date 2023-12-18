@@ -319,9 +319,11 @@ def Faqs():
     return render_template("/pages/faqs.html")
 
 
-# =====================================================================
-# ============--------------Recherche Annonces-----------==============
-# =====================================================================
+@app.route("/Checkout")
+def Checkout():
+    return render_template("/pages/checkout.html")
 
 
-# =====================Search-----Lieu
+@app.route("/Tracking-order")
+def Tracking():
+    return render_template("/pages/checkout.html")

@@ -58,14 +58,12 @@
                 <div class="section-title">
                   <h4>Filtre Par Prix</h4>
                 </div>
-              
+
                 <div>
-                  <p>
-                    Price:
-                    <div class="slider-values">
-                      <span id="min-value"></span> CFA  -  <span id="max-value"></span> CFA
-                    </div>
-                  </p>
+                  Price:<div class="slider-values">
+                    <span id="min-value"></span> CFA - <span id="max-value"></span> CFA
+                  </div>
+
                   <input type="range" id="minamount" class="form-range" min="0" max="100000" step="500" name="min_price" />
                   <input type="range" id="maxamount" class="form-range" min="0" max="100000" step="500" name="max_price" />
                 </div>
@@ -144,7 +142,15 @@
                     {% else %}
                       {{ item.img_url }}
                     {% endif %}">
-                    <div class="label new">NOUVEAU</div>
+                    {% if item.nbre_vues > 50 %}
+                      <div class="label sale">Tendance</div>
+                    {% endif %}
+                    {% if item.date_pub == today_date %}
+                      <div class="label new">Nouveau</div>
+                    {% endif %}
+                    {% if item.quantity == 0 %}
+                      <div class="label stockout">Rupture de Stock</div>
+                    {% endif %}
                     <ul class="product__hover">
                       <li>
                         <a href="{{ item.img_url }}" class="image-popup"><span class="arrow_expand"></span></a>
