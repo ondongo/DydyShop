@@ -12,13 +12,13 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 from typing import List
 from werkzeug.datastructures import FileStorage
-
+from application.models.EnumColorAndSize import EnumSize
+from api.models.EnumColorAndSize import EnumSize
+from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
 
 from api.models.EnumColorAndSize import EnumColor, EnumSize
-
-
 
 
 db = SQLAlchemy(app)
@@ -27,22 +27,24 @@ app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
-
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    
+
+
 class Favorite(db.Model):
     __tablename__ = "favorites"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
 
+
 class Image(db.Model):
     __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
+
 
 class Category(db.Model):
     __tablename__ = "categories"
@@ -147,7 +149,6 @@ def getAllAnnonceRecent():
     return Item.query.order_by(desc(Item.date_pub)).limit(5).all()
 
 
-
 def getAllAnnonceA_La_Une():
     return Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
 
@@ -223,6 +224,7 @@ def add_images_to_item(item, image_files):
         new_image = Image(filename=filename, item_id=item.id)
         db.session.add(new_image)
     db.session.commit()
+
 
 
 def editAnnonceModel(Item: Item):
@@ -338,4 +340,3 @@ def init_db():
         db.create_all()
 
         log.warning("Base de donnees actualisee")
-
