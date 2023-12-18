@@ -118,8 +118,8 @@ class CartItem(db.Model):
     __tablename__ = "cart_items"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False, default=1)
+    annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
+    quantity = db.Column(db.Integer)
     item = db.relationship("Item")
 
 
@@ -264,34 +264,28 @@ def add_favori(favorite):
 
 
 # ========---------Mettre Au panier
-def transfer_session_cart_to_db_cart(user_id, session_cart):
+def transfer_session_cart_to_db(user_id, session_carts, session_quantities):
     user_cart = CartItem.query.filter_by(user_id=user_id).first()
 
-    # Si le panier de l'utilisateur n'existe pas, créez-en un nouveau
-    if not user_cart:
+    print("icccccciii", user_cart)
+    print("===================", session_carts)
+    print("===================", session_quantities)
+    if user_cart is None:
         user_cart = CartItem(user_id=user_id)
         db.session.add(user_cart)
-        db.session.commit()
 
-    for product_id in session_cart:
-        if product_id is not None:
-            cart_item = CartItem.query.filter_by(
-                annonce_id=product_id, user_id=user_id
-            ).first()
+    for index in range(len(session_carts)):
+        product_id = session_carts[index]
+        quantity = session_quantities[index]
 
-        # Si le produit est déjà dans le panier de l'utilisateur, augmentez la quantité
-        if cart_item:
-            cart_item.quantity += 1
-        else:
-            # Sinon, ajoutez le produit au panier de l'utilisateur avec une quantité de 1
-            cart_item = CartItem(user_id=user_id, annonce_id=product_id, quantity=1)
-            db.session.add(cart_item)
+        cart_item = CartItem(user_id=user_id,  annonce_id=product_id, quantity=quantity)
+        db.session.add(cart_item)
 
     db.session.commit()
 
 
-def clear_cart():
-    CartItem.query.delete()
+def clear_cart(user_id):
+    CartItem.query.filter_by(user_id=user_id).delete()
     db.session.commit()
 
 

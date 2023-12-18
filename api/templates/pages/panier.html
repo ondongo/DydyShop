@@ -55,9 +55,9 @@
                                     </div>
                                 </td>
                                 <td class="cart__price">{{ item.prix }}FCFA</td>
-                                <td class="cart__quantity">
-                                    <div class="pro-qty">
-                                        <input type="text" value="1">
+                                <td >
+                                    <div class="cart__product__item__title">
+                                        <h6>{{ session.quantite[loop.index0] }}</h6>
                                     </div>
                                 </td>
                                 <td class="cart__total">{{ item.prix }}FCFA</td>
@@ -72,9 +72,7 @@
         </div>
         <div class="row">
             <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="cart__btn">
-                    <a href="#">Commander</a>
-                </div>
+               
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="cart__btn update__btn">
@@ -96,8 +94,9 @@
                 <div class="cart__total__procced">
                     <h6>total panier</h6>
                     <ul>
-                        <li>total <span>4000FCFA</span></li>
-                        <li>Total <span>8000FCFA</span></li>
+                        <li>produit(s) <span>{{ session['panier']|length }}</li>
+                        <li>total <span>{{ session['total']}} CFA</span></li>
+                       
                     </ul>
                     <a href="#" class="primary-btn">Commander</a>
                 </div>
