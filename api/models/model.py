@@ -6,9 +6,13 @@ import logging as log
 from datetime import datetime
 from sqlalchemy import desc, func
 from flask_login import UserMixin, current_user
+from application.models.EnumColorAndSize import EnumSize
+from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
+
 
 from typing import List
 from werkzeug.datastructures import FileStorage
+
 
 
 
@@ -185,10 +189,31 @@ def findAnnonceById(id_annonce):
 
 
 
+def getBestSellingItems():
+    best_selling_items = (
+        db.session.query(Item, func.sum(OrderItem.quantity).label("total_sold"))
+        .join(OrderItem, Item.id == OrderItem.annonce_id)
+        .group_by(Item.id)
+        .order_by(desc("total_sold"))
+        .limit(3) 
+        .all()
+    )
+
+    return best_selling_items
+
+
+
+
+
+def create_item(new_item: Item):
+    db.session.add(new_item)
+    db.session.commit()
+
 def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
     
+
 
 
 def add_images_to_item(item, image_files):
@@ -273,6 +298,10 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
+
+
+
+# ************************************ USER REQUETES ***********************************
 
 
 def saveUser(user: User):
