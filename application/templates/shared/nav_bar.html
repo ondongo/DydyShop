@@ -37,14 +37,24 @@
           <ul class="dropdown-menu">
             <div class="d-flex flex-column justify-content-center px-3">
               <li >
-                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
+                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
               </li>
               <li>
-                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
+                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
               </li>
               <li>
-                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
               </li>
+
+
+              <li>
+                <a href="{{ url_for('Contact') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Contact</a>
+              </li>
+
+              <li>
+                <a href="{{ url_for('Faqs') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Faqs</a>
+              </li>
+
 
             
               <li>
@@ -87,7 +97,7 @@
           <nav class="header__menu col-lg-6 mt-2">
             <ul>
               <li class="active">
-                <a href="{{ url_for('Article') }}">Accueil</a>
+                <a href="/">Accueil</a>
               </li>
               <li>
                 <a href="{{ url_for('Shop') }}">Shop</a>
@@ -149,13 +159,21 @@
                   <ul class="dropdown-menu">
                     <div class="d-flex flex-column justify-content-center px-3">
                       <li >
-                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
+                        <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
                       </li>
                       <li>
-                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
+                        <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
                       </li>
                       <li>
-                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+                        <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+                      </li>
+        
+                      <li>
+                        <a href="{{ url_for('Contact') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Contact</a>
+                      </li>
+
+                      <li>
+                        <a href="{{ url_for('Faqs') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Faqs</a>
                       </li>
 
                     

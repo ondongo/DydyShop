@@ -79,6 +79,9 @@ def Article():
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
     best_sales = getBestSellingItems()
 
+    # Items Sections
+    four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
+
     return render_template(
         "/pages/index.html",
         items=items,
@@ -92,6 +95,7 @@ def Article():
         trending_products=trending_products,
         best_sales=best_sales,
         pagination=pagination,
+        four_all_items=four_all_items,
     )
 
 
@@ -308,6 +312,11 @@ def annonce_Id(id_item):
 @app.route("/Contact")
 def Contact():
     return render_template("/pages/contact.html")
+
+
+@app.route("/Faqs")
+def Faqs():
+    return render_template("/pages/faqs.html")
 
 
 # =====================================================================
