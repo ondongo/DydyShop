@@ -6,14 +6,11 @@ import logging as log
 from datetime import datetime
 from sqlalchemy import desc, func
 from flask_login import UserMixin, current_user
-from application.models.EnumColorAndSize import EnumSize
+from api.models.EnumColorAndSize import EnumSize
 from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
-
 from api.models.EnumColorAndSize import EnumColor, EnumSize
-
-
 
 
 db = SQLAlchemy(app)
@@ -22,22 +19,24 @@ app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
-
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    
+
+
 class Favorite(db.Model):
     __tablename__ = "favorites"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
 
+
 class Image(db.Model):
     __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
+
 
 class Category(db.Model):
     __tablename__ = "categories"
@@ -142,7 +141,6 @@ def getAllAnnonceRecent():
     return Item.query.order_by(desc(Item.date_pub)).limit(5).all()
 
 
-
 def getAllAnnonceA_La_Une():
     return Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
 
@@ -183,21 +181,17 @@ def findAnnonceById(id_annonce):
     return item
 
 
-
 def getBestSellingItems():
     best_selling_items = (
         db.session.query(Item, func.sum(OrderItem.quantity).label("total_sold"))
         .join(OrderItem, Item.id == OrderItem.annonce_id)
         .group_by(Item.id)
         .order_by(desc("total_sold"))
-        .limit(3) 
+        .limit(3)
         .all()
     )
 
     return best_selling_items
-
-
-
 
 
 def create_item(new_item: Item):
@@ -326,4 +320,3 @@ def init_db():
         db.create_all()
 
         log.warning("Base de donnees actualisee")
-

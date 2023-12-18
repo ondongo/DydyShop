@@ -1,6 +1,6 @@
 # DydyShop
 
-DyDyShop est une application web de commerce électronique développée avec Flask, SQLAlchemy et d'autres technologies. Elle propose une gamme de fonctionnalités pour améliorer l'expérience d'achat en ligne.
+DyDyShop est une api web de commerce électronique développée avec Flask, SQLAlchemy et d'autres technologies. Elle propose une gamme de fonctionnalités pour améliorer l'expérience d'achat en ligne.
 
 ## Fonctionnalités User and Admin
 

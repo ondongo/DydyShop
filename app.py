@@ -1,6 +1,6 @@
 from api import app
 
-# from application import front as f
+# from api import front as f
 
 
 # Lancement
