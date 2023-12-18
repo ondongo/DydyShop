@@ -45,7 +45,7 @@ from api.models.model import (
     create_item,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
-    transfer_session_cart_to_db_cart,
+    transfer_session_cart_to_db,
     un_delete,
     un_deleteFavorite,
     un_published,
@@ -501,9 +501,9 @@ def login():
                 login_user(user)
 
                 if "panier" in session:
-                    transfer_session_cart_to_db_cart(user.id, session["panier"])
-                    session.pop("panier")
-                    session.pop("total")
+                    transfer_session_cart_to_db(user.id, session["panier"], session["quantite"])
+
+                    destroy_session()
 
                 if "admin" in current_user.roles:
                     return redirect(url_for("admin_dashboard"))
@@ -683,20 +683,32 @@ def google_authorized():
 #
 
 
+@app.route("/destroy_session")
+def destroy_session():
+    # Vérifiez d'abord si la session existe
+    if session:
+        # Utilisez la méthode clear() pour détruire la session
+        session.clear()
+
+    return "Session détruite avec succès!"
+
+
 @app.route("/add_panier/<int:id>")
 def add_panier(id):
     if "panier" not in session:
         session["panier"] = []
-        session["quantite"] = 0
+        session["quantite"] = []
         session["total"] = 0.0
 
     product = Item.query.get(id)
     if product:
         if id in session["panier"]:
-            session["quantite"] += 1
+            index = session["panier"].index(id)
+            session["quantite"][index] += 1
         else:
             session["panier"].append(id)
-            session["quantity"] += 1
+            session["quantite"].append(1)
+
         session["total"] += float(product.prix)
 
     return redirect(url_for("Panier"))
@@ -707,29 +719,17 @@ def remove_from_cart(id):
     if "panier" in session:
         if id in session["panier"]:
             index = session["panier"].index(id)
+            session["quantite"][index] -= 1
 
-            # Si la clé "quantite" existe et la quantité est supérieure à 0
-            if (
-                "quantity" in session
-                and len(session["quantity"]) > index
-                and session["quantity"][index] > 0
-            ):
-                # Décrémenter la quantité
-                session["quantity"][index] -= 1
-
-                # Si la quantité est égale à 0, supprimer le produit du panier
-                if session["quantity"][index] == 0:
-                    session["panier"].remove(id)
-                    session["quantity"].pop(index)
-
-            else:
-                # Si la clé "quantite" n'existe pas, supprimer le produit du panier
-                session["panier"].remove(id)
-
-            # Mettre à jour le total
+            # Mettez à jour le total
             product = Item.query.get(id)
             if product:
                 session["total"] -= float(product.prix)
+
+            # Si la quantité atteint zéro, retirez l'article du panier
+            if session["quantite"][index] <= 0:
+                session["panier"].pop(index)
+                session["quantite"].pop(index)
 
         return redirect(url_for("Panier"))
     return redirect(url_for("index"))
@@ -737,13 +737,30 @@ def remove_from_cart(id):
 
 @app.route("/Panier")
 def Panier():
-    items_in_cart = []
-    if "panier" in session:
-        items_in_cart = [Item.query.get(item_id) for item_id in session["panier"]]
+    items_in_cart, total_quantity = get_items_in_cart()
 
     print("=========Contenu de la session:=============", session)
 
-    return render_template("/pages/panier.html", items_in_cart=items_in_cart)
+    return render_template(
+        "/pages/panier.html", items_in_cart=items_in_cart, total_quantity=total_quantity
+    )
+
+
+def get_items_in_cart():
+    items_in_cart = []
+    total_quantity = 0
+
+    if "panier" in session:
+        for index in range(len(session["panier"])):
+            item_id = session["panier"][index]
+            quantity = session["quantite"][index]
+            product = Item.query.get(item_id)
+
+            if product and quantity > 0:
+                items_in_cart.append(product)
+                total_quantity += quantity
+
+    return items_in_cart, total_quantity
 
 
 #
@@ -913,4 +930,3 @@ def remove_wishlistBack(id_annonce):
 
 import requests
 import re
-
