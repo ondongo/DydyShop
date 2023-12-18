@@ -1,3 +1,5 @@
+from datetime import timedelta
+from datetime import datetime
 import dbm
 
 from api.forms import LoginForm
@@ -8,7 +10,7 @@ from api.models.EnumColorAndSize import *
 from api.models.EnumCategorie import *
 from api.models.SousCategorie import *
 from .front import app
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
 
@@ -39,10 +41,13 @@ from api.models.model import (
     Category,
     Item,
     Favorite,
+    Order,
     SubCategory,
     add_favori,
     add_images_to_item,
+    ajouter_cart,
     create_item,
+    delete_cart,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
     transfer_session_cart_to_db,
@@ -283,19 +288,86 @@ def gestionArticle():
 @login_required
 @admin_required
 def gestiondash():
-    annonces = (
-        Item.query.filter(
-            Item.published == 1, Item.deleted == 0, Item.user_id == current_user.id
-        )
-        .order_by((Item.date_pub))
-        .all()
+    current_date = datetime.utcnow()
+    three_months_ago = current_date - timedelta(days=90)
+
+    # Calculate the first day of the current month
+    first_day_current_month = current_date.replace(day=1)
+
+    # Calculate the first day of the three previous months
+    first_day_three_months_ago = first_day_current_month - timedelta(days=90)
+
+    # Calculate the last day of the three previous months
+    last_day_three_months_ago = first_day_current_month - timedelta(days=1)
+
+    # Format the month names in French
+    month_names = [
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Août",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre",
+    ]
+
+    # Retrieve the number of users for the last three months
+    users_last_three_months = User.query.filter(
+        User.date_created >= three_months_ago
+    ).count()
+
+    # Retrieve the number of orders for the last three months
+    orders_last_three_months = Order.query.filter(
+        Order.date_created >= three_months_ago
+    ).count()
+
+    # Retrieve the monthly revenue for the last three months
+    monthly_revenue_last_three_months = (
+        Order.query.filter(Order.date_created >= three_months_ago)
+        .with_entities(func.sum(Order.total_amount))
+        .scalar()
     )
-    count_publier = len(annonces)
+
+    # Calculate the percentage increase in revenue compared to the previous month
+    one_month_ago = current_date - timedelta(days=30)
+    revenue_previous_month = (
+        Order.query.filter(
+            Order.date_created >= one_month_ago, Order.date_created < three_months_ago
+        )
+        .with_entities(func.sum(Order.total_amount))
+        .scalar()
+    )
+
+    percentage_increase = 0  # Default value if either value is None
+    if (
+        monthly_revenue_last_three_months is not None
+        and revenue_previous_month is not None
+    ):
+        percentage_increase = (
+            (monthly_revenue_last_three_months - revenue_previous_month)
+            / revenue_previous_month
+        ) * 100
+
+    # Trending products
+    trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
+
+    print("ggggggggggggggggggggggggggg", trending_products)
     return render_template(
         "/back/dashboard.html",
-        annonces=annonces,
-        listcategories=listcategories,
-        count_publier=count_publier,
+        trending_products=trending_products,
+        users_last_three_months=users_last_three_months,
+        orders_last_three_months=orders_last_three_months,
+        monthly_revenue_last_three_months=monthly_revenue_last_three_months,
+        percentage_increase=percentage_increase,
+        first_day_three_months_ago=first_day_three_months_ago.strftime("%B %Y"),
+        last_day_three_months_ago=last_day_three_months_ago.strftime("%B %Y"),
+        current_month=current_date.strftime("%B %Y"),
+        month_names=month_names,
     )
 
 
@@ -501,7 +573,9 @@ def login():
                 login_user(user)
 
                 if "panier" in session:
-                    transfer_session_cart_to_db(user.id, session["panier"], session["quantite"])
+                    transfer_session_cart_to_db(
+                        user.id, session["panier"], session["quantite"]
+                    )
 
                     destroy_session()
 
@@ -520,12 +594,6 @@ def login():
         return redirect(url_for("login"))
 
     return render_template("/back/login.html", form=form)
-
-
-@app.route("/admin/dashboard")
-@admin_required
-def admin_dashboard():
-    return render_template("/back/dashboard.html")
 
 
 # Delogin
@@ -693,56 +761,110 @@ def destroy_session():
     return "Session détruite avec succès!"
 
 
+from flask_login import current_user
+
+
 @app.route("/add_panier/<int:id>")
 def add_panier(id):
-    if "panier" not in session:
-        session["panier"] = []
-        session["quantite"] = []
-        session["total"] = 0.0
+    if current_user.is_authenticated:
+        # Utilisateur connecté, utilisez le panier en base de données
+        user_id = current_user.id
+        user_cart = CartItem.query.filter_by(user_id=user_id, annonce_id=id).first()
 
-    product = Item.query.get(id)
-    if product:
-        if id in session["panier"]:
-            index = session["panier"].index(id)
-            session["quantite"][index] += 1
+        if user_cart:
+            user_cart.quantity += 1
         else:
-            session["panier"].append(id)
-            session["quantite"].append(1)
+            user_cart = CartItem(user_id=user_id, annonce_id=id, quantity=1)
+            ajouter_cart(user_cart)
 
-        session["total"] += float(product.prix)
+        updateSession()
+    else:
+        # Utilisateur non connecté, utilisez le panier en session
+        if "panier" not in session:
+            session["panier"] = []
+            session["quantite"] = []
+            session["total"] = 0.0
+
+        product = Item.query.get(id)
+        if product:
+            if id in session["panier"]:
+                index = session["panier"].index(id)
+                session["quantite"][index] += 1
+            else:
+                session["panier"].append(id)
+                session["quantite"].append(1)
+
+            session["total"] += float(product.prix)
 
     return redirect(url_for("Panier"))
 
 
 @app.route("/remove_from_cart/<int:id>")
 def remove_from_cart(id):
-    if "panier" in session:
-        if id in session["panier"]:
-            index = session["panier"].index(id)
-            session["quantite"][index] -= 1
+    if current_user.is_authenticated:
+        # Utilisateur connecté, utilisez le panier en base de données
+        user_id = current_user.id
+        user_cart = CartItem.query.filter_by(user_id=user_id, annonce_id=id).first()
 
-            # Mettez à jour le total
-            product = Item.query.get(id)
-            if product:
-                session["total"] -= float(product.prix)
+        if user_cart:
+            user_cart.quantity -= 1
+            if user_cart.quantity <= 0:
+                delete_cart(user_cart)
+        updateSession()
+    else:
+        # Utilisateur non connecté, utilisez le panier en session
+        if "panier" in session:
+            if id in session["panier"]:
+                index = session["panier"].index(id)
+                session["quantite"][index] -= 1
 
-            # Si la quantité atteint zéro, retirez l'article du panier
-            if session["quantite"][index] <= 0:
-                session["panier"].pop(index)
-                session["quantite"].pop(index)
+                product = Item.query.get(id)
+                if product:
+                    session["total"] -= float(product.prix)
 
-        return redirect(url_for("Panier"))
-    return redirect(url_for("index"))
+                if session["quantite"][index] <= 0:
+                    session["panier"].pop(index)
+                    session["quantite"].pop(index)
+
+    return redirect(url_for("Panier"))
 
 
 @app.route("/Panier")
 def Panier():
-    items_in_cart, total_quantity = get_items_in_cart()
+    if current_user.is_authenticated:
+        # Utilisateur connecté, récupérez le panier depuis la base de données
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        items_in_cart = [
+            cart_item.item
+            for cart_item in user_cart_items
+            if cart_item.item is not None
+        ]
+
+        total_quantity = sum(
+            cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.quantity is not None
+        )
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        # Utilisateur non connecté, récupérez le panier depuis la session
+        items_in_cart, total_quantity = get_items_in_cart()
+        total_amount = session.get("total", 0.0)
 
     print("=========Contenu de la session:=============", session)
 
     return render_template(
-        "/pages/panier.html", items_in_cart=items_in_cart, total_quantity=total_quantity
+        "/pages/panier.html",
+        items_in_cart=items_in_cart,
+        total_quantity=total_quantity,
+        total_amount=total_amount,
     )
 
 

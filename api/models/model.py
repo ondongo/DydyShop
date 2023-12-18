@@ -29,6 +29,7 @@ configure_uploads(app, photos)
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Favorite(db.Model):
@@ -36,6 +37,7 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Image(db.Model):
@@ -43,6 +45,7 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Category(db.Model):
@@ -50,6 +53,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     subcategories = db.relationship("SubCategory", backref="category")
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class SubCategory(db.Model):
@@ -57,6 +61,7 @@ class SubCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Item(db.Model):
@@ -83,6 +88,10 @@ class Item(db.Model):
     size1 = db.Column(db.String(100), nullable=True)
     size2 = db.Column(db.String(100), nullable=True)
     size3 = db.Column(db.String(100), nullable=True)
+    @property
+    def quantity_in_cart(self):
+        cart_item = CartItem.query.filter_by(annonce_id=self.id).first()
+        return cart_item.quantity if cart_item else 0
 
 
 class User(db.Model, UserMixin):
@@ -102,6 +111,7 @@ class User(db.Model, UserMixin):
     roles = db.Column(db.String(50))
     confirmation_token = db.Column(db.String, unique=True)
     confirmed = db.Column(db.Boolean, default=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
     # reset_token = db.Column(db.String(200), unique=True)
 
     def __repr__(self):
@@ -121,6 +131,7 @@ class CartItem(db.Model):
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
     quantity = db.Column(db.Integer)
     item = db.relationship("Item")
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Order(db.Model):
@@ -129,6 +140,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     items = db.relationship("OrderItem", backref="order", lazy=True)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class OrderItem(db.Model):
@@ -138,6 +150,7 @@ class OrderItem(db.Model):
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     item = db.relationship("Item")
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 def getAllAnnonce():
@@ -296,7 +309,12 @@ def saveUser(user: User):
     db.session.add(user)
     db.session.commit()
 
-
+def ajouter_cart(user_cart:CartItem):
+    db.session.add(user_cart)
+ 
+def delete_cart(user_cart:CartItem):
+    db.session.delete(user_cart)
+    
 def ajouter_favori(favorite: Favorite):
     db.session.add(favorite)
     db.session.commit()
