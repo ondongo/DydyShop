@@ -17,41 +17,44 @@
         <span class="icon_search search-switch"></span>
       </li>
       <li>
-        <a href="{{url_for('wishlist')}}">
+        <a href="{{ url_for('wishlist') }}">
           <span class="icon_heart_alt"></span>
-          <div class="tip">2</div>
+          <div class="tip" style="background-color: #d85629">2</div>
         </a>
       </li>
       <li>
         <a href="{{ url_for('Panier') }}">
           <span class="icon_bag_alt"></span>
-          <div class="tip">{{ session['panier']|length }}</div>
+          <div class="tip" style="background-color: #d85629">{{ session['panier']|length }}</div>
         </a>
       </li>
 
-      <li>
-        <div class="btn-group">
-          <a class="btn btn-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%"><i class="fas fa-users"></i></a>
-          <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+      {% if current_user.is_authenticated %}
+      <li >
+        <div class="btn-group mb-3">
+          <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+          <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #d85629;"></button>
           <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="#">Compte/Profil</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Accueil</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Gérer Annonces</a>
-            </li>
-            <li>
-              <hr class="dropdown-divider" />
-            </li>
-            <li>
-              <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Déconnexion</a>
-            </li>
+            <div class="d-flex flex-column justify-content-center px-3">
+              <li >
+                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
+              </li>
+              <li>
+                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
+              </li>
+              <li>
+                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+              </li>
+
+            
+              <li>
+                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2 text-center" style="background-color: #d85629; border-radius: 100%;  color:white;">Déconnexion</a>
+              </li>
+            </div>
           </ul>
         </div>
       </li>
+    {% endif %}
     </ul>
   </div>
 
@@ -72,14 +75,14 @@
 
 <!-- Header -->
 <header class="header">
-  <div class="container-fluid ">
+  <div class="container-fluid">
     <div class="row">
       <div class="col-xl-3 col-lg-2">
-        <div class="header__logo d-flex align-items-center ">
+        <div class="header__logo d-flex align-items-center">
           <a href="/"><img src="{{ url_for('static', filename = 'eldyCss/img/logo.png') }}" width="150px" height="60px" alt="" /></a>
         </div>
       </div>
-      <div class="col-xl-6 col-lg-7   ">
+      <div class="col-xl-6 col-lg-7">
         <div class="row">
           <nav class="header__menu col-lg-6 mt-2">
             <ul>
@@ -90,10 +93,10 @@
                 <a href="{{ url_for('Shop') }}">Shop</a>
               </li>
               <li>
-                <a href="{{ url_for('display_Shop', subcategory=1) }}">Sacs</a>
+                <a href="{{ url_for('display_Shop', subcategory = 1) }}">Sacs</a>
               </li>
               <li>
-                <a href="{{ url_for('display_Shop', subcategory=3) }}">Robes</a>
+                <a href="{{ url_for('display_Shop', subcategory = 3) }}">Robes</a>
               </li>
             </ul>
           </nav>
@@ -111,7 +114,7 @@
         </div>
       </div>
 
-      <div class="col-lg-3 d-flex justify-content-end">
+      <div class="col-lg-3 d-flex justify-content-end ">
         <div class="header__right">
           {% if current_user.is_authenticated %}
             <div class="header__right__auth d-none">
@@ -126,7 +129,7 @@
           {% endif %}
           <ul class="header__right__widget">
             <li>
-              <a href="{{url_for('wishlist')}}">
+              <a href="{{ url_for('wishlist') }}">
                 <span class="icon_heart_alt"></span>
                 <div class="tip" style="background-color: #d85629">2</div>
               </a>
@@ -139,30 +142,31 @@
             </li>
 
             {% if current_user.is_authenticated %}
-            <li>
-              <div class="btn-group btn-rounded-circle">
-                <a class="btn btn-rounded-circle" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 50%"><i class="fas fa-users"></i></a>
-                <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a class="dropdown-item" href="#">Compte/Profil</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Accueil</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Gérer Annonces</a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill px-4 py-2" style="color: #FFFFF;">Délogin</a>
-                  </li>
-                  {% endif %}
-                </ul>
-              </div>
-            </li>
+              <li>
+                <div class="btn-group mb-3">
+                  <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+                  <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #d85629;"></button>
+                  <ul class="dropdown-menu">
+                    <div class="d-flex flex-column justify-content-center px-3">
+                      <li >
+                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
+                      </li>
+                      <li>
+                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
+                      </li>
+                      <li>
+                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+                      </li>
+
+                    
+                      <li>
+                        <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2 text-center" style="background-color: #d85629; border-radius: 100%;  color:white;">Déconnexion</a>
+                      </li>
+                    </div>
+                  </ul>
+                </div>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>
