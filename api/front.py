@@ -3,9 +3,9 @@ from flask import Flask, abort, render_template, redirect, url_for, request
 from flask_login import current_user
 import requests
 from sqlalchemy import desc
-from application.models.EnumColorAndSize import *
-from application.models.EnumCategorie import *
-from application.models.SousCategorie import *
+from api.models.EnumColorAndSize import *
+from api.models.EnumCategorie import *
+from api.models.SousCategorie import *
 from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy import or_
 
@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config.from_object("config")
 
 
-from application.models.model import (
+from api.models.model import (
     Category,
     Image,
     SubCategory,
