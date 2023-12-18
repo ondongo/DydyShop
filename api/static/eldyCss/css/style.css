@@ -2342,6 +2342,39 @@ ol {
 	color: #d85629;
 }
 
+
+.checkout__form .checkout__form__input select {
+	height: 50px;
+	width: 100%;
+	border: 1px solid #e1e1e1;
+	border-radius: 2px;
+	margin-bottom: 25px;
+	font-size: 14px;
+	padding-left: 20px;
+	color: #666666;
+}
+
+.checkout__form .checkout__form__input select::-webkit-input-placeholder {
+	color: #666666;
+}
+
+.checkout__form .checkout__form__input select::-moz-placeholder {
+	color: #666666;
+}
+
+.checkout__form .checkout__form__input select:-ms-input-placeholder {
+	color: #666666;
+}
+
+.checkout__form .checkout__form__input select::-ms-input-placeholder {
+	color: #666666;
+}
+
+.checkout__form .checkout__form__input select::placeholder {
+	color: #666666;
+}
+
+
 .checkout__form .checkout__form__input input {
 	height: 50px;
 	width: 100%;

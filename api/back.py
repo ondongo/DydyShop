@@ -1,17 +1,18 @@
 import dbm
+
+from api.forms import LoginForm
 from .front import app
 
 from flask import abort, render_template, request, redirect, url_for, flash, session
-from application.models.EnumColorAndSize import *
-from application.models.EnumCategorie import *
-from application.models.SousCategorie import *
+from api.models.EnumColorAndSize import *
+from api.models.EnumCategorie import *
+from api.models.SousCategorie import *
 from .front import app
 from sqlalchemy import desc
 from flask_login import login_required
 from flask_paginate import Pagination, get_page_parameter
 
-# from flask_oauthlib.client import OAuth
-# Hash password
+
 import hashlib
 from flask_login import (
     LoginManager,
@@ -33,7 +34,7 @@ from twilio.rest import Client
 # =============================Import Model===========================
 # =====================================================================
 
-from application.models.model import (
+from api.models.model import (
     CartItem,
     Category,
     Item,
@@ -72,10 +73,29 @@ def admin_required(func):
     return decorated_view
 
 
+maintenance_mode = False
+
+
+@app.before_request
+def check_for_maintenance():
+    if maintenance_mode and request.endpoint not in ["maintenance"]:
+        return redirect(url_for("maintenance"))
+    # Si la requête est déjà pour la page "maintenance", ne pas rediriger.
+    elif maintenance_mode and request.endpoint == "maintenance":
+        return None
+    else:
+        return None
+
+
+@app.route("/maintenance")
+def maintenance():
+    return render_template("/maintenance/maintenance.html")
+
+
 #
-# =======================================================================================================================
-# ============================= Gestion Du Crud Dashboard ===================================================================
-# =======================================================================================================================
+# ===========================================================================
+# ============================= Gestion Du Crud Dashboard ===================
+# ===========================================================================
 #
 
 
@@ -420,7 +440,6 @@ def creation_compte():
             )
             return redirect(url_for("creation_compte"))
 
-        # Hasher le mot de passe dans la base de données
         hashed_password = hashlib.md5(password.encode("utf-8")).hexdigest()
 
         role = "admin" if login_recup == "eldy@gmail.com" else "user"
@@ -434,10 +453,15 @@ def creation_compte():
             roles=role,
         )
 
-        test_existance = User.query.filter_by(tel=tel_recup, login=login_recup).first()
-        if test_existance:
-            flash("Ce login ou tel déjà utilisé. Veuillez en choisir un autre.")
+        test_existance_tel = User.query.filter_by(tel=tel_recup).first()
+        if test_existance_tel:
+            flash("Ce Numéro déjà utilisé. Veuillez en choisir un autre", "warning")
             return redirect(url_for("creation_compte"))
+        test_existance_login = User.query.filter_by(login=login_recup).first()
+        if test_existance_login:
+            flash("Ce Login . Veuillez en choisir un autre", "warning")
+            return redirect(url_for("creation_compte"))
+
         else:
             saveUser(nouvel_utilisateur)
             # identity_changed.send(app, identity=Identity(nouvel_utilisateur.id, role))
@@ -463,10 +487,13 @@ def load_user(user_id):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        login = request.form["login"]
-        password = request.form["pass"]
-        tel = request.form["tel"]
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        login = form.login.data
+        password = form.password.data
+        tel = form.tel.data
+
         user = User.query.filter_by(login=login, tel=tel).first()
 
         if user and user.check_password(password):
@@ -487,12 +514,12 @@ def login():
                     "Votre adresse e-mail n'est pas confirmée. Veuillez vérifier votre boîte de réception.",
                     "info",
                 )
-                return render_template("/back/login.html")
-        else:
-            flash("Login ou mot de passe incorrect")
-            return render_template("/back/login.html")
-    else:
-        return render_template("/back/login.html")
+                return redirect(url_for("login"))
+
+        flash("Login , mot de passe  ou numéro incorrect", "danger")
+        return redirect(url_for("login"))
+
+    return render_template("/back/login.html", form=form)
 
 
 @app.route("/admin/dashboard")
@@ -552,7 +579,6 @@ def reset_password(token):
     if user:
         if request.method == "POST":
             new_password = request.form.get("new_password")
-            # Mettez à jour le mot de passe dans la base de données et supprimez le token de réinitialisation
             user.password = hashlib.md5(new_password.encode("utf-8")).hexdigest()
             user.reset_token = None
             updateSession()
@@ -783,13 +809,14 @@ def create_checkout_message(cart_items):
 # account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
 # auth_token = "008dda7a6424142308e6c538b44dcdea"
 
+from decouple import config
+
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
 def send_whatsapp_message(message):
-    account_sid = "AC133734595c6e3326b9cf8aae0dd5d1dd"
-    auth_token = "d285e0f4a064345a8521d4d7f3518207"
+    account_sid = config("TWILIO_ACCOUNT_SID")
+    auth_token = config("TWILIO_AUTH_TOKEN")
     client = Client(account_sid, auth_token)
-
     message = client.messages.create(
         from_="whatsapp:+14155238886",
         body=message,

@@ -3,9 +3,9 @@ from flask import Flask, abort, render_template, redirect, url_for, request
 from flask_login import current_user
 import requests
 from sqlalchemy import desc
-from application.models.EnumColorAndSize import *
-from application.models.EnumCategorie import *
-from application.models.SousCategorie import *
+from api.models.EnumColorAndSize import *
+from api.models.EnumCategorie import *
+from api.models.SousCategorie import *
 from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy import or_
 
@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config.from_object("config")
 
 
-from application.models.model import (
+from api.models.model import (
     Category,
     Image,
     SubCategory,
@@ -79,6 +79,9 @@ def Article():
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
     best_sales = getBestSellingItems()
 
+    # Items Sections
+    four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
+
     return render_template(
         "/pages/index.html",
         items=items,
@@ -92,6 +95,7 @@ def Article():
         trending_products=trending_products,
         best_sales=best_sales,
         pagination=pagination,
+        four_all_items=four_all_items,
     )
 
 
@@ -310,10 +314,96 @@ def Contact():
     return render_template("/pages/contact.html")
 
 
-# =====================================================================
-# ============--------------Recherche Annonces-----------==============
-# =====================================================================
+@app.route("/Faqs")
+def Faqs():
+    return render_template("/pages/faqs.html")
 
 
-# =====================Search-----Lieu
+@app.route("/Checkout")
+def Checkout():
+    return render_template("/pages/checkout.html")
+
+
+
+@app.route("/Tracking-order")
+def Tracking():
+    return render_template("/pages/checkout.html")
+
+
+# ===================================================================
+# =============================Chat Envoye Recevoir Avec Socketio  =========================================
+# =====================================================================
+
+#====================je vais dans mon fichier special.py
+
+# messages = []  # Liste pour stocker les messages
+
+# @app.route('/chat/<int:article_id>')
+# def chat(article_id):
+#     Item = Item.query.get(article_id)
+#     if Item:
+#         article_author = Item.users.nom
+#         return render_template("/pages/chat.html", article_author=article_author)
+#     else:
+#         return "Article not found"
+
+# @socketio.on('connect')
+# def handle_connect():
+#     print('Client connected!')
+
+# @socketio.on('user_join')
+# def handle_user_join(username):
+#     print(f'User {username} joined!')
+
+# @socketio.on('new_message')
+# def handle_new_message(data):
+#     message = data['message']
+#     recipient = data['recipient']
+#     sender = None
+
+#     for sid, user in socketio.server.manager.rooms[''].items():
+#         if user == request.sid:
+#             sender = sid
+#             break
+
+#     if recipient == article_author:
+#         emit('chat', {'message': message, 'sender': sender, 'recipient': recipient}, room=recipient)
+#     else:
+#         emit('chat', {'message': message, 'sender': sender}, broadcast=True)
+
+#         # Ajouter le message à la liste
+#         messages.append({'sender': sender, 'message': message})
+
+
+
+# @app.route('/Item/Recent', methods=['POST'])
+# def process_form():
+#     selected_value = request.form['select_field']
+#     annonces = getAnnoncesByDate('2023-03-28 03:37:35.970126')
+#     # Do something with the selected value
+#     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons)
+    
+
+
+
+
+
+
+
+
+# @app.route('/')
+# def index():
+#     # Accessing Enum members:
+#     my_etat =EnumEtatArticle.Reconditione.name
+
+#     # return 'my_etat is {}'.format(my_etat.value)
+#     return 'my_etat is {}'.format(my_etat)
+
+
+# articles = Article.query.order_by(Article.prix.asc()).all()
+# articles = Article.query.order_by(Article.prix.desc()).all()
+# # récupère les 10 articles les plus récents
+# articles = Article.query.order_by(Article.date.desc()).limit(10).all()
+
+
 

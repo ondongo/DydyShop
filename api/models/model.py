@@ -1,6 +1,6 @@
 import hashlib
 from flask_sqlalchemy import SQLAlchemy
-from application.front import app
+from api.front import app
 import datetime
 import logging as log
 from datetime import datetime
@@ -10,8 +10,13 @@ from application.models.EnumColorAndSize import EnumSize
 from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 
 
+from typing import List
+from werkzeug.datastructures import FileStorage
 
-from application.models.EnumColorAndSize import EnumColor, EnumSize
+
+
+
+from api.models.EnumColorAndSize import EnumColor, EnumSize
 
 
 
@@ -22,19 +27,22 @@ app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
+
+class Subscriber(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
 class Favorite(db.Model):
     __tablename__ = "favorites"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     annonce_id = db.Column(db.Integer, db.ForeignKey("items.id"))
 
-
 class Image(db.Model):
     __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
-
 
 class Category(db.Model):
     __tablename__ = "categories"
@@ -201,6 +209,12 @@ def create_item(new_item: Item):
     db.session.add(new_item)
     db.session.commit()
 
+def create_item(new_item: Item):
+    db.session.add(new_item)
+    db.session.commit()
+    
+
+
 
 def add_images_to_item(item, image_files):
     for image_file in image_files:
@@ -284,6 +298,7 @@ def transfer_session_cart_to_db_cart(user_id, session_cart):
 def clear_cart():
     CartItem.query.delete()
     db.session.commit()
+
 
 
 # ************************************ USER REQUETES ***********************************
