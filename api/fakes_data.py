@@ -1,5 +1,5 @@
-from application.models.EnumColorAndSize import *
-from application.models.EnumCategorie import *
+from api.models.EnumColorAndSize import *
+from api.models.EnumCategorie import *
 from config import *
 
 annonces = [

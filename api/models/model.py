@@ -1,6 +1,6 @@
 import hashlib
 from flask_sqlalchemy import SQLAlchemy
-from application.front import app
+from api.front import app
 import datetime
 import logging as log
 from datetime import datetime
@@ -12,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 
 
 
-from application.models.EnumColorAndSize import EnumColor, EnumSize
+from api.models.EnumColorAndSize import EnumColor, EnumSize
 
 
 

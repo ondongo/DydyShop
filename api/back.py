@@ -1,12 +1,12 @@
 import dbm
 
-from application.forms import LoginForm
+from api.forms import LoginForm
 from .front import app
 
 from flask import abort, render_template, request, redirect, url_for, flash, session
-from application.models.EnumColorAndSize import *
-from application.models.EnumCategorie import *
-from application.models.SousCategorie import *
+from api.models.EnumColorAndSize import *
+from api.models.EnumCategorie import *
+from api.models.SousCategorie import *
 from .front import app
 from sqlalchemy import desc
 from flask_login import login_required
@@ -34,7 +34,7 @@ from twilio.rest import Client
 # =============================Import Model===========================
 # =====================================================================
 
-from application.models.model import (
+from api.models.model import (
     CartItem,
     Category,
     Item,

@@ -1,4 +1,4 @@
-from application import app
+from api import app
 
 # from application import front as f
 
