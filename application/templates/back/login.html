@@ -2,7 +2,7 @@
 {% extends './layout/connBase.html' %}
 
 {% block title %}
-  {{ super() }}|About
+  {{ super() }}|A Propos
 {% endblock %}
 
 {% block content %}
@@ -28,34 +28,33 @@
         <div class="col-lg-12">
           <h6 class="coupon__link"><span class="icon_tag_alt"></span> <a href="#">Bienvenue sur DydyShop</a> Connectez Vous.</h6>
           {% for message, category in get_flashed_messages(with_categories = true) %}
-            <div class="alert alert-{{message}} alert-dismissible fade show" role="alert">
-              <strong>{{ category.capitalize() }}!</strong> {{ message }}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-          {% endfor %}
+          <div class="alert alert-{{message}} alert-dismissible fade show" role="alert">
+            <strong>{{ category.capitalize() }}!</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+        {% endfor %}
         </div>
       </div>
-
-      <form action="#" method="POST" class="checkout__form">
+      <form method="POST" action="{{ url_for('login') }}"  class="checkout__form">
         <div class="row">
           <div class="col-lg-8">
             <h5>information</h5>
             <div class="row">
               <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="checkout__form__input">
+                  {{ form.hidden_tag() }}
                   <p>
                     Numero <span>*</span>
                   </p>
 
-                  <input name="tel" type="text" />
-                </div>
+                 {{ form.tel(placeholder="Numéro") }} </div>
               </div>
               <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="checkout__form__input">
                   <p>
                     Login <span>*</span>
                   </p>
-                  <input name="login" type="text" />
+                  {{ form.login( placeholder="Email") }}
                 </div>
               </div>
 
@@ -64,24 +63,17 @@
                   <p>
                     Password <span>*</span>
                   </p>
-                  <input name="pass" type="text" />
+                  {{ form.password(placeholder="Password") }}
                 </div>
               </div>
-              <div class="col-lg-12">
-                <div class="checkout__form__input">
-                  <p>
-                    Confirmer Password <span>*</span>
-                  </p>
-                  <input type="text" />
-                </div>
-              </div>
+          
             </div>
           </div>
           <div class="col-lg-4">
             <div class="checkout__order">
               <h5>Valider</h5>
 
-              <button type="submit" class="site-btn">Se Connecter</button>
+              {{ form.submit(class="site-btn")}}
               <br /> <br />
 
               <a href="{{ url_for('creation_compte') }}" class="site-btn google-login-btn">

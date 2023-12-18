@@ -79,6 +79,9 @@ def Article():
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
     best_sales = getBestSellingItems()
 
+    # Items Sections
+    four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
+
     return render_template(
         "/pages/index.html",
         items=items,
@@ -92,6 +95,7 @@ def Article():
         trending_products=trending_products,
         best_sales=best_sales,
         pagination=pagination,
+        four_all_items=four_all_items,
     )
 
 
@@ -310,129 +314,20 @@ def Contact():
     return render_template("/pages/contact.html")
 
 
-# =====================================================================
-# ============--------------Recherche Annonces-----------==============
-# =====================================================================
+@app.route("/Faqs")
+def Faqs():
+    return render_template("/pages/faqs.html")
 
 
-# =====================Search-----Lieu
-@app.route('/Ann_lieu')
-def articles_par_lieu():
-    lieu = request.args.get('lieu')
-    
-    if lieu is None:
-        # Si la catégorie n'est pas spécifiée, afficher toutes les annonces
-        annonces = Item.query.all()
-        count =len(annonces)
-    else:
-        # Si la catégorie est spécifiée, filtrer par catégorie
-        annonces = Item.query.filter_by(lieuPub=lieu).all()
-        count_lieu =Item.query.filter_by(lieuPub=lieu).count()
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-        
-    
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count_lieu=count_lieu,pagination=pagination)
-
-
-# =====================Search-----Lieu
-@app.route('/Ann_Prix')
-def annonces_par_Prix():
-    prixmaxRecup=request.args.get('max-priceIndex')
-    prixminRecup=request.args.get('min-priceIndex')
-
-    if prixmaxRecup is not None and prixminRecup is not None:
-        annonces=Item.query.filter(Item.prix.between(prixminRecup,prixmaxRecup)).all()
-
-    else:
-        # Si la catégorie est spécifiée, filtrer par catégorie
-        annonces = Item.query.all()
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-        
-    
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,pagination=pagination)
+@app.route("/Checkout")
+def Checkout():
+    return render_template("/pages/checkout.html")
 
 
 
-# afficher les annonces filtrées
-@app.route('/annoncesTri', methods=['GET', 'POST'])
-def afficher_annoncesTri():
-    if request.method == 'POST':
-        tri = request.form['tri']
-        if tri == 'croissant':
-            annonces = Item.query.order_by(Item.prix.asc()).all()
-        elif tri == 'decroissant':
-            annonces = Item.query.order_by(Item.prix.desc()).all()
-        elif tri == 'recents':
-            annonces = Item.query.order_by(Item.datePub.desc()).all()
-        else:
-            return 'Tri invalide'
-    else:
-        annonces = Item.query.all()
-
-    count =len(annonces)
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
-
-
-# =====================================================================
-# =============================Voiture===========================
-# =====================================================================
-
-@app.route('/FilterByDescription')
-def FilterByDescriptions():
-    recolte = request.args.get('recolteMarque')
-    annonces = Item.query.filter(Item.description.ilike(f"%{recolte}%")).all()
-    
-    count =len(annonces)
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
-
-
-
-
-
-@app.route("/FilterAll")
-def allFilter():
-    #sousCategorieRecup=request.args.get('sousCategorie')
-    CategoryRecup=request.args.get('Categories')
-    #lieuxRecup=request.args.get('region')
-    prixmaxRecup=request.args.get('max-price')
-    prixminRecup=request.args.get('min-price')
-    sousCategorieRecup=request.args.get('sousCategorie')
-    if prixmaxRecup is not None and prixminRecup is not None and sousCategorieRecup is None :
-        annonces=Item.query.filter(Item.prix.between(prixminRecup,prixmaxRecup)).all()
-        
-        
-    if sousCategorieRecup is not None and prixmaxRecup is None and prixminRecup is None:
-        annonces=Item.query.filter(Item.sousCategorie==sousCategorieRecup).all()
-    annonces=Item.query.filter(Item.prix.between(prixminRecup,prixmaxRecup),Item.categorie==CategoryRecup).all()
-    count =len(annonces)
-    
-    
-    page = request.args.get(get_page_parameter(), type=int, default=1)
-    NbreElementParPage = 2
-    offset = (page - 1) * NbreElementParPage
-    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(annonces))
-    annonces = annonces[offset: offset + NbreElementParPage]
-    
-    return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons,count=count,pagination=pagination)
-
+@app.route("/Tracking-order")
+def Tracking():
+    return render_template("/pages/checkout.html")
 
 
 
@@ -510,5 +405,6 @@ def allFilter():
 # articles = Article.query.order_by(Article.prix.desc()).all()
 # # récupère les 10 articles les plus récents
 # articles = Article.query.order_by(Article.date.desc()).limit(10).all()
+
 
 
