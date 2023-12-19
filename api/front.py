@@ -1,5 +1,5 @@
 import re
-from flask import Flask, abort, render_template, redirect, url_for, request
+from flask import Flask, abort, render_template, redirect, session, url_for, request
 from flask_login import current_user
 import requests
 from sqlalchemy import desc
@@ -21,6 +21,7 @@ app.config.from_object("config")
 
 
 from api.models.model import (
+    CartItem,
     Category,
     Image,
     SubCategory,
@@ -30,7 +31,7 @@ from api.models.model import (
     getAllAnnoncePublier,
     getAllAnnonceA_La_Une,
     getAllAnnonceRecent,
-    getBestSellingItems,
+  
 )
 
 categories = list(EnumCategorie)
@@ -68,6 +69,21 @@ def Article():
     # countTuniques = len(annoncesTuniques)
     # countSac = len(annoncesSac)
     # countEnsemble = len(annoncesEnsemble)
+
+    if current_user.is_authenticated:
+        # Utilisateur connecté, récupérez le panier depuis la base de données
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        total_amount = session.get("total", 0.0)
+
     count = len(items)
     page = request.args.get(get_page_parameter(), type=int, default=1)
     NbreElementParPage = 2
@@ -77,7 +93,8 @@ def Article():
 
     trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
-    best_sales = getBestSellingItems()
+    best_sales = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
+    # getBestSellingItems()
 
     # Items Sections
     four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
@@ -96,6 +113,7 @@ def Article():
         best_sales=best_sales,
         pagination=pagination,
         four_all_items=four_all_items,
+        total_amount=total_amount,
     )
 
 
@@ -319,12 +337,6 @@ def Faqs():
     return render_template("/pages/faqs.html")
 
 
-@app.route("/Checkout")
-def Checkout():
-    return render_template("/pages/checkout.html")
-
-
-
 @app.route("/Tracking-order")
 def Tracking():
     return render_template("/pages/checkout.html")
@@ -334,7 +346,7 @@ def Tracking():
 # =============================Chat Envoye Recevoir Avec Socketio  =========================================
 # =====================================================================
 
-#====================je vais dans mon fichier special.py
+# ====================je vais dans mon fichier special.py
 
 # messages = []  # Liste pour stocker les messages
 
@@ -375,20 +387,12 @@ def Tracking():
 #         messages.append({'sender': sender, 'message': message})
 
 
-
 # @app.route('/Item/Recent', methods=['POST'])
 # def process_form():
 #     selected_value = request.form['select_field']
 #     annonces = getAnnoncesByDate('2023-03-28 03:37:35.970126')
 #     # Do something with the selected value
 #     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons)
-    
-
-
-
-
-
-
 
 
 # @app.route('/')
@@ -404,6 +408,3 @@ def Tracking():
 # articles = Article.query.order_by(Article.prix.desc()).all()
 # # récupère les 10 articles les plus récents
 # articles = Article.query.order_by(Article.date.desc()).limit(10).all()
-
-
-

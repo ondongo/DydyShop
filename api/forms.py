@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, EmailField, PasswordField, SubmitField
+from wtforms import SelectField, StringField, EmailField, PasswordField, SubmitField
 
 from wtforms.validators import InputRequired, Length, Email, DataRequired, EqualTo
 
@@ -71,7 +71,12 @@ class LoginForm(FlaskForm):
     
     submit = SubmitField("Se Connecter")
 
-
+class CheckoutForm(FlaskForm):
+    delivery_address = StringField('Adresse de livraison', validators=[DataRequired()])
+    phone_number = StringField('Numéro de téléphone', validators=[DataRequired()])
+    country = SelectField("Pays", choices=[("Senegal", "Sénégal"), ("Congo", "Congo"), ("France", "France")], validators=[DataRequired()])
+    email = StringField('Email')
+    submit = SubmitField('Valider la commande')
 
 class SubscribeForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])

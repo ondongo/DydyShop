@@ -40,40 +40,26 @@
           <h6 class="coupon__link"><span class="icon_tag_alt"></span> Checkout</h6>
         </div>
       </div>
-      <form action="#" class="checkout__form">
+
+      <form method="post" action="{{ url_for('checkout') }}" class="checkout__form">
+        {{ form.hidden_tag() }}
         <div class="row">
           <div class="col-lg-8">
             <h5>Detail de l'achat</h5>
             <div class="row">
-              <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="checkout__form__input">
-                  <p>Nom</p>
-                  <input type="text" />
-                </div>
-              </div>
-              <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="checkout__form__input">
-                  <p>Prenom</p>
-                  <input type="text" />
-                </div>
-              </div>
               <div class="col-lg-12">
                 <div class="checkout__form__input">
                   <p>
                     Pays <span>*</span>
                   </p>
-                  <select class="form-control">
-                    <option>Sénégal</option>
-                    <option>Congo</option>
-                    <option>France</option>
-                  </select>
+                  {{ form.country }} 
                 </div>
 
                 <div class="checkout__form__input">
                   <p>
                     Adresse de livraison <span>*</span>
                   </p>
-                  <input type="text" />
+                  {{ form.delivery_address(placeholder="Adresse") }}
                 </div>
               </div>
               <div class="col-lg-6 col-md-6 col-sm-6">
@@ -81,13 +67,13 @@
                   <p>
                     Téléphone <span>*</span>
                   </p>
-                  <input type="text" />
+                  {{ form.phone_number(placeholder="Téléphone") }}
                 </div>
               </div>
               <div class="col-lg-6 col-md-6 col-sm-6">
                 <div class="checkout__form__input">
                   <p>Email</p>
-                  <input type="text" />
+                  {{ form.email(placeholder="Email") }}
                 </div>
               </div>
             </div>
@@ -101,24 +87,18 @@
                     <span class="top__text">Product</span>
                     <span class="top__text__right">Total</span>
                   </li>
-                  <li>
-                    01. Chain buck bag <span>$ 300.0</span>
-                  </li>
-                  <li>
-                    02. Zip-pockets pebbled<br /> tote briefcase <span>$ 170.0</span>
-                  </li>
-                  <li>
-                    03. Black jean <span>$ 170.0</span>
-                  </li>
-                  <li>
-                    04. Cotton shirt <span>$ 110.0</span>
-                  </li>
+
+                  {% for item in items_in_cart %}
+                    <li>
+                      {{ item.title }} <span>{{ item.prix }} CFA</span>
+                    </li>
+                  {% endfor %}
                 </ul>
               </div>
               <div class="checkout__order__total">
                 <ul>
                   <li>
-                    Total <span>$ 750.0</span>
+                    Total <span>{{ total_amount }} CFA</span>
                   </li>
                 </ul>
               </div>
@@ -163,7 +143,8 @@
                   <span class="checkmark"></span>
                 </label>
               </div>
-              <button type="submit" class="site-btn">Valider la commande</button>
+              {{ form.submit(class="site-btn")}}
+              
             </div>
           </div>
         </div>

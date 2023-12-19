@@ -9,7 +9,7 @@
   <div class="offcanvas__close">+</div>
   <div class="row">
     <div class="offcanvas__logo">
-      <a href="./index.html"><img src="{{ url_for('static', filename = 'eldyCss/img/logo.png') }}" width="150px" height="50px" alt="" /></a>
+      <a href="/"><img src="{{ url_for('static', filename = 'eldyCss/img/logo.png') }}" width="150px" height="50px" alt="" /></a>
     </div>
 
     <ul class="offcanvas__widget mt-3">
@@ -39,6 +39,11 @@
               <li >
                 <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
               </li>
+
+              <li>
+                <a href="{{url_for("gestiondash")}}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
+              </li>
+
               <li>
                 <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
               </li>
@@ -161,6 +166,11 @@
                       <li >
                         <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
                       </li>
+
+                      <li>
+                        <a href="{{url_for("gestiondash")}}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
+                      </li>
+
                       <li>
                         <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
                       </li>
