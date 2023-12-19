@@ -140,6 +140,11 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     items = db.relationship("OrderItem", backref="order", lazy=True)
+    delivery_address= db.Column(db.String(200)),
+    phone_number=db.Column(db.String(200)),
+    email=db.Column(db.String(200)),
+    status=db.Column(db.String(200)),
+    country=db.Column(db.String(200)),
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -235,7 +240,6 @@ def add_images_to_item(item, image_files):
 
 def editAnnonceModel(Item: Item):
     old_annonce = Item.query.get(Item.id)
-    #
     old_annonce.title = Item.title
     old_annonce.description = Item.description
     old_annonce.published = Item.published
@@ -302,7 +306,7 @@ def clear_cart(user_id):
     db.session.commit()
 
 
-# ************************************ USER REQUETES ***********************************
+# ************************************ SESSION REQUETES ***********************************
 
 
 def saveUser(user: User):
@@ -320,6 +324,14 @@ def ajouter_favori(favorite: Favorite):
     db.session.commit()
 
 
+def add_order(order:Order):
+    db.session.add(order)
+
+
+def add_order_item(order_item:OrderItem):
+    db.session.add(order_item) 
+ 
+ 
 def updateSession():
     db.session.commit()
 

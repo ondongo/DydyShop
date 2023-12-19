@@ -336,11 +336,6 @@ def Faqs():
     return render_template("/pages/faqs.html")
 
 
-@app.route("/Checkout")
-def Checkout():
-    return render_template("/pages/checkout.html")
-
-
 @app.route("/Tracking-order")
 def Tracking():
     return render_template("/pages/checkout.html")

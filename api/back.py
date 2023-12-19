@@ -2,7 +2,7 @@ from datetime import timedelta
 from datetime import datetime
 import dbm
 
-from api.forms import LoginForm
+from api.forms import CheckoutForm, LoginForm
 from .front import app
 
 from flask import abort, render_template, request, redirect, url_for, flash, session
@@ -42,10 +42,14 @@ from api.models.model import (
     Item,
     Favorite,
     Order,
+    OrderItem,
     SubCategory,
     add_favori,
     add_images_to_item,
+    add_order,
+    add_order_item,
     ajouter_cart,
+    clear_cart,
     create_item,
     delete_cart,
     getAllAnnonceBrouillon,
@@ -557,7 +561,7 @@ def login():
                     destroy_session()
 
                 if "admin" in current_user.roles:
-                    return redirect(url_for("admin_dashboard"))
+                    return redirect(url_for("gestiondash"))
                 else:
                     return redirect(url_for("index"))
             else:
@@ -867,75 +871,138 @@ def get_items_in_cart():
 # ============================= Gestion des commandes ===================================================================
 # =======================================================================================================================
 #
-@app.route("/checkout")
+
+
+@app.route("/checkout", methods=["GET", "POST"])
 @login_required
 def checkout():
-    # Obtenez les détails des articles dans le panier à partir de votre base de données
-    # cart_items = get_cart_items()
+    form = CheckoutForm()
+    if current_user.is_authenticated:
+        # Utilisateur connecté, récupérez le panier depuis la base de données
+        user_id = current_user.id
 
-    # Créez un message de vérification en convertissant les détails du panier en texte
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        items_in_cart = [
+            cart_item.item
+            for cart_item in user_cart_items
+            if cart_item.item is not None
+        ]
 
-    # checkout_message = create_checkout_message(cart_items)
-    checkout_message = (
-        "Une commande de chaussure a été passé sur le site de DydyShop  prix:5000FCFA"
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    if form.validate_on_submit():
+        delivery_address = form.delivery_address.data
+        phone_number = form.phone_number.data
+        email = form.email.data
+        country = form.country.data
+
+        order_id = create_order(
+            current_user.id,
+            items_in_cart,
+            delivery_address,
+            phone_number,
+            email,
+            country,
+            total_amount,
+        )
+
+        checkout_message = create_checkout_message(
+            items_in_cart,
+            total_amount,
+            delivery_address,
+            phone_number,
+            email,
+            country,
+        )
+        send_whatsapp_message(checkout_message)
+
+        # clear_cart()
+
+        flash("Votre commande a été passée avec succès!", "success")
+        return redirect(url_for("index"))
+
+    return render_template(
+        "/pages/checkout.html",
+        items_in_cart=items_in_cart,
+        total_amount=total_amount,
+        form=form,
     )
 
-    # Envoyez le message WhatsApp (utilisez vos propres informations Twilio)
-    send_whatsapp_message(checkout_message)
 
-    # Réinitialisez le panier après la commande
-    # clear_cart()
+def create_order(
+    user_id, items_in_cart, delivery_address, phone_number, email, country, total_amount
+):
+    # Create an order
+    order = Order(
+        user_id=user_id,
+        total_amount=total_amount,
+        delivery_address=delivery_address,
+        phone_number=phone_number,
+        email=email,
+        country=country,
+    )
+    add_order(order)
+    updateSession()
 
-    flash("Votre commande a été passée avec succès!", "success")
-    return redirect(url_for("index"))
+    # Create order items
+    for item in items_in_cart:
+        order_item = OrderItem(
+            order_id=order.id,
+            annonce_id=item.id,
+            quantity=item.quantity,
+        )
+        add_order_item(order_item)
+
+    updateSession()
+
+    return order.id
 
 
 # Fonction pour obtenir les détails des articles dans le panier depuis la base de données
-def get_cart_items():
-    cart_items = CartItem.query.all()
-    cart_item_details = []
-
-    for cart_item in cart_items:
-        item = Item.query.get(cart_item.annonce_id)
-        if item:
-            item_details = {
-                "name": item.title,
-                "price": item.prix,
-                "quantity": cart_item.quantity,
-            }
-            cart_item_details.append(item_details)
-
-    return cart_item_details
 
 
-# Fonction pour créer un message de vérification en convertissant les détails du panier en texte
-def create_checkout_message(cart_items):
+def create_checkout_message(
+    items_in_cart,
+    total_amount,
+    delivery_address,
+    phone_number,
+    email,
+    country,
+):
     message = "Votre commande :\n"
-    total_price = 0
-    for item in cart_items:
-        item_name = item["name"]
-        item_price = item["price"]
-        item_quantity = item["quantity"]
-        total_price += item_price * item_quantity
+    for item in items_in_cart:
+        item_name = item.title
+        item_price = item.prix
+        item_quantity = item.quantity
         message += f"{item_name} x{item_quantity}: {item_price * item_quantity}€\n"
-    message += f"Total : {total_price}€"
+
+    message += f"Total : {total_amount} CFA\n"
+    message += f"Adresse de livraison : {delivery_address}\n"
+    message += f"Numéro de téléphone : {phone_number}\n"
+    message += f"Email : {email}\n"
+    message += f"Pays : {country}"
+
     return message
 
-
-# account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
-# auth_token = "008dda7a6424142308e6c538b44dcdea"
 
 from decouple import config
 
 
 # Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
-def send_whatsapp_message(message):
-    account_sid = config("TWILIO_ACCOUNT_SID")
-    auth_token = config("TWILIO_AUTH_TOKEN")
-    client = Client(account_sid, auth_token)
+def send_whatsapp_message(message_receveid):
+    TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
+    TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80"
+    # account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
+    # auth_token = "008dda7a6424142308e6c538b44dcdea"
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     message = client.messages.create(
+        #+14155238886
         from_="whatsapp:+14155238886",
-        body=message,
+        body=message_receveid,
         to="whatsapp:+221771592145",
     )
 
