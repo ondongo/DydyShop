@@ -326,44 +326,21 @@ def gestiondash():
         Order.date_created >= three_months_ago
     ).count()
 
-    # Retrieve the monthly revenue for the last three months
     monthly_revenue_last_three_months = (
         Order.query.filter(Order.date_created >= three_months_ago)
         .with_entities(func.sum(Order.total_amount))
         .scalar()
+        or 0
     )
-
-    # Calculate the percentage increase in revenue compared to the previous month
-    one_month_ago = current_date - timedelta(days=30)
-    revenue_previous_month = (
-        Order.query.filter(
-            Order.date_created >= one_month_ago, Order.date_created < three_months_ago
-        )
-        .with_entities(func.sum(Order.total_amount))
-        .scalar()
-    )
-
-    percentage_increase = 0  # Default value if either value is None
-    if (
-        monthly_revenue_last_three_months is not None
-        and revenue_previous_month is not None
-    ):
-        percentage_increase = (
-            (monthly_revenue_last_three_months - revenue_previous_month)
-            / revenue_previous_month
-        ) * 100
 
     # Trending products
     trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(5).all()
-
-    print("ggggggggggggggggggggggggggg", trending_products)
     return render_template(
         "/back/dashboard.html",
         trending_products=trending_products,
         users_last_three_months=users_last_three_months,
         orders_last_three_months=orders_last_three_months,
         monthly_revenue_last_three_months=monthly_revenue_last_three_months,
-        percentage_increase=percentage_increase,
         first_day_three_months_ago=first_day_three_months_ago.strftime("%B %Y"),
         last_day_three_months_ago=last_day_three_months_ago.strftime("%B %Y"),
         current_month=current_date.strftime("%B %Y"),
