@@ -206,7 +206,7 @@ def findAnnonceById(id_annonce):
     return item
 
 
-def getBestSellingItems():
+""" def getBestSellingItems():
     best_selling_items = (
         db.session.query(Item, func.sum(OrderItem.quantity).label("total_sold"))
         .join(OrderItem, Item.id == OrderItem.annonce_id)
@@ -216,7 +216,7 @@ def getBestSellingItems():
         .all()
     )
 
-    return best_selling_items
+    return best_selling_items """
 
 
 def create_item(new_item: Item):

@@ -31,7 +31,7 @@ from api.models.model import (
     getAllAnnoncePublier,
     getAllAnnonceA_La_Une,
     getAllAnnonceRecent,
-    getBestSellingItems,
+  
 )
 
 categories = list(EnumCategorie)
@@ -93,7 +93,8 @@ def Article():
 
     trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
-    best_sales = getBestSellingItems()
+    best_sales = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
+    # getBestSellingItems()
 
     # Items Sections
     four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
