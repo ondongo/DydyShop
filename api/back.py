@@ -30,7 +30,20 @@ login_manager.login_view = "login"
 login_manager.login_message_category = "info"
 from functools import wraps
 from twilio.rest import Client
+import os
+import pathlib
 
+import requests
+from flask import Flask, session, abort, redirect, request
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+from pip._vendor import cachecontrol
+import google.auth.transport.requests
+
+
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+app.secret_key = "WriteHereYourSecretKey"  # Change this to a secret key
+# oauth = OAuth(app)
 
 # =====================================================================
 # =============================Import Model===========================
@@ -577,12 +590,91 @@ def login():
     return render_template("/back/login.html", form=form)
 
 
-# Delogin
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
+    session.pop("google_token", None)
     # identity_changed.send(app, identity=Identity(None))
+    return redirect(url_for("index"))
+
+
+#
+# =======================================================================================================================
+# ============================= Gestion Authentification Google ===================================================================
+# =======================================================================================================================
+#
+
+
+from flask_oauthlib.client import OAuth
+
+GOOGLE_CLIENT_ID = (
+    "6354560417-l78je9noot5ul7tpg8muk9gps9p1gded.apps.googleusercontent.com"
+)
+
+GOOGLE_CLIENT_SECRET = "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"
+oauth = OAuth(app)
+
+
+google = oauth.remote_app(
+    "google",
+    consumer_key=GOOGLE_CLIENT_ID,
+    consumer_secret=GOOGLE_CLIENT_SECRET,
+    request_token_params={
+        "scope": "email profile"  # Spécifiez les autorisations nécessaires
+    },
+    base_url="https://www.googleapis.com/oauth2/v1/",
+    request_token_url=None,
+    access_token_method="POST",
+    access_token_url="https://accounts.google.com/o/oauth2/token",
+    authorize_url="https://accounts.google.com/o/oauth2/auth",
+)
+
+
+@google.tokengetter
+def get_google_oauth_token():
+    return session.get("google_token")
+
+
+@app.route("/google-login")
+def login_google():
+    return google.authorize(callback=url_for("callback", _external=True))
+
+
+@app.route("/callback")
+def callback():
+    response = google.authorized_response()
+    if response is None or response.get("access_token") is None:
+        return "Accès refusé : raison={} erreur={}".format(
+            request.args["error_reason"], request.args["error_description"]
+        )
+
+    session["google_token"] = (response["access_token"], "")
+    user_info = google.get("userinfo")
+    email_retrieve = user_info.data["email"]
+
+    print("gggggggg", user_info.data["email"])
+    existing_user = User.query.filter_by(google_login=email_retrieve).first()
+
+    if existing_user:
+        existing_user.google_id = user_info.data["id"]
+        existing_user.nom = user_info.data["name"]
+        existing_user.prenom = user_info.data["given_name"]
+        existing_user.profile_image = user_info.data["picture"]
+
+        saveUser(existing_user)
+
+    else:
+        new_user = User(
+            nom=user_info.data["name"],
+            prenom=user_info.data["given_name"],
+            login=user_info.data["email"],
+            google_id=user_info.data["id"],
+            google_login=user_info.data["email"],
+        )
+        saveUser(new_user)
+    login_user(existing_user)
+    print("=========Contenu de la session:=============", session)
     return redirect(url_for("index"))
 
 
@@ -653,75 +745,6 @@ def reset_password(token):
     except IdentityChanged as e:
         # Gérer l'exception (par exemple, imprimer un avertissement ou journaliser l'erreur)
         print(f"Erreur lors du changement d'identité : {e}")
-
- """
-
-
-#
-# =======================================================================================================================
-# ============================= Gestion Authentification Google ===================================================================
-# =======================================================================================================================
-#
-
-""" oauth = OAuth(app)
-
-
-google = oauth.remote_app(
-    'google',
-    consumer_key='YOUR_GOOGLE_CLIENT_ID',
-    consumer_secret='YOUR_GOOGLE_CLIENT_SECRET',
-    request_token_params={
-        'scope': 'openid email profile',  # Spécifiez les autorisations nécessaires
-    },
-    base_url='https://www.googleapis.com/oauth2/v1/',
-    request_token_url=None,
-    access_token_method='POST',
-    access_token_url='https://accounts.google.com/o/oauth2/token',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-)
-
-
-
-
-@app.route('/google-login')
-def google_login():
-    return google.authorize(callback=url_for('authorized', _external=True))
-
-@app.route('/google-logout')
-def google_logout():
-    session.pop('google_token', None)
-    return redirect(url_for('index'))
-
-@app.route('/google-login/authorized')
-def google_authorized():
-    response = google.authorized_response()
-    if response is None or response.get('access_token') is None:
-        return 'Accès refusé : raison={} erreur={}'.format(
-            request.args['error_reason'],
-            request.args['error_description']
-        )
-
-    session['google_token'] = (response['access_token'], '')
-    user_info = google.get('userinfo')
-    
-    # Vérifiez si l'utilisateur existe déjà dans la base de données par login Google
-    existing_user = User.query.filter_by(google_login=user_info.data['login']).first()
-
-    if existing_user:
-        # Mettez à jour les informations de l'utilisateur si nécessaire
-        existing_user.google_id = user_info.data['id']
-        existing_user.full_name = user_info.data['name']
-        existing_user.profile_image = user_info.data['picture']
-        db.session.commit()
-    else:
-        # Créez un nouvel utilisateur dans la base de données
-        new_user = User(google_id=user_info.data['id'],
-                        google_login=user_info.data['login'],
-                        nom=user_info.data['name'])
-                        #profile_image=user_info.data['picture'])
-        SaveUser(new_user)
-
-
 
  """
 
@@ -839,7 +862,7 @@ def Panier():
         items_in_cart, total_quantity = get_items_in_cart()
         total_amount = session.get("total", 0.0)
 
-    print("=========Contenu de la session:=============", session)
+   
 
     return render_template(
         "/pages/panier.html",
@@ -1000,7 +1023,7 @@ def send_whatsapp_message(message_receveid):
     # auth_token = "008dda7a6424142308e6c538b44dcdea"
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     message = client.messages.create(
-        #+14155238886
+        # +14155238886
         from_="whatsapp:+14155238886",
         body=message_receveid,
         to="whatsapp:+221771592145",
