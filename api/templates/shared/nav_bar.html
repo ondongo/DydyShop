@@ -30,46 +30,47 @@
       </li>
 
       {% if current_user.is_authenticated %}
-      <li >
-        <div class="btn-group mb-3">
-          <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
-          <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #d85629;"></button>
-          <ul class="dropdown-menu">
-            <div class="d-flex flex-column justify-content-center px-3">
-              <li >
-                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
-              </li>
+        <li>
+          <div class="btn-group mb-3">
+            {% if current_user.is_authenticated %}
+            <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 35px; height: 35px; border-radius: 50%;" />
+             {% else %}
+               <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+             {% endif %}
+            <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #d85629;"></button>
+            <ul class="dropdown-menu">
+              <div class="d-flex flex-column justify-content-center px-3">
+                <li>
+                  <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
+                </li>
 
-              <li>
-                <a href="{{url_for("gestiondash")}}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
-              </li>
+                <li>
+                  <a href="{{ url_for('gestiondash') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
+                </li>
 
-              <li>
-                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
-              </li>
-              <li>
-                <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
-              </li>
+                <li>
+                  <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Compte</a>
+                </li>
+                <li>
+                  <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
+                </li>
 
+                <li>
+                  <a href="{{ url_for('Contact') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Contact</a>
+                </li>
 
-              <li>
-                <a href="{{ url_for('Contact') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Contact</a>
-              </li>
+                <li>
+                  <a href="{{ url_for('Faqs') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Faqs</a>
+                </li>
 
-              <li>
-                <a href="{{ url_for('Faqs') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Faqs</a>
-              </li>
-
-
-            
-              <li>
-                <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2 text-center" style="background-color: #d85629; border-radius: 100%;  color:white;">Déconnexion</a>
-              </li>
-            </div>
-          </ul>
-        </div>
-      </li>
-    {% endif %}
+                <li>
+                  <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2 text-center" style="background-color: #d85629; border-radius: 100%;  color:white;">Déconnexion</a>
+                </li>
+              </div>
+            </ul>
+          </div>
+        </li>
+      {% endif %}
     </ul>
   </div>
 
@@ -129,7 +130,7 @@
         </div>
       </div>
 
-      <div class="col-lg-3 d-flex justify-content-end ">
+      <div class="col-lg-3 d-flex justify-content-end">
         <div class="header__right">
           {% if current_user.is_authenticated %}
             <div class="header__right__auth d-none">
@@ -159,16 +160,21 @@
             {% if current_user.is_authenticated %}
               <li>
                 <div class="btn-group mb-3">
-                  <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+                  {% if current_user.is_authenticated %}
+                 <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 35px; height: 35px; border-radius: 50%;" />
+                  {% else %}
+                    <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style="background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+                  {% endif %}
+
                   <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: #d85629;"></button>
                   <ul class="dropdown-menu">
                     <div class="d-flex flex-column justify-content-center px-3">
-                      <li >
+                      <li>
                         <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Accueil</a>
                       </li>
 
                       <li>
-                        <a href="{{url_for("gestiondash")}}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
+                        <a href="{{ url_for('gestiondash') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Dashboard</a>
                       </li>
 
                       <li>
@@ -177,7 +183,7 @@
                       <li>
                         <a href="/" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Commandes</a>
                       </li>
-        
+
                       <li>
                         <a href="{{ url_for('Contact') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Contact</a>
                       </li>
@@ -186,7 +192,6 @@
                         <a href="{{ url_for('Faqs') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2" style="color: #FFFFF;">Faqs</a>
                       </li>
 
-                    
                       <li>
                         <a href="{{ url_for('logout') }}" class="dropdown-item btn btn-outline-danger rounded-pill py-2 text-center" style="background-color: #d85629; border-radius: 100%;  color:white;">Déconnexion</a>
                       </li>
