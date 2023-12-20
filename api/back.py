@@ -448,13 +448,17 @@ from flask_mail import Message, Mail
 
 
 # Ce sont des informations Test
-app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
-app.config["MAIL_PORT"] = 2525
-app.config["MAIL_USERNAME"] = "966afbb985ad95"
-app.config["MAIL_PASSWORD"] = "1bdae0667ba459"
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_DEFAULT_SENDER"] = "gloireondongo1205@gmail.com"
+# app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
+# app.config["MAIL_PORT"] = 2525
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 465
+# app.config["MAIL_USERNAME"] = "966afbb985ad95"
+# pp.config["MAIL_PASSWORD"] = "1bdae0667ba459"
+app.config["MAIL_USERNAME"] = "gloireondongo1205@gmail.com"
+app.config["MAIL_PASSWORD"] = "zsnocpmplstortpk"
+app.config["MAIL_USE_TLS"] = False
+app.config["MAIL_USE_SSL"] = True
+# app.config["MAIL_DEFAULT_SENDER"] = "gloireondongo1205@gmail.com"
 mail = Mail(app)
 
 
@@ -463,15 +467,24 @@ def generate_confirmation_token():
 
 
 def send_confirmation_email(user):
+    sender = "noreply@gmail.com"
     token = generate_confirmation_token()
     user.confirmation_token = token
     updateSession()
 
     confirmation_link = url_for("confirm_email", token=token, _external=True)
-    msg = Message("Confirmation d'e-mail", recipients=[user.login])
-    msg.body = "Cliquez sur le lien suivant pour confirmer votre adresse e-mail sur DyDyShop: {0}".format(
+    msg = Message("Confirmation d'e-mail", sender=sender, recipients=[user.login])
+    msg_body = "Cliquez sur le lien suivant pour confirmer votre adresse e-mail sur DyDyShop: {0}".format(
         confirmation_link
     )
+    
+    msg.body=""
+    
+    data={
+        'app_name':"DYDYSHOP",
+        'body': msg_body 
+    }
+    msg.html = render_template("email/confirmEmail.html", user_name=user.nom , data=data)
     mail.send(msg)
 
 
@@ -689,7 +702,8 @@ def send_reset_email(user):
 
     reset_link = url_for("reset_password", token=reset_token, _external=True)
     msg = Message("Réinitialisation de mot de passe", recipients=[user.login])
-    msg.body = f"Cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+
+    msg.body = f"Cliquez sur le lien suivant pocur réinitialiser votre mot de passe : {reset_link}"
     mail.send(msg)
 
 
@@ -861,8 +875,6 @@ def Panier():
         # Utilisateur non connecté, récupérez le panier depuis la session
         items_in_cart, total_quantity = get_items_in_cart()
         total_amount = session.get("total", 0.0)
-
-   
 
     return render_template(
         "/pages/panier.html",
