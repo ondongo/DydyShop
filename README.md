@@ -31,3 +31,4 @@ DyDyShop est une application web de commerce électronique développée avec Fla
 - [SQLAlchemy](https://www.sqlalchemy.org/)
 - [Twilio](https://www.twilio.com/) (pour les notifications WhatsApp)
 - [OAuth2 avec Google](https://developers.google.com/identity/protocols/oauth2) (pour l'authentification avec Google)
+- [Template et envoi email personalisé ](https://pythonhosted.org/Flask-Mail/)https://pythonhosted.org/Flask-Mail/) 
