@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 
 from wtforms import SelectField, StringField, EmailField, PasswordField, SubmitField
 
-from wtforms.validators import InputRequired, Length, Email, DataRequired, EqualTo
+from wtforms.validators import InputRequired, Length, DataRequired, EqualTo
 
 
 # ===============> Je prefere utiliser Mes propres Formulaires
@@ -27,10 +27,7 @@ class RegisterForm(FlaskForm):
     )
     email = EmailField(
         "Email",
-        validators=[
-            # InputRequired("Le champs est requis!!!"),
-            Email(),
-        ],
+        validators=[DataRequired()]
     )
     password = PasswordField(
         "Mot de Passe",
@@ -79,9 +76,9 @@ class CheckoutForm(FlaskForm):
     submit = SubmitField('Valider la commande')
 
 class SubscribeForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired()])
     submit = SubmitField("Subscribe")
 
 
 class ArticleForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired()])
