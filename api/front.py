@@ -2,36 +2,49 @@ import re
 from flask import Flask, abort, render_template, redirect, session, url_for, request
 from flask_login import current_user
 import requests
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from api.models.EnumColorAndSize import *
 from api.models.EnumCategorie import *
 from api.models.SousCategorie import *
 from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy import or_
+from flask_babel import Babel
+from flask import g, request
 
-# ----------Fichier Principal-------------
+
+def get_locale():
+    # if a user is logged in, use the locale from the user settings
+    user = getattr(g, "user", None)
+    if user is not None:
+        return user.locale
+    # otherwise try to guess the language from the user accept
+    # header the browser transmits.  We support de/fr/en in this
+    # example.  The best match wins.
+    return request.accept_languages.best_match(["de", "fr", "en"])
+
+
+def get_timezone():
+    user = getattr(g, "user", None)
+    if user is not None:
+        return user.timezone
+
+
 app = Flask(__name__)
 
-# Montrer a flask la ou se trouve notre fichier de config Flask
-# app.config.from_object("config"))
-# Pagination des pages
-# pagination = Pagination(app)
-
 app.config.from_object("config")
-
+babel = Babel(app, locale_selector=get_locale, timezone_selector=get_timezone)
 
 from api.models.model import (
     CartItem,
     Category,
+    Favorite,
     Image,
+    Review,
     SubCategory,
     User,
     findAnnonceById,
     Item,
     getAllAnnoncePublier,
-    getAllAnnonceA_La_Une,
-    getAllAnnonceRecent,
-  
 )
 
 categories = list(EnumCategorie)
@@ -59,22 +72,22 @@ def index():
 @app.route("/Article")
 def Article():
     items = getAllAnnoncePublier()
-    # annoncesTuniques = Item.query.filter_by(
-    # categorie=SousCategorieHomme.tunique.name
-    # ).all()
-    # annoncesSac = Item.query.filter_by(categorie=SousCategorieFemmme.sac.name).all()
-    # annoncesEnsemble = Item.query.filter_by(
-    # categorie=SousCategorieFemmme.ensemble.name
-    # ).all()
-    # countTuniques = len(annoncesTuniques)
-    # countSac = len(annoncesSac)
-    # countEnsemble = len(annoncesEnsemble)
+
+    total_amount = 0.0
+    favoris_count = 0
+    carts_count = 0
 
     if current_user.is_authenticated:
-        # Utilisateur connecté, récupérez le panier depuis la base de données
         user_id = current_user.id
 
         user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        # Retrieve the count of items in the user's shopping cart
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        # Retrieve the count of items in the user's favorites
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
         total_amount = sum(
             cart_item.item.prix * cart_item.quantity
             for cart_item in user_cart_items
@@ -94,11 +107,7 @@ def Article():
     trending_products = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
     three_lowest_price_items = Item.query.order_by(Item.prix.asc()).limit(3).all()
     best_sales = Item.query.order_by(desc(Item.nbre_vues)).limit(3).all()
-    # getBestSellingItems()
-
-    # Items Sections
     four_all_items = Item.query.order_by(Item.prix.asc()).limit(4).all()
-
     return render_template(
         "/pages/index.html",
         items=items,
@@ -114,6 +123,8 @@ def Article():
         pagination=pagination,
         four_all_items=four_all_items,
         total_amount=total_amount,
+        favoris_count=favoris_count,
+        carts_count=carts_count,
     )
 
 
@@ -134,6 +145,29 @@ def Shop():
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=count)
     items = items[offset : offset + NbreElementParPage]
 
+    favoris_count = 0
+    carts_count = 0
+
+    if current_user.is_authenticated:
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        # Retrieve the count of items in the user's shopping cart
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        # Retrieve the count of items in the user's favorites
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        total_amount = session.get("total", 0.0)
+
     return render_template(
         "/pages/shop.html",
         items=items,
@@ -143,6 +177,9 @@ def Shop():
         pagination=pagination,
         sous_categories_femmes=sous_categories_femmes,
         sous_categories_hommes=sous_categories_hommes,
+        total_amount=total_amount,
+        favoris_count=favoris_count,
+        carts_count=carts_count,
     )
 
 
@@ -165,10 +202,8 @@ def display_Shop():
     max_price = request.args.get("max_price")
     sort_by_price = request.args.get("sort_by_price")
 
-    # Construisez la requête de base pour les articles
     query = getAllAnnoncePublier()
 
-    # Ajoutez des filtres en fonction des paramètres de la requête
     if category:
         query = Item.query.filter(Item.category_id == category)
 
@@ -176,13 +211,11 @@ def display_Shop():
         query = Item.query.filter(Item.subcategory_id == subcategory)
 
     if size:
-        # Filtrer par taille (utilisez la table de liaison item_sizes)
         query = Item.query.filter(
             or_(Item.size1 == size, Item.size2 == size, Item.size3 == size)
         )
 
     if color:
-        # Filtrer par couleur (utilisez la table de liaison item_colors)
         query = Item.query.filter(
             or_(Item.color1 == color, Item.color2 == color, Item.color3 == color)
         )
@@ -190,7 +223,6 @@ def display_Shop():
     if min_price and max_price:
         query = Item.query.filter(Item.prix.between(min_price, max_price))
 
-    # Ajoutez le tri par prix
     if sort_by_price == "asc":
         query = Item.query.order_by(Item.prix.asc())
     elif sort_by_price == "desc":
@@ -207,6 +239,27 @@ def display_Shop():
     pagination = Pagination(page=page, per_page=items_per_page, total=len(items))
     items = items[offset : offset + items_per_page]
 
+    favoris_count = 0
+    carts_count = 0
+
+    if current_user.is_authenticated:
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        total_amount = session.get("total", 0.0)
+
     return render_template(
         "/pages/shop.html",
         items=items,
@@ -216,6 +269,9 @@ def display_Shop():
         count=count,
         sous_categories_femmes=sous_categories_femmes,
         sous_categories_hommes=sous_categories_hommes,
+        total_amount=total_amount,
+        favoris_count=favoris_count,
+        carts_count=carts_count,
     )
 
 
@@ -237,6 +293,27 @@ def recherche_annon():
     offset = (page - 1) * NbreElementParPage
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(items))
     items = items[offset : offset + NbreElementParPage]
+
+    favoris_count = 0
+    carts_count = 0
+
+    if current_user.is_authenticated:
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        total_amount = session.get("total", 0.0)
     return render_template(
         "/pages/shop.html",
         categories=categories,
@@ -247,12 +324,35 @@ def recherche_annon():
         sous_categories=sous_categories,
         sous_categories_femmes=sous_categories_femmes,
         sous_categories_hommes=sous_categories_hommes,
+        total_amount=total_amount,
+        favoris_count=favoris_count,
+        carts_count=carts_count,
     )
 
 
 @app.route("/no-filter-found")
 def NoFilterFound():
-    return render_template("errors/no_filter_found.html")
+    favoris_count = 0
+    carts_count = 0
+    if current_user.is_authenticated:
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+    return render_template(
+        "errors/no_filter_found.html",
+        favoris_count=favoris_count,
+        carts_count=carts_count,
+    )
 
 
 # =====================================================================
@@ -301,9 +401,43 @@ def annonce_Id(id_item):
     ]
 
     unique_colors_with_names = list(zip(unique_colors, color_names))
-    user = User.query.get(current_user.id)
-    annonces_favoris = user.favorites
-    annonces_favoris_ids = [fav.annonce_id for fav in user.favorites]
+
+    total_amount = 0.0
+    favoris_count = 0
+    carts_count = 0
+    annonces_favoris = []
+    annonces_favoris_ids = []
+
+    average_rating = (
+        Review.query.with_entities(func.avg(Review.rating))
+        .filter_by(item_id=id_item)
+        .scalar()
+    )
+
+    average_rating = average_rating or 0.0
+
+    if current_user.is_authenticated:
+        user_id = current_user.id
+
+        user_cart_items = CartItem.query.filter_by(user_id=user_id).all()
+
+        user = User.query.get(current_user.id)
+        annonces_favoris = user.favorites
+        annonces_favoris_ids = [fav.annonce_id for fav in user.favorites]
+
+        carts_count = CartItem.query.filter_by(user_id=user_id).count()
+
+        favoris_count = Favorite.query.filter_by(user_id=user_id).count()
+
+        total_amount = sum(
+            cart_item.item.prix * cart_item.quantity
+            for cart_item in user_cart_items
+            if cart_item.item is not None and cart_item.quantity is not None
+        )
+
+    else:
+        total_amount = session.get("total", 0.0)
+
     similar_items = (
         Item.query.filter(
             Item.subcategory_id == item.subcategory_id,
@@ -324,12 +458,11 @@ def annonce_Id(id_item):
         similar_items=similar_items,
         annonces_favoris=annonces_favoris,
         annonces_favoris_ids=annonces_favoris_ids,
+        carts_count=carts_count,
+        favoris_count=favoris_count,
+        total_amount=total_amount,
+        average_rating=average_rating,
     )
-
-
-@app.route("/Contact")
-def Contact():
-    return render_template("/pages/contact.html")
 
 
 @app.route("/Faqs")
@@ -339,72 +472,4 @@ def Faqs():
 
 @app.route("/Tracking-order")
 def Tracking():
-    return render_template("/pages/checkout.html")
-
-
-# ===================================================================
-# =============================Chat Envoye Recevoir Avec Socketio  =========================================
-# =====================================================================
-
-# ====================je vais dans mon fichier special.py
-
-# messages = []  # Liste pour stocker les messages
-
-# @app.route('/chat/<int:article_id>')
-# def chat(article_id):
-#     Item = Item.query.get(article_id)
-#     if Item:
-#         article_author = Item.users.nom
-#         return render_template("/pages/chat.html", article_author=article_author)
-#     else:
-#         return "Article not found"
-
-# @socketio.on('connect')
-# def handle_connect():
-#     print('Client connected!')
-
-# @socketio.on('user_join')
-# def handle_user_join(username):
-#     print(f'User {username} joined!')
-
-# @socketio.on('new_message')
-# def handle_new_message(data):
-#     message = data['message']
-#     recipient = data['recipient']
-#     sender = None
-
-#     for sid, user in socketio.server.manager.rooms[''].items():
-#         if user == request.sid:
-#             sender = sid
-#             break
-
-#     if recipient == article_author:
-#         emit('chat', {'message': message, 'sender': sender, 'recipient': recipient}, room=recipient)
-#     else:
-#         emit('chat', {'message': message, 'sender': sender}, broadcast=True)
-
-#         # Ajouter le message à la liste
-#         messages.append({'sender': sender, 'message': message})
-
-
-# @app.route('/Item/Recent', methods=['POST'])
-# def process_form():
-#     selected_value = request.form['select_field']
-#     annonces = getAnnoncesByDate('2023-03-28 03:37:35.970126')
-#     # Do something with the selected value
-#     return render_template("/pages/index.html",annonces=annonces,categories=categories,icons=icons)
-
-
-# @app.route('/')
-# def index():
-#     # Accessing Enum members:
-#     my_etat =EnumEtatArticle.Reconditione.name
-
-#     # return 'my_etat is {}'.format(my_etat.value)
-#     return 'my_etat is {}'.format(my_etat)
-
-
-# articles = Article.query.order_by(Article.prix.asc()).all()
-# articles = Article.query.order_by(Article.prix.desc()).all()
-# # récupère les 10 articles les plus récents
-# articles = Article.query.order_by(Article.date.desc()).limit(10).all()
+    return render_template("/pages/tracking.html")

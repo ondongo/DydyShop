@@ -77,20 +77,34 @@
                   {% endfor %}
                 </select>
                 <!-- Ajoutez un champ caché pour la catégorie -->
-                <input type="hidden" name="categorie_hidden" id="categorie_hidden"/>
+                <input type="hidden" name="categorie_hidden" id="categorie_hidden" />
               </div>
             </div>
             <div class="row">
-
-              <div class="col-md-6 mb-3">
+              <div class="col-md-4 mb-3">
                 <div class="form-group">
-                  <label for="phone">Url</label>
-                  <input class="form-control" type="text" name="img_url"/>
+                  <label for="phone">Lien Image Principal</label>
+                  <input class="form-control" type="text" name="img_url" />
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <div class="form-group">
+                  <label for="phone">Lien Image secondaire 1</label>
+                  <input class="form-control" type="text" name="img_url2" />
                 </div>
               </div>
 
 
+              <div class="col-md-4 mb-3">
+                <div class="form-group">
+                  <label for="phone">Lien Image secondaire 2</label>
+                  <input class="form-control" type="text" name="img_url3" />
+                </div>
+              </div>
+            </div>
 
+            <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="form-group">
                   <label for="phone">Prix</label>
@@ -179,14 +193,14 @@
   <script src="assets/js/ui/component.fileupload.js"></script>
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
- 
+
   <script>
-    $(document).ready(function() {
-        $("#sous_categorie").change(function() {
-            var selectedCategoryId = $("#sous_categorie option:selected").data("category");
-            $(".categorie-select").val(selectedCategoryId);
-            $("#categorie_hidden").val(selectedCategoryId);
-        });
-    });
-</script>
+    $(document).ready(function () {
+      $('#sous_categorie').change(function () {
+        var selectedCategoryId = $('#sous_categorie option:selected').data('category')
+        $('.categorie-select').val(selectedCategoryId)
+        $('#categorie_hidden').val(selectedCategoryId)
+      })
+    })
+  </script>
 {% endblock %}

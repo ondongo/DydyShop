@@ -26,10 +26,19 @@ app.config["UPLOADED_PHOTOS_DEST"] = "uploads"
 configure_uploads(app, photos)
 
 
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
+
+
 class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
 
 class Favorite(db.Model):
@@ -56,6 +65,16 @@ class Category(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Review(db.Model):
+    __tablename__ = "reviews"
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey("items.id"), nullable=False)
+
+
 class SubCategory(db.Model):
     __tablename__ = "sub_categories"
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +90,8 @@ class Item(db.Model):
     description = db.Column(db.Text)
     prix = db.Column(db.Float, nullable=True)
     img_url = db.Column(db.String(255), nullable=True)
+    img_url2 = db.Column(db.String(255), nullable=True)
+    img_url3 = db.Column(db.String(255), nullable=True)
     img_title = db.Column(db.String(100), nullable=True)
     date_pub = db.Column(db.DateTime, default=datetime.utcnow)
     published = db.Column(db.Boolean, default=True)
@@ -82,29 +103,47 @@ class Item(db.Model):
     images = db.relationship("Image", backref="item", lazy=True)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     subcategory_id = db.Column(db.Integer, db.ForeignKey("sub_categories.id"))
+    reviews = db.relationship("Review", backref="item", lazy="dynamic")
     color1 = db.Column(db.String(100), nullable=True)
     color2 = db.Column(db.String(100), nullable=True)
     color3 = db.Column(db.String(100), nullable=True)
     size1 = db.Column(db.String(100), nullable=True)
     size2 = db.Column(db.String(100), nullable=True)
     size3 = db.Column(db.String(100), nullable=True)
+
     @property
     def quantity_in_cart(self):
         cart_item = CartItem.query.filter_by(annonce_id=self.id).first()
         return cart_item.quantity if cart_item else 0
+    
+    @property
+    def average_rating(self):
+        """
+        Récupère la moyenne des ratings pour l'article.
+        """
+        return db.session.query(func.avg(Review.rating)).filter_by(item_id=self.id).scalar() or 0.0
+
+    @property
+    def ratings_count(self):
+        """
+        Récupère le nombre total de ratings pour l'article.
+        """
+        return Review.query.filter_by(item_id=self.id).count()
 
 
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(200), nullable=False)
+    pays = db.Column(db.String(200), nullable=True)
+    adresse = db.Column(db.String(200), nullable=True)
     prenom = db.Column(db.String(200))
     tel = db.Column(db.String(200))
     login = db.Column(db.String(200), nullable=False)
     password = db.Column(db.String(5000))
     google_id = db.Column(db.String(200), unique=True)
     google_login = db.Column(db.String(200), unique=True)
-    profile_image = db.Column(db.String(200)) 
+    profile_image = db.Column(db.String(200))
     active = db.Column(db.Boolean, default=True)
     NbreAnnoncePub = db.Column(db.Integer, default=0)
     favorites = db.relationship("Favorite", backref="user", lazy="dynamic")
@@ -113,6 +152,18 @@ class User(db.Model, UserMixin):
     confirmation_token = db.Column(db.String, unique=True)
     confirmed = db.Column(db.Boolean, default=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    notifications = db.relationship("Notification", backref="user", lazy="dynamic")
+    subscriptions = db.relationship("Subscriber", backref="user", lazy="dynamic")
+
+    def is_subscriber(self):
+        """
+        Check if the user is a subscriber.
+
+        Returns:
+            bool: True if the user is a subscriber, False otherwise.
+        """
+        return self.subscriptions.count() > 0
+
     # reset_token = db.Column(db.String(200), unique=True)
 
     def __repr__(self):
@@ -141,11 +192,11 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
     items = db.relationship("OrderItem", backref="order", lazy=True)
-    delivery_address= db.Column(db.String(200)),
-    phone_number=db.Column(db.String(200)),
-    email=db.Column(db.String(200)),
-    status=db.Column(db.String(200)),
-    country=db.Column(db.String(200)),
+    delivery_address = (db.Column(db.String(200)),)
+    phone_number = (db.Column(db.String(200)),)
+    email = (db.Column(db.String(200)),)
+    status = (db.Column(db.String(200)),)
+    country = (db.Column(db.String(200)),)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -256,7 +307,6 @@ def editAnnonceModel(Item: Item):
 def un_published(id_annonce):
     Item = Item.query.get(id_annonce)
 
-    # Tester si c'est une publication:
     if not Item.published:
         Item.datePub = datetime.datetime.utcnow()
 
@@ -296,7 +346,7 @@ def transfer_session_cart_to_db(user_id, session_carts, session_quantities):
         product_id = session_carts[index]
         quantity = session_quantities[index]
 
-        cart_item = CartItem(user_id=user_id,  annonce_id=product_id, quantity=quantity)
+        cart_item = CartItem(user_id=user_id, annonce_id=product_id, quantity=quantity)
         db.session.add(cart_item)
 
     db.session.commit()
@@ -307,32 +357,32 @@ def clear_cart(user_id):
     db.session.commit()
 
 
-# ************************************ SESSION REQUETES ***********************************
-
-
 def saveUser(user: User):
     db.session.add(user)
     db.session.commit()
 
-def ajouter_cart(user_cart:CartItem):
+
+def ajouter_cart(user_cart: CartItem):
     db.session.add(user_cart)
- 
-def delete_cart(user_cart:CartItem):
+
+
+def delete_cart(user_cart: CartItem):
     db.session.delete(user_cart)
-    
+
+
 def ajouter_favori(favorite: Favorite):
     db.session.add(favorite)
     db.session.commit()
 
 
-def add_order(order:Order):
+def add_order(order: Order):
     db.session.add(order)
 
 
-def add_order_item(order_item:OrderItem):
-    db.session.add(order_item) 
- 
- 
+def add_order_item(order_item: OrderItem):
+    db.session.add(order_item)
+
+
 def updateSession():
     db.session.commit()
 
@@ -345,6 +395,18 @@ def updatecategory(category: Category):
 def updatesubcategory(subcategory: SubCategory):
     db.session.add(subcategory)
     db.session.commit()
+
+
+def add_notification(user, message):
+    notification = Notification(user=user, message=message)
+    db.session.add(notification)
+    db.session.commit()
+
+
+def add_subscriber(subscriber: Subscriber, user_id):
+    subscriber.user_id = user_id
+    db.session.add(subscriber)
+
 
 
 # =====================================================================

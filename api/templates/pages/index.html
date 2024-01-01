@@ -13,6 +13,26 @@
 
   <!-- Categories Section Begin -->
   <section class="categories">
+    <style>
+      .custom-alert-container {
+        position: absolute;
+        top: 110px;
+        right: 20px; 
+        z-index: 9999;
+      }
+    </style>
+    
+    <div class="container custom-alert-container">
+      <div class="row">
+        <div class="col-lg-12">
+          {% for message, category in get_flashed_messages(with_categories = true) %}
+            <div class="alert alert-{{ message }} alert-dismissible fade show custom-alert" role="alert">
+              <strong>{{ category.capitalize() }}!</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-6 p-0">
@@ -93,7 +113,7 @@
       </div>
       <div class="row property__gallery">
         {% for item in four_all_items %}
-        <div class="col-lg-3 col-md-4 col-sm-6 mix {% if item.category_id == 1 %} women {% else %} men {% endif %}">
+          <div class="col-lg-3 col-md-4 col-sm-6 mix {% if item.category_id == 1 %}{% endif %}">
             <div class="product__item">
               <div class="product__item__pic set-bg"
                 data-setbg="{% if not item.img_url %}
@@ -338,6 +358,34 @@
 
   <!-- Instagram End -->
 
+ 
+
+
+  <script>
+    // Ajoutez ce script pour gérer la disparition automatique des alertes
+    $(document).ready(function () {
+      $('.custom-alert').each(function () {
+        // Ajoutez la classe "fade-out" après 5 secondes
+        var alertElement = $(this)
+        setTimeout(function () {
+          alertElement.addClass('fade-out')
+        }, 5000)
+      })
+    
+      // Supprimez l'élément après la fin de l'animation
+      $('.custom-alert').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+        $(this).remove()
+      })
+    })
+  </script>
+
+  <style>
+    /* Ajoutez cette règle CSS pour définir l'animation de fade-out */
+    .fade-out {
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+  </style>
   <!-- Footer Section Begin -->
   <footer class="footer">
     <div class="container">
@@ -359,7 +407,7 @@
             <h6>Contact</h6>
             <ul>
               <li>
-                <a href="{{ url_for('Contact') }}">Nous Contactez </a>
+                <a href="{{ url_for('Contact') }}">Nous Contactez</a>
               </li>
               <li>
                 <a href="{{ url_for('Faqs') }}">FAQ</a>
@@ -372,10 +420,10 @@
             <h6>Profile</h6>
             <ul>
               <li>
-                <a href="#">Mon compte</a>
+                <a href="{{url_for('Profile')}}">Mon compte</a>
               </li>
               <li>
-                <a href="#">Mes Commandes</a>
+                <a href="{{url_for('OrderPage')}}">Mes Commandes</a>
               </li>
               <li>
                 <a href="{{ url_for('wishlist') }}">Mes Favoris</a>
@@ -386,8 +434,8 @@
         <div class="col-lg-4 col-md-8 col-sm-8">
           <div class="footer__newslatter">
             <h6>Newsletter</h6>
-            <form action="#">
-              <input type="text" placeholder="Email" />
+            <form id="newsletter-form" action="/newsletter" method="post">
+              <input type="text" placeholder="Email" name="email" />
               <button type="submit" class="site-btn">S'inscire</button>
             </form>
             <div class="footer__social">
