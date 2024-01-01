@@ -55,7 +55,7 @@ SQLAlchemy==2.0.17
 twilio==8.10.3
 typing_extensions==4.8.0
 urllib3==2.0.5
-Werkzeug==3.0.0
+Werkzeug==2.3.0
 WTForms==3.0.0
 yarl==1.9.4
 zipp==3.17.0
