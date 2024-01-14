@@ -2,7 +2,7 @@ from datetime import timedelta
 from datetime import datetime
 import dbm
 
-from api.forms import CheckoutForm, LoginForm
+from api.forms import CheckoutForm, LoginForm, MessageForm, ProfileForm
 from .front import app
 from sqlalchemy.orm import joinedload
 from flask import (
@@ -82,6 +82,7 @@ from api.models.model import (
     clear_cart,
     create_item,
     delete_cart,
+    get_annonce_by_id,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
     transfer_session_cart_to_db,
@@ -91,6 +92,7 @@ from api.models.model import (
     editAnnonceModel,
     User,
     saveUser,
+    update_annonce_quantity,
     updateSession,
     updatecategory,
     updatesubcategory,
@@ -98,8 +100,6 @@ from api.models.model import (
 
 
 listcategories = list(EnumCategorie)
-
-
 
 
 def admin_required(func):
@@ -131,7 +131,6 @@ def check_for_maintenance():
 @app.route("/maintenance")
 def maintenance():
     return render_template("/maintenance/maintenance.html")
-
 
 
 # ===========================================================================
@@ -468,7 +467,6 @@ def recherche_annonAvancee():
 
 import secrets
 from flask_mail import Message, Mail
-
 
 # Ce sont des informations Test
 # app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
@@ -832,7 +830,6 @@ def add_panier(id):
         else:
             user_cart = CartItem(user_id=user_id, annonce_id=id, quantity=1)
             ajouter_cart(user_cart)
-
         updateSession()
     else:
         # Utilisateur non connecté, utilisez le panier en session
@@ -1029,13 +1026,14 @@ def create_order(
             quantity=item.quantity,
         )
         add_order_item(order_item)
+        annonce = get_annonce_by_id(item.id)
+        if annonce:
+            annonce.quantity -= item.quantity
+            update_annonce_quantity(annonce)
 
     updateSession()
 
     return order.id
-
-
-# Fonction pour obtenir les détails des articles dans le panier depuis la base de données
 
 
 def create_checkout_message(
@@ -1065,10 +1063,32 @@ def create_checkout_message(
 from decouple import config
 
 
-# Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
+@app.context_processor
+def inject_message_form():
+    return {"messageForm": MessageForm()}
+
+
+@app.route("/send-message", methods=["POST"])
+def handle_form():
+    messageForm = MessageForm()
+    if messageForm.validate_on_submit():
+        message = (
+            f"Votre commande: {messageForm.article.data}\n"
+            f"Votre message: {messageForm.message.data}"
+        )
+        send_whatsapp_message(message)
+        flash("Message envoyé avec succès!", "success")
+        return redirect(url_for("index"))
+    else:
+        return redirect(url_for("index"))
+
+
 def send_whatsapp_message(message_receveid):
-    TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
-    TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80"
+    TWILIO_ACCOUNT_SID = "AC133734595c6e3326b9cf8aae0dd5d1dd"
+    TWILIO_AUTH_TOKEN = "d285e0f4a064345a8521d4d7f3518207"
+
+    """ TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
+    TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80" """
     # account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
     # auth_token = "008dda7a6424142308e6c538b44dcdea"
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -1260,11 +1280,26 @@ def getUser(user_id):
     return user
 
 
-@app.route("/Profile")
+@app.route("/Profile", methods=["GET", "POST"])
 @login_required
 def Profile():
-    return render_template("/pages/profile.html", user=current_user)
-
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.nom = form.nom.data
+        current_user.prenom = form.prenom.data
+        current_user.tel = form.tel.data
+        current_user.pays = form.pays.data
+        current_user.adresse = form.adresse.data
+        updateSession()
+        flash("Votre profil a été mis à jour avec succès!", "success")
+        return redirect(url_for("Profile"))
+    elif request.method == "GET":
+        form.nom.data = current_user.nom
+        form.prenom.data = current_user.prenom
+        form.tel.data = current_user.tel
+        form.pays.data = current_user.pays
+        form.adresse.data = current_user.adresse
+    return render_template("/pages/profile.html", form=form, user=current_user)
 
 @app.route("/Order")
 @login_required
@@ -1272,9 +1307,13 @@ def OrderPage():
     page = request.args.get(get_page_parameter(), type=int, default=1)
     NbreElementParPage = 2
     offset = (page - 1) * NbreElementParPage
-    orders=["HH","II"]
+    orders = ["HH", "II"]
     pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(orders))
-    return render_template("/pages/order.html", user=current_user, pagination=pagination,)
+    return render_template(
+        "/pages/order.html",
+        user=current_user,
+        pagination=pagination,
+    )
 
 
 @app.route("/mark_notification_read/<int:notification_id>")

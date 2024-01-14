@@ -14,11 +14,17 @@
               <li class="breadcrumb-item">
                 <a href="#">Home</a>
               </li>
-         
+
               <li class="breadcrumb-item active" aria-current="page">Profile</li>
             </ol>
           </nav>
         </div>
+
+        {% for message, category in get_flashed_messages(with_categories = true) %}
+          <div class="alert alert-{{ message }} alert-dismissible fade show custom-alert col-lg-12" role="alert">
+            <strong>{{ category.capitalize() }}!</strong>
+          </div>
+        {% endfor %}
       </div>
 
       <div class="row">
@@ -32,18 +38,16 @@
               {% endif %}
 
               <h5 class="my-3">{{ user.nom }}</h5>
-              <p class="text-muted mb-1">{{ user.date_created|datetimeformat}}</p>
+              <p class="text-muted mb-1">{{ user.date_created|datetimeformat }}</p>
 
               <p class="text-muted mb-4">{{ user.prenom }}</p>
               <div class="d-flex justify-content-center mb-2 flex-column">
                 {% if current_user.is_subscriber() %}
                   <button type="button" class="btn mb-2 disabled" style="background:#d85629; color: white;">Vous êtes abonné à notre newsletter</button>
-                  <button type="button" class="btn ms-1  mb-3 hoverbutton" style="border-color: #d85629;">Se désabonner de la newsletter</button>
+                  <button type="button" class="btn ms-1 mb-3 hoverbutton" style="border-color: #d85629;">Se désabonner de la newsletter</button>
                 {% else %}
-                  <button type="button" id="newsletter"  class="btn mb-3 hoverbutton" style="border-color: #d85629;">Vous n'êtes abonné à notre newsletter cliquer ici</button>
+                  <button type="button" id="newsletter" class="btn mb-3 hoverbutton" style="border-color: #d85629;">Vous n'êtes abonné à notre newsletter cliquer ici</button>
                 {% endif %}
-
-
 
                 <button type="button" class="btn ms-1 hoverbutton" id="profile" style="border-color: #d85629;">Modifier ton profil</button>
               </div>
@@ -87,7 +91,7 @@
                 </div>
                 <div class="col-sm-9">
                   <p class="text-muted mb-0">
-                    {% if google_id is not none %}
+                    {% if google_id is none %}
                       Aucun numéro
                     {% else %}
                       (097) {{ user.tel }}
@@ -140,7 +144,6 @@
     </div>
   </section>
 
-
   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -160,13 +163,14 @@
           <button type="button" class="close custom-close-button" data-dismiss="modal" aria-label="Close"><i class="fa-solid fa-circle-xmark" style="color: white; background: #d85629; padding: 5px; border-radius: 50px;"></i></button>
         </div>
         <div class="modal-body">
-          <div class="alert alert-warning" role="alert">En vous inscrivant vous recevevrez l'actualité de <strong>DydyShop par Mail</strong></div>
+          <div class="alert alert-warning" role="alert">
+            En vous inscrivant vous recevevrez l'actualité de <strong>DydyShop par Mail</strong>
+          </div>
           <form>
             <div class="form-group">
               <label for="recipient-name" class="col-form-label">Votre email :</label>
               <input type="text" class="form-control" id="email" />
             </div>
-           
           </form>
         </div>
         <div class="modal-footer">
@@ -177,124 +181,104 @@
     </div>
   </div>
 
+  <style>
+    .custom-close-button {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+      color: inherit;
+    }
+    input[disabled] {
+      cursor: not-allowed;
+      color: black;
+    }
+  </style>
 
   <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Modification de profil</h5>
-
-          <style>
-            .custom-close-button {
-              background: none;
-              border: none;
-              padding: 0;
-              font-size: inherit;
-              color: inherit;
-            }
-          </style>
-
-          <button type="button" class="close2 custom-close-button" data-dismiss="modal" aria-label="Close"><i class="fa-solid fa-circle-xmark" style="color: white; background: #d85629; padding: 5px; border-radius: 50px;"></i></button>
+          <button type="button" class="close custom-close-button" data-dismiss="modal" aria-label="Close"><i class="fa-solid fa-circle-xmark" style="color: white; background: #d85629; padding: 5px; border-radius: 50px;"></i></button>
         </div>
+
         <div class="modal-body">
-          <div class="alert alert-warning" role="alert">Merci de mettre des informations <strong>Exactes</strong> lors de la mise à jour. Les informations utiles à la plateforme ne peuvent être modifier</div>
-          <form class=" mb-2">
-
-            <div class="d-flex w-100 flex-column justify-content-center align-items-center">
-            {% if current_user.is_authenticated %}
-            <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 150px;  border-radius: 50%;" />
-          {% else %}
-            <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style=" width: 150px; background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
-          {% endif %}
-
-
-          <h5 class="my-3">{{ user.nom }}</h5>
-          <p class="text-muted mb-1">{{ user.date_created|datetimeformat}}</p>
-
+          <form method="POST" action="{{ url_for('Profile') }}">
+            {{ form.hidden_tag() }}
+            <div class="alert alert-warning" role="alert">
+              Merci de mettre des informations <strong>Exactes</strong> lors de la mise à jour. Les informations utiles à la plateforme ne peuvent être modifiées.
             </div>
+
+            <!-- User Info -->
+            <div class="user-info text-center mb-3">
+              {% if current_user.is_authenticated %}
+                <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 150px; border-radius: 50%;" />
+              {% else %}
+                <a class="btn" role="button" style="width: 150px; background-color: #d85629; border-radius: 100%; color: white;"><i class="fas fa-user"></i></a>
+              {% endif %}
+              <h5>{{ user.nom }}</h5>
+              <p class="text-muted">{{ user.date_created|datetimeformat }}</p>
+            </div>
+
+            <!-- Form Fields -->
             <div class="form-group">
-              <label for="recipient-name" class="col-form-label">Votre email :</label>
-              <style>
-                input[disabled] {
-                  cursor: not-allowed;
-                  color: black;
-                }
-                
-              
-              </style>
-              <input type="text" class="form-control " id="email" value={{user.login}} disabled readonly/>
+              <label for="email" class="col-form-label">Votre email :</label>
+              <input type="text" class="form-control" id="email" value="{{ user.login }}" disabled readonly />
             </div>
 
+            {{ form.tel.label(class = 'col-form-label') }}
+            {{ form.tel(class = 'form-control') }}
 
-            <div class="form-group">
-              <label for="recipient-name" class="col-form-label">Telephone :</label>
-             
-              <input type="text" class="form-control " id="email" value={{user.tel}} />
+            <div class="row">
+              <div class="col-6">{{ form.nom.label(class = 'col-form-label') }}
+                {{ form.nom(class = 'form-control') }}</div>
+              <div class="col-6">{{ form.prenom.label(class = 'col-form-label') }}
+                {{ form.prenom(class = 'form-control') }}</div>
             </div>
 
-
-            <div class="form-group ">
-
-              <div class="row">
-
-                <div class="col-6 ">
-              <label for="recipient-name" class="col-form-label">Nom :</label>
-             
-              <input type="text" class="form-control " value={{user.nom}} />
-                </div>
-
-                <div class="col-6 ">
-              <label for="recipient-name" class="col-form-label">prenom :</label>
-            
-              <input type="text" class="form-control " value={{user.prenom}} />
-                </div>
-              </div>
+            <div class="row">
+              <div class="col-6">{{ form.pays.label(class = 'col-form-label') }}
+                {{ form.pays(class = 'form-control') }}</div>
+              <div class="col-6">{{ form.adresse.label(class = 'col-form-label') }}
+                {{ form.adresse(class = 'form-control') }}</div>
             </div>
 
-
-            <div class="form-group">
-
-              <div class="row">
-
-                <div class="col-6 ">
-                    <label for="recipient-name" class="col-form-label">Pays :</label>
-                  
-                    <select class="form-control">
-                      <option selected>Choix du Pays</option>
-                      <option value="1">Sénégal</option>
-                      <option value="2">Congo</option>
-                      <option value="3">Gabon</option>
-                      <option value="3">France</option>
-                    </select>
-                </div>
-
-                <div class="col-6 ">
-                  <label for="recipient-name" class="col-form-label">Adresse :</label>
-             
-                  <input type="text" class="form-control " id="email" value={{user.tel}} />
-
-                </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+              {{ form.submit(class = 'btn', style = 'color: white; background: #d85629;') }}
             </div>
-
-
-         
-
-         
-           
           </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary close2" data-dismiss="modal">Fermer</button>
-          <button type="button" class="btn" style="color: white; background: #d85629; ">Modifier</button>
         </div>
       </div>
     </div>
   </div>
 
+  <script>
+    $(document).ready(function () {
+      $('.custom-alert').each(function () {
+        var alertElement = $(this)
+        setTimeout(function () {
+          alertElement.addClass('fade-out')
+        }, 5000)
+      })
+    
+      $('.custom-alert').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+        $(this).remove()
+      })
+    })
+  </script>
 
-
-
-
+  <style>
+    .fade-out {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease-out, height 0.5s, margin 0.5s, padding 0.5s;
+    }
+  </style>
   <script>
     $(document).ready(function () {
       $('#newsletter').click(function () {
@@ -311,8 +295,7 @@
         }
       })
     })
-
-
+    
     $(document).ready(function () {
       $('#profile').click(function () {
         $('#exampleModal2').modal('show')

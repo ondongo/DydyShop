@@ -33,7 +33,7 @@ app = Flask(__name__)
 
 app.config.from_object("config")
 babel = Babel(app, locale_selector=get_locale, timezone_selector=get_timezone)
-
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 from api.models.model import (
     CartItem,
     Category,

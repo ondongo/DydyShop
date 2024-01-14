@@ -115,13 +115,18 @@ class Item(db.Model):
     def quantity_in_cart(self):
         cart_item = CartItem.query.filter_by(annonce_id=self.id).first()
         return cart_item.quantity if cart_item else 0
-    
+
     @property
     def average_rating(self):
         """
         Récupère la moyenne des ratings pour l'article.
         """
-        return db.session.query(func.avg(Review.rating)).filter_by(item_id=self.id).scalar() or 0.0
+        return (
+            db.session.query(func.avg(Review.rating))
+            .filter_by(item_id=self.id)
+            .scalar()
+            or 0.0
+        )
 
     @property
     def ratings_count(self):
@@ -248,6 +253,14 @@ def getAllAnnonceBrouillon():
         .order_by(desc(Item.date_pub))
         .all()
     )
+
+
+def get_annonce_by_id(annonce_id):
+    return Item.query.get(annonce_id)
+
+
+def update_annonce_quantity(annonce: Item):
+    db.session.commit()
 
 
 def findAnnonceById(id_annonce):
@@ -406,7 +419,6 @@ def add_notification(user, message):
 def add_subscriber(subscriber: Subscriber, user_id):
     subscriber.user_id = user_id
     db.session.add(subscriber)
-
 
 
 # =====================================================================

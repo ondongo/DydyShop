@@ -110,17 +110,17 @@
         <div class="row">
           <nav class="header__menu col-lg-6 mt-2">
             <ul>
-              <li class="active">
-                <a href="/">Accueil</a>
+              <li class="{{ 'active' if request.path == "/Article"}}">
+                <a href="{{ url_for('index') }}">Accueil</a>
               </li>
-              <li>
+              <li class="{{ 'active' if request.path == url_for('Shop') }}">
                 <a href="{{ url_for('Shop') }}">Shop</a>
               </li>
-              <li>
-                <a href="{{ url_for('display_Shop', subcategory = 1) }}">Sacs</a>
+              <li class="{{ 'active' if request.path == url_for('display_Shop') and request.args.get('subcategory') == '1' }}">
+                <a href="{{ url_for('display_Shop', subcategory=1) }}">Sacs</a>
               </li>
-              <li>
-                <a href="{{ url_for('display_Shop', subcategory = 3) }}">Robes</a>
+              <li class="{{ 'active' if request.path == url_for('display_Shop') and request.args.get('subcategory') == '3' }}">
+                <a href="{{ url_for('display_Shop', subcategory=3) }}">Robes</a>
               </li>
             </ul>
           </nav>
