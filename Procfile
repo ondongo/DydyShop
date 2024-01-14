@@ -1,1 +1,1 @@
-web: gunicorn "api:app" -b :10000
+gunicorn "api:app" -b :10000
