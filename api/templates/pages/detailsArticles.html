@@ -108,13 +108,13 @@
             </div>
             <p>{{ item.description }}</p>
             <div class="product__details__button">
-              <div class="quantity">
+            {% comment %}   <div class="quantity">
                 <span>Quantite:</span>
                 <div class="pro-qty">
                   <input type="text" value="1" min="1" max="{{ item.quantity }}" />
                 </div>
-              </div>
-              <a href="#" class="cart-btn"><span class="icon_bag_alt"></span> Ajouter au panier</a>
+              </div> {% endcomment %}
+              <a href="{{ url_for('add_panier', id = item.id) }}" class="cart-btn"><span class="icon_bag_alt"></span> Ajouter au panier</a>
               <ul>
                 <li>
                   {% if item.id in annonces_favoris_ids %}
@@ -123,9 +123,9 @@
                     <a href="{{ url_for('add_wishlistBack', id_annonce = item.id, next = request.path) }}"><i class="fa-regular fa-heart" style="color: #d5d5d5;"></i></a>
                   {% endif %}
                 </li>
-                <li>
+              {% comment %}   <li>
                   <a href="#"><span class="icon_adjust-horiz"></span></a>
-                </li>
+                </li> {% endcomment %}
               </ul>
             </div>
             <div class="product__details__widget">
