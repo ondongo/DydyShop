@@ -1084,8 +1084,8 @@ def handle_form():
 
 
 def send_whatsapp_message(message_receveid):
-    TWILIO_ACCOUNT_SID = "AC133734595c6e3326b9cf8aae0dd5d1dd"
-    TWILIO_AUTH_TOKEN = "d285e0f4a064345a8521d4d7f3518207"
+    TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
+    TWILIO_AUTH_TOKEN = "017540cab722f22776bfaf41f8f96f17"
 
     """ TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
     TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80" """
@@ -1300,6 +1300,7 @@ def Profile():
         form.pays.data = current_user.pays
         form.adresse.data = current_user.adresse
     return render_template("/pages/profile.html", form=form, user=current_user)
+
 
 @app.route("/Order")
 @login_required
