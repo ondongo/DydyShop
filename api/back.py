@@ -167,7 +167,7 @@ def add_subcategory():
             return redirect(url_for("add_subcategory"))
 
     return render_template(
-        "/back/AddSubcategory.html", categories=categories, subcategories=subcategories
+        "/back/AddSubCategory.html", categories=categories, subcategories=subcategories
     )
 
 
