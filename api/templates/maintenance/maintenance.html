@@ -25,10 +25,40 @@
     </p>
   </div>
   <div class="d-flex justify-content-center">
-    <form>
-      <input class="form-control mb-2" placeholder="Votre email"/>
-      <button type="submit" class="btn" style="background-color:#d85629;border: 1px solid transparent;border-color: #d85629;
-      color: #fff;display: inline-block;">Prevenez moi quand il est prêt</button>
-    </form>
+
+    {% for message, category in get_flashed_messages(with_categories = true) %}
+    <div class="alert alert-{{ message }} alert-dismissible fade show custom-alert col-lg-12" role="alert">
+      <strong>{{ category.capitalize() }}!</strong>
+    </div>
+  {% endfor %}
+    <form action="{{ url_for('maintenance') }}" method="post">
+      <input type="email" name="email" class="form-control mb-2" placeholder="Votre email" required/>
+      <button type="submit" class="btn" style="background-color:#d85629; border: 1px solid transparent; border-color: #d85629; color: #fff; display: inline-block;">Prévenez-moi quand il est prêt</button>
+  </form>
   </div>
+  <script>
+    $(document).ready(function () {
+      $('.custom-alert').each(function () {
+        var alertElement = $(this)
+        setTimeout(function () {
+          alertElement.addClass('fade-out')
+        }, 5000)
+      })
+    
+      $('.custom-alert').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+        $(this).remove()
+      })
+    })
+  </script>
+
+  <style>
+    .fade-out {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease-out, height 0.5s, margin 0.5s, padding 0.5s;
+    }
+  </style>
 {% endblock %}

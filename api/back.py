@@ -128,9 +128,37 @@ def check_for_maintenance():
         return None
 
 
-@app.route("/maintenance")
+
+@app.route("/maintenance", methods=["POST"])
 def maintenance():
+    email = request.form.get("email")
+    if not email or not is_valid_email(email):
+        flash("Veuillez fournir une adresse e-mail valide.", "danger")
+        return redirect(url_for("maintenance"))
+    send_maintenance(email)
     return render_template("/maintenance/maintenance.html")
+
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+def send_maintenance(email):
+    subject = "Maintenance Importante sur DydyShop"
+    body = "Cher client, nous vous informons qu'une maintenance est prévue sur DydyShop. Durant cette période, notre site pourrait être temporairement indisponible. Nous nous excusons pour tout inconvénient et apprécions votre compréhension."
+    sender = "noreply@gmail.com"
+
+    msg = Message(subject, sender=sender, recipients=[email])
+    msg_body = body
+
+    msg.body = ""
+
+    data = {"app_name": "DYDYSHOP", "body": msg_body}
+    msg.html = render_template("email/maintenanceNotification.html", user_name=email, data=data)
+    try:
+        mail.send(msg)
+        print(f"Newsletter envoyée avec succès à {email}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de la newsletter à {email}: {str(e)}")
+
 
 
 # ===========================================================================
