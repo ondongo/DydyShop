@@ -114,7 +114,7 @@ def admin_required(func):
     return decorated_view
 
 
-maintenance_mode = True
+maintenance_mode = False
 
 
 @app.before_request
