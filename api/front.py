@@ -30,7 +30,7 @@ def get_timezone():
 
 
 app = Flask(__name__)
-Talisman(app, content_security_policy=None)
+Talisman(app, content_security_policy=None, force_https=True)
 app.config.from_object("config")
 babel = Babel(app, locale_selector=get_locale, timezone_selector=get_timezone)
 
