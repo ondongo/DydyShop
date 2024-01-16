@@ -10,7 +10,7 @@ from flask_paginate import Pagination, get_page_parameter
 from sqlalchemy import or_
 from flask_babel import Babel
 from flask import g, request
-
+from flask_talisman import Talisman
 
 def get_locale():
     # if a user is logged in, use the locale from the user settings
@@ -30,7 +30,7 @@ def get_timezone():
 
 
 app = Flask(__name__)
-
+Talisman(app, content_security_policy=None)
 app.config.from_object("config")
 babel = Babel(app, locale_selector=get_locale, timezone_selector=get_timezone)
 
