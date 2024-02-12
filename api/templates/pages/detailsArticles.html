@@ -108,13 +108,8 @@
             </div>
             <p>{{ item.description }}</p>
             <div class="product__details__button">
-              <div class="quantity">
-                <span>Quantite:</span>
-                <div class="pro-qty">
-                  <input type="text" value="1" min="1" max="{{ item.quantity }}" />
-                </div>
-              </div>
-              <a href="#" class="cart-btn"><span class="icon_bag_alt"></span> Ajouter au panier</a>
+         
+              <a href="{{ url_for('add_panier', id = item.id) }}" class="cart-btn"><span class="icon_bag_alt"></span> Ajouter au panier</a>
               <ul>
                 <li>
                   {% if item.id in annonces_favoris_ids %}
@@ -123,9 +118,7 @@
                     <a href="{{ url_for('add_wishlistBack', id_annonce = item.id, next = request.path) }}"><i class="fa-regular fa-heart" style="color: #d5d5d5;"></i></a>
                   {% endif %}
                 </li>
-                <li>
-                  <a href="#"><span class="icon_adjust-horiz"></span></a>
-                </li>
+             
               </ul>
             </div>
             <div class="product__details__widget">
@@ -153,21 +146,87 @@
         </div>
         <div class="col-lg-12">
           <div class="product__details__tab">
-            <ul class="nav nav-tabs" role="tablist">
+            <ul class="nav nav-tabs" id="myTabs">
               <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">Donner votre avis</a>
+                <a class="nav-link active" id="tabs-1-tab" data-bs-toggle="tab" href="#tabs-1" role="tab" aria-controls="tabs-1" aria-selected="true">Votre Avis</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">les avis ( 2 )</a>
+                <a class="nav-link" id="tabs-2-tab" data-bs-toggle="tab" href="#tabs-2" role="tab" aria-controls="tabs-2" aria-selected="false">Vues (2)</a>
               </li>
             </ul>
+
             <div class="tab-content">
-              <div class="tab-pane" id="tabs-1" role="tabpanel">
-                <h6>Description</h6>
-                <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut loret fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt loret. Neque porro lorem quisquam est, qui dolorem ipsum quia dolor si. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut loret fugit, sed quia ipsu consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Nulla consequat massa quis enim.</p>
-                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.</p>
+              <div class="tab-panel-1 active" id="tabs-1" role="tabpanel-1" aria-labelledby="tabs-1-tab">
+                <h6>Votre Avis</h6>
+                <div class="mb-3">
+                  <style>
+                    .fa-star {
+                      font-size: 30px;
+                      cursor: pointer;
+                    }
+                    .checked {
+                      color: #d85629;
+                    }
+                  </style>
+
+                  <div id="center">
+                    <span class="fa fa-star" id="star1"></span>
+                    <span class="fa fa-star" id="star2"></span>
+                    <span class="fa fa-star" id="star3"></span>
+                    <span class="fa fa-star" id="star4"></span>
+                    <span class="fa fa-star" id="star5"></span>
+                    <h6>Cliquer ici!</h6>
+                  </div>
+
+                  <script>
+                    $('#star1').click(function () {
+                      $('#star1').addClass('checked')
+                      $('#star2').removeClass('checked')
+                      $('#star3').removeClass('checked')
+                      $('#star4').removeClass('checked')
+                      $('#star5').removeClass('checked')
+                      var star1 = $('#star1').class()
+                    })
+                    $('#star2').click(function () {
+                      $('#star1').addClass('checked')
+                      $('#star2').addClass('checked')
+                      $('#star3').removeClass('checked')
+                      $('#star4').removeClass('checked')
+                      $('#star5').removeClass('checked')
+                    })
+                    $('#star3').click(function () {
+                      $('#star1').addClass('checked')
+                      $('#star2').addClass('checked')
+                      $('#star3').addClass('checked')
+                      $('#star4').removeClass('checked')
+                      $('#star5').removeClass('checked')
+                    })
+                    $('#star4').click(function () {
+                      $('#star1').addClass('checked')
+                      $('#star2').addClass('checked')
+                      $('#star3').addClass('checked')
+                      $('#star4').addClass('checked')
+                      $('#star5').removeClass('checked')
+                    })
+                    $('#star5').click(function () {
+                      $('#star1').addClass('checked')
+                      $('#star2').addClass('checked')
+                      $('#star3').addClass('checked')
+                      $('#star4').addClass('checked')
+                      $('#star5').addClass('checked')
+                    })
+                    
+                    var nombreEtoiles = $('.fa-star.checked').length
+                    console.log(nombreEtoiles)
+                  </script>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Votre commentaire</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <button type="submit" class="mb-3 site-btn">Confirmer l'avis</button>
               </div>
-              <div class="tab-pane active" id="tabs-2" role="tabpanel">
+              <div class="tab-panel-2" id="tabs-2" role="tabpanel" aria-labelledby="tabs-2-tab">
                 <h6>Vues ( 2 )</h6>
                 <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut loret fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt loret. Neque porro lorem quisquam est, qui dolorem ipsum quia dolor si. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut loret fugit, sed quia ipsu consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Nulla consequat massa quis enim.</p>
                 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.</p>

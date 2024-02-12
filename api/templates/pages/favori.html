@@ -25,52 +25,62 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
-          <h6 class="coupon__link"><span class="icon_heart_alt"></span>  Votre liste d'envies</h6>
+          <h6 class="coupon__link"><span class="icon_heart_alt"></span> Votre liste d'envies</h6>
         </div>
       </div>
 
       <div class="row">
         <div class="col-lg-12">
-            <div class="cart__total__procced">
-                <div class="shop__cart__table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Produit</th>
-                                <th>Prix</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in annonces_favoris %}
-                                <tr>
-                                    <td class="cart__product__item">
-                                        <img src="{{ item.img_url }}" width="90px" height="90px" alt="{{ item.title }}" />
-                                        <div class="cart__product__item__title">
-                                            <h6>{{ item.title }}</h6>
-                                            <div>
-                                             
-                                                    <span class="fa fa-star checked"></span>
-                                                    <span class="fa fa-star checked"></span>
-                                                    <span class="fa fa-star checked"></span>
-                                                    <span class="fa fa-star checked"></span>
-                                                    <span class="fa fa-star checked"></span>
-                                             
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="cart__price">{{ item.prix }} FCFA</td>
-                                    <td class="cart__close">
-                                        <a href="{{ url_for('remove_wishlistBack', id_annonce=item.annonce_id) }}"><span class="icon_close"></span></a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+          {% if annonces_favoris|length == 0 %}
+            <div class="w-100 d-flex justify-content-center align-items-center text-center">
+              <h3 style="color: #d85629;
+              font-size: 4rem;
+              font-weight: 700;
+              line-height: 1.5;
+              text-shadow: 4px 1px 0 rgba(242,149,65,.2);
+              text-transform: uppercase;">Aucun favoris !!!</h3>
             </div>
+            {% else %}
+          <div class="cart__total__procced">
+            <div class="shop__cart__table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in annonces_favoris %}
+                    <tr>
+                      <td class="cart__product__item">
+                        <img src="{{ item.img_url }}" width="90px" height="90px" alt="{{ item.title }}" />
+                        <div class="cart__product__item__title">
+                          <h6>{{ item.title }}</h6>
+                          <div>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="cart__price">{{ item.prix }} FCFA</td>
+                      <td class="cart__close">
+                        <a href="{{ url_for('remove_wishlistBack', id_annonce = item.annonce_id) }}"><span class="icon_close"></span></a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {% endif %}
         </div>
-    </div>
+      </div>
     </div>
   </section>
   <!-- Shop Cart Section End -->

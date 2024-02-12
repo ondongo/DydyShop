@@ -1,8 +1,15 @@
 from flask_wtf import FlaskForm
 
-from wtforms import SelectField, StringField, EmailField, PasswordField, SubmitField
+from wtforms import (
+    SelectField,
+    StringField,
+    EmailField,
+    PasswordField,
+    SubmitField,
+    TextAreaField,
+)
 
-from wtforms.validators import InputRequired, Length, Email, DataRequired, EqualTo
+from wtforms.validators import InputRequired, Length, DataRequired, EqualTo
 
 
 # ===============> Je prefere utiliser Mes propres Formulaires
@@ -25,13 +32,7 @@ class RegisterForm(FlaskForm):
             ),
         ],
     )
-    email = EmailField(
-        "Email",
-        validators=[
-            # InputRequired("Le champs est requis!!!"),
-            Email(),
-        ],
-    )
+    email = EmailField("Email", validators=[DataRequired()])
     password = PasswordField(
         "Mot de Passe",
         validators=[
@@ -68,20 +69,49 @@ class LoginForm(FlaskForm):
             Length(min=8, message="Le mot de passe doit avoir au moins 8 caractères!"),
         ],
     )
-    
+
     submit = SubmitField("Se Connecter")
 
+
 class CheckoutForm(FlaskForm):
-    delivery_address = StringField('Adresse de livraison', validators=[DataRequired()])
-    phone_number = StringField('Numéro de téléphone', validators=[DataRequired()])
-    country = SelectField("Pays", choices=[("Senegal", "Sénégal"), ("Congo", "Congo"), ("France", "France")], validators=[DataRequired()])
-    email = StringField('Email')
-    submit = SubmitField('Valider la commande')
+    delivery_address = StringField("Adresse de livraison", validators=[DataRequired()])
+    phone_number = StringField("Numéro de téléphone", validators=[DataRequired()])
+    country = SelectField(
+        "Pays",
+        choices=[("Senegal", "Sénégal"), ("Congo", "Congo"), ("France", "France")],
+        validators=[DataRequired()],
+    )
+    email = StringField("Email")
+    submit = SubmitField("Valider la commande")
+
 
 class SubscribeForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired()])
     submit = SubmitField("Subscribe")
 
 
 class ArticleForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[DataRequired()])
+
+
+class MessageForm(FlaskForm):
+    article = StringField("Votre article à commander:", validators=[DataRequired()])
+    message = TextAreaField("Message:", validators=[DataRequired()])
+    submit = SubmitField("Envoyer message sur Whatsapp")
+
+
+class ProfileForm(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), Length(max=200)])
+    prenom = StringField("Prénom", validators=[Length(max=200)])
+    tel = StringField("Téléphone", validators=[DataRequired()])
+    pays = SelectField(
+        "Pays",
+        choices=[
+            ("Sénégal", "Sénégal"),
+            ("Congo", "Congo"),
+            ("Gabon", "Gabon"),
+            ("France", "France"),
+        ],
+    )
+    adresse = StringField("Adresse", validators=[Length(max=200)])
+    submit = SubmitField("Modifier")

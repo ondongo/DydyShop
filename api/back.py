@@ -2,10 +2,20 @@ from datetime import timedelta
 from datetime import datetime
 import dbm
 
-from api.forms import CheckoutForm, LoginForm
+from api.forms import CheckoutForm, LoginForm, MessageForm, ProfileForm
 from .front import app
-
-from flask import abort, render_template, request, redirect, url_for, flash, session
+from sqlalchemy.orm import joinedload
+from flask import (
+    abort,
+    jsonify,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    session,
+)
+from flask_babel import Babel
 from api.models.EnumColorAndSize import *
 from api.models.EnumCategorie import *
 from api.models.SousCategorie import *
@@ -28,6 +38,10 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, UploadNotAllowed
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
+login_manager.login_message = "Veuillez vous connecter pour accéder à cette page "
+from flask import g, request
+
+
 from functools import wraps
 from twilio.rest import Client
 import os
@@ -54,17 +68,21 @@ from api.models.model import (
     Category,
     Item,
     Favorite,
+    Notification,
     Order,
     OrderItem,
     SubCategory,
+    Subscriber,
     add_favori,
     add_images_to_item,
     add_order,
     add_order_item,
+    add_subscriber,
     ajouter_cart,
     clear_cart,
     create_item,
     delete_cart,
+    get_annonce_by_id,
     getAllAnnonceBrouillon,
     getAllAnnonceDel,
     transfer_session_cart_to_db,
@@ -74,6 +92,7 @@ from api.models.model import (
     editAnnonceModel,
     User,
     saveUser,
+    update_annonce_quantity,
     updateSession,
     updatecategory,
     updatesubcategory,
@@ -109,12 +128,39 @@ def check_for_maintenance():
         return None
 
 
-@app.route("/maintenance")
+
+@app.route("/maintenance", methods=["POST"])
 def maintenance():
+    email = request.form.get("email")
+    if not email or not is_valid_email(email):
+        flash("Veuillez fournir une adresse e-mail valide.", "danger")
+        return redirect(url_for("maintenance"))
+    send_maintenance(email)
     return render_template("/maintenance/maintenance.html")
 
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-#
+def send_maintenance(email):
+    subject = "Maintenance Importante sur DydyShop"
+    body = "Cher client, nous vous informons qu'une maintenance est prévue sur DydyShop. Durant cette période, notre site pourrait être temporairement indisponible. Nous nous excusons pour tout inconvénient et apprécions votre compréhension."
+    sender = "noreply@gmail.com"
+
+    msg = Message(subject, sender=sender, recipients=[email])
+    msg_body = body
+
+    msg.body = ""
+
+    data = {"app_name": "DYDYSHOP", "body": msg_body}
+    msg.html = render_template("email/maintenanceNotification.html", user_name=email, data=data)
+    try:
+        mail.send(msg)
+        print(f"Newsletter envoyée avec succès à {email}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de la newsletter à {email}: {str(e)}")
+
+
+
 # ===========================================================================
 # ============================= Gestion Du Crud Dashboard ===================
 # ===========================================================================
@@ -149,7 +195,7 @@ def add_subcategory():
             return redirect(url_for("add_subcategory"))
 
     return render_template(
-        "/back/AddSubcategory.html", categories=categories, subcategories=subcategories
+        "/back/AddSubCategory.html", categories=categories, subcategories=subcategories
     )
 
 
@@ -198,6 +244,8 @@ def validate_and_save_annonce(request):
     color2_form = request.form.get("color2")
     color3_form = request.form.get("color3")
     img_form = request.form.get("img_url")
+    img_form2 = request.form.get("img_url2")
+    img_form3 = request.form.get("img_url3")
     if size1_form:
         size1_result = "Petite"
 
@@ -233,6 +281,8 @@ def validate_and_save_annonce(request):
         size2=size2_result,
         size3=size3_result,
         img_url=img_form,
+        img_url2=img_form2,
+        img_url3=img_form3,
     )
 
     create_item(new_annonce)
@@ -446,15 +496,18 @@ def recherche_annonAvancee():
 import secrets
 from flask_mail import Message, Mail
 
-
 # Ce sont des informations Test
-app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
-app.config["MAIL_PORT"] = 2525
-app.config["MAIL_USERNAME"] = "966afbb985ad95"
-app.config["MAIL_PASSWORD"] = "1bdae0667ba459"
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_DEFAULT_SENDER"] = "gloireondongo1205@gmail.com"
+# app.config["MAIL_SERVER"] = "sandbox.smtp.mailtrap.io"
+# app.config["MAIL_PORT"] = 2525
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 465
+# app.config["MAIL_USERNAME"] = "966afbb985ad95"
+# pp.config["MAIL_PASSWORD"] = "1bdae0667ba459"
+app.config["MAIL_USERNAME"] = "gloireondongo1205@gmail.com"
+app.config["MAIL_PASSWORD"] = "zsnocpmplstortpk"
+app.config["MAIL_USE_TLS"] = False
+app.config["MAIL_USE_SSL"] = True
+# app.config["MAIL_DEFAULT_SENDER"] = "gloireondongo1205@gmail.com"
 mail = Mail(app)
 
 
@@ -463,15 +516,21 @@ def generate_confirmation_token():
 
 
 def send_confirmation_email(user):
+    sender = "noreply@gmail.com"
     token = generate_confirmation_token()
     user.confirmation_token = token
     updateSession()
 
     confirmation_link = url_for("confirm_email", token=token, _external=True)
-    msg = Message("Confirmation d'e-mail", recipients=[user.login])
-    msg.body = "Cliquez sur le lien suivant pour confirmer votre adresse e-mail sur DyDyShop: {0}".format(
+    msg = Message("Confirmation d'e-mail", sender=sender, recipients=[user.login])
+    msg_body = "Cliquez sur le lien suivant pour confirmer votre adresse e-mail sur DyDyShop: {0}".format(
         confirmation_link
     )
+
+    msg.body = ""
+
+    data = {"app_name": "DYDYSHOP", "body": msg_body}
+    msg.html = render_template("email/confirmEmail.html", user_name=user.nom, data=data)
     mail.send(msg)
 
 
@@ -508,8 +567,12 @@ def creation_compte():
 
         hashed_password = hashlib.md5(password.encode("utf-8")).hexdigest()
 
-        role = "admin" if login_recup == "eldy@gmail.com" else "user"
-
+        # Add another email to the condition
+        role = (
+            "admin"
+            if login_recup in ["eldy@gmail.com", "gloireondongo1205@gmail.com"]
+            else "user"
+        )
         nouvel_utilisateur = User(
             nom=nom,
             prenom=prenom,
@@ -651,6 +714,8 @@ def callback():
 
     session["google_token"] = (response["access_token"], "")
     user_info = google.get("userinfo")
+
+    print("iigigigig", user_info.data)
     email_retrieve = user_info.data["email"]
 
     print("gggggggg", user_info.data["email"])
@@ -661,8 +726,14 @@ def callback():
         existing_user.nom = user_info.data["name"]
         existing_user.prenom = user_info.data["given_name"]
         existing_user.profile_image = user_info.data["picture"]
-
+        existing_user.roles = (
+            "admin"
+            if user_info.data["email"]
+            in ["eldy@gmail.com", "gloireondongo1205@gmail.com"]
+            else "user"
+        )
         saveUser(existing_user)
+        login_user(existing_user)
 
     else:
         new_user = User(
@@ -671,9 +742,15 @@ def callback():
             login=user_info.data["email"],
             google_id=user_info.data["id"],
             google_login=user_info.data["email"],
+            profile_image=user_info.data["picture"],
+            roles="admin"
+            if user_info.data["email"]
+            in ["eldy@gmail.com", "gloireondongo1205@gmail.com"]
+            else "user",
         )
         saveUser(new_user)
-    login_user(existing_user)
+        login_user(new_user)
+
     print("=========Contenu de la session:=============", session)
     return redirect(url_for("index"))
 
@@ -689,7 +766,8 @@ def send_reset_email(user):
 
     reset_link = url_for("reset_password", token=reset_token, _external=True)
     msg = Message("Réinitialisation de mot de passe", recipients=[user.login])
-    msg.body = f"Cliquez sur le lien suivant pour réinitialiser votre mot de passe : {reset_link}"
+
+    msg.body = f"Cliquez sur le lien suivant pocur réinitialiser votre mot de passe : {reset_link}"
     mail.send(msg)
 
 
@@ -780,7 +858,6 @@ def add_panier(id):
         else:
             user_cart = CartItem(user_id=user_id, annonce_id=id, quantity=1)
             ajouter_cart(user_cart)
-
         updateSession()
     else:
         # Utilisateur non connecté, utilisez le panier en session
@@ -861,8 +938,6 @@ def Panier():
         # Utilisateur non connecté, récupérez le panier depuis la session
         items_in_cart, total_quantity = get_items_in_cart()
         total_amount = session.get("total", 0.0)
-
-   
 
     return render_template(
         "/pages/panier.html",
@@ -979,13 +1054,14 @@ def create_order(
             quantity=item.quantity,
         )
         add_order_item(order_item)
+        annonce = get_annonce_by_id(item.id)
+        if annonce:
+            annonce.quantity -= item.quantity
+            update_annonce_quantity(annonce)
 
     updateSession()
 
     return order.id
-
-
-# Fonction pour obtenir les détails des articles dans le panier depuis la base de données
 
 
 def create_checkout_message(
@@ -1015,10 +1091,32 @@ def create_checkout_message(
 from decouple import config
 
 
-# Fonction pour envoyer un message WhatsApp (utilisez vos propres informations Twilio)
+@app.context_processor
+def inject_message_form():
+    return {"messageForm": MessageForm()}
+
+
+@app.route("/send-message", methods=["POST"])
+def handle_form():
+    messageForm = MessageForm()
+    if messageForm.validate_on_submit():
+        message = (
+            f"Votre commande: {messageForm.article.data}\n"
+            f"Votre message: {messageForm.message.data}"
+        )
+        send_whatsapp_message(message)
+        flash("Message envoyé avec succès!", "success")
+        return redirect(url_for("index"))
+    else:
+        return redirect(url_for("index"))
+
+
 def send_whatsapp_message(message_receveid):
     TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
-    TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80"
+    TWILIO_AUTH_TOKEN = "017540cab722f22776bfaf41f8f96f17"
+
+    """ TWILIO_ACCOUNT_SID = "ACda1a374fc048affd076363ebd0f1bb5d"
+    TWILIO_AUTH_TOKEN = "7659957c485181ae33f15d3825f68d80" """
     # account_sid = "ACda1a374fc048affd076363ebd0f1bb5d"
     # auth_token = "008dda7a6424142308e6c538b44dcdea"
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -1065,8 +1163,9 @@ def forbidden(error):
 @login_required
 def wishlist():
     user = User.query.get(current_user.id)
-    annonces_favoris = user.favorites
-    annonces_favoris_ids = [fav.annonce_id for fav in user.favorites]
+    annonces_favoris = user.favorites.all()
+    annonces_favoris_ids = [fav.annonce_id for fav in annonces_favoris]
+
     return render_template("/pages/favori.html", annonces_favoris=annonces_favoris)
 
 
@@ -1115,6 +1214,146 @@ def remove_wishlistBack(id_annonce):
     next_page = request.args.get("next")
 
     return redirect(next_page or url_for("wishlist"))
+
+
+#
+# =======================================================================================================================
+# ============================= Gestion des contacts =====================================================================
+# =======================================================================================================================
+#
+
+
+@app.route("/newsletter", methods=["POST"])
+@login_required
+def newsletter():
+    if request.method == "POST":
+        email = request.form["email"]
+        user_id = current_user.id
+
+        if not email:
+            flash("Veuillez fournir une adresse e-mail.", "danger")
+            return jsonify(
+                {"status": "error", "message": "Veuillez fournir une adresse e-mail."}
+            )
+        if Subscriber.query.filter_by(email=email).first():
+            message = f"L'adresse e-mail {email} est déjà abonnée."
+            flash(message, "info")
+            return redirect(url_for("index"))
+
+        subscriber = Subscriber(email=email)
+        add_subscriber(subscriber, user_id)
+        updateSession()
+
+        send_newsletter(email)
+
+        flash(f"La newsletter a été envoyée à {email} avec succès!", "success")
+
+    return redirect(url_for("index"))
+
+
+def send_newsletter(email):
+    subject = "Bienvenue à notre newsletter !"
+    body = "Merci de vous être abonné à notre newsletter. Vous serez informer les dernières actualités et mises à jour."
+    sender = "noreply@gmail.com"
+
+    msg = Message(subject, sender=sender, recipients=[email])
+    msg_body = body
+
+    msg.body = ""
+
+    data = {"app_name": "DYDYSHOP", "body": msg_body}
+    msg.html = render_template("email/confirmEmail.html", user_name=email, data=data)
+    try:
+        mail.send(msg)
+        print(f"Newsletter envoyée avec succès à {email}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de la newsletter à {email}: {str(e)}")
+
+
+@app.route("/Contact")
+def Contact():
+    return render_template("/pages/contact.html")
+
+
+def send_contact(email):
+    subject = "Bienvenue à notre newsletter !"
+    body = "Merci de vous être abonné à notre newsletter. Vous serez informer les dernières actualités et mises à jour."
+    sender = "noreply@gmail.com"
+
+    msg = Message(subject, sender=sender, recipients=[email])
+    msg_body = body
+
+    msg.body = ""
+
+    data = {"app_name": "DYDYSHOP", "body": msg_body}
+    msg.html = render_template("email/confirmEmail.html", user_name=email, data=data)
+    try:
+        mail.send(msg)
+        print(f"vous avez contacté avec succès dydyshop {email}")
+    except Exception as e:
+        print(f"Erreur lors de l'envoi de contact à {email}: {str(e)}")
+
+
+def getUser(user_id):
+    """
+    Get user information by user ID.
+
+    Parameters:
+        user_id (int): The ID of the user.
+
+    Returns:
+        User: User object if found, None otherwise.
+    """
+    user = User.query.get(user_id)
+    return user
+
+
+@app.route("/Profile", methods=["GET", "POST"])
+@login_required
+def Profile():
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.nom = form.nom.data
+        current_user.prenom = form.prenom.data
+        current_user.tel = form.tel.data
+        current_user.pays = form.pays.data
+        current_user.adresse = form.adresse.data
+        updateSession()
+        flash("Votre profil a été mis à jour avec succès!", "success")
+        return redirect(url_for("Profile"))
+    elif request.method == "GET":
+        form.nom.data = current_user.nom
+        form.prenom.data = current_user.prenom
+        form.tel.data = current_user.tel
+        form.pays.data = current_user.pays
+        form.adresse.data = current_user.adresse
+    return render_template("/pages/profile.html", form=form, user=current_user)
+
+
+@app.route("/Order")
+@login_required
+def OrderPage():
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    NbreElementParPage = 2
+    offset = (page - 1) * NbreElementParPage
+    orders = ["HH", "II"]
+    pagination = Pagination(page=page, per_page=NbreElementParPage, total=len(orders))
+    return render_template(
+        "/pages/order.html",
+        user=current_user,
+        pagination=pagination,
+    )
+
+
+@app.route("/mark_notification_read/<int:notification_id>")
+@login_required
+@admin_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.get(notification_id)
+    if notification and notification.user == current_user:
+        notification.read = True
+        updateSession()
+    return redirect(url_for("dashboard"))
 
 
 import requests

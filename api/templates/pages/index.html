@@ -13,18 +13,46 @@
 
   <!-- Categories Section Begin -->
   <section class="categories">
+    <style>
+      .custom-alert-container {
+        position: absolute;
+        top: 110px;
+        right: 20px;
+        z-index: 9999;
+      }
+    </style>
+
+    <div class="container custom-alert-container">
+      <div class="row">
+        <div class="col-lg-12">
+          {% for message, category in get_flashed_messages(with_categories = true) %}
+            <div class="alert alert-{{ message }} alert-dismissible fade show custom-alert" role="alert">
+              <strong>{{ category.capitalize() }}!</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-6 p-0">
-          <div class="categories__item categories__large__item set-bg" data-setbg="{{ url_for('static', filename = 'eldyCss/img/eldy.png') }} ">
+          <div class="categories__item categories__large__item set-bg" data-setbg="{{ url_for('static', filename = 'img/Dalle3.png') }} ">
             <div class="categories__text">
               <h2 style="font-size: 55px; color: aliceblue">Bienvenue sur DydyShop</h2>
 
-              <p style="text-align: justify; color: white">
+              <style>
+                @media screen and (max-width: 768px) {
+                  p.mobile-hide {
+                    max-width: 200px;
+                  }
+                }
+              </style>
+              <p style="text-align: justify; color: white; font-weight: 600;">
                 "Découvrez la fusion parfaite entre tradition et modernité<br />
                 chez DydyShop : votre destination fashion africaine<br />
                 incontournable pour être à la pointe de la mode !".
               </p>
+
               <a href="{{ url_for('Shop') }}" style="display: inline-block; background-color: #d85629; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Decouvrir</a>
             </div>
           </div>
@@ -59,7 +87,7 @@
               </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 p-0">
-              <div class="categories__item set-bg" data-setbg="{{ url_for('static', filename = 'eldyCss/img/image1.jpg') }}">
+              <div class="categories__item set-bg" data-setbg="{{ url_for('static', filename = 'img/Dalle4.png') }}">
                 <div class="categories__text">
                   <h4 style="color: aliceblue">Tous</h4>
                   <p>{{ count }} items</p>
@@ -93,7 +121,7 @@
       </div>
       <div class="row property__gallery">
         {% for item in four_all_items %}
-        <div class="col-lg-3 col-md-4 col-sm-6 mix {% if item.category_id == 1 %} women {% else %} men {% endif %}">
+          <div class="col-lg-3 col-md-4 col-sm-6 mix {% if item.category_id == 1 %}{% endif %}">
             <div class="product__item">
               <div class="product__item__pic set-bg"
                 data-setbg="{% if not item.img_url %}
@@ -116,10 +144,11 @@
                     <a href="img/categories/test1.png" class="image-popup"><span class="arrow_expand"></span></a>
                   </li>
                   <li>
-                    <a href="#"><span class="icon_heart_alt"></span></a>
+                    <a href="{{ url_for('annonce_Id', id_item = item.id) }}"><span class="fas fa-eye"></span></a>
                   </li>
+
                   <li>
-                    <a href="#"><span class="icon_bag_alt"></span></a>
+                    <a href="{{ url_for('add_panier', id = item.id) }}"><span class="icon_bag_alt"></span></a>
                   </li>
                 </ul>
               </div>
@@ -143,7 +172,7 @@
   <!-- Product Section End -->
 
   <!-- Banner Section Begin -->
-  <section class="banner set-bg" data-setbg="{{ url_for('static', filename = 'eldyCss/img/banner/bannermod.jpg') }}" style="opacity: 0.8">
+  <section class="banner set-bg" data-setbg="{{ url_for('static', filename = 'img/Dalle2.png') }}">
     <div class="container">
       <div class="row">
         <div class="col-xl-7 col-lg-8 m-auto">
@@ -151,21 +180,14 @@
             <div class="banner__item">
               <div class="banner__text">
                 <span>"Explorez la richesse de la mode africaine avec DydyShop !"</span>
-                <h1 style="color: aliceblue">The Project Jacket</h1>
+                <h1 style="color: aliceblue">DYDYSHOP</h1>
                 <a href="#">Acheter</a>
               </div>
             </div>
             <div class="banner__item">
               <div class="banner__text">
                 <span>"Explorez la richesse de la mode africaine avec DydyShop !"</span>
-                <h1 style="color: aliceblue">The Project Jacket</h1>
-                <a href="#">Acheter</a>
-              </div>
-            </div>
-            <div class="banner__item">
-              <div class="banner__text">
-                <span>"Explorez la richesse de la mode africaine avec DydyShop !"</span>
-                <h1 style="color: aliceblue">The Project Jacket</h1>
+                <h1 style="color: aliceblue">DYDYSHOP</h1>
                 <a href="#">Acheter</a>
               </div>
             </div>
@@ -338,6 +360,31 @@
 
   <!-- Instagram End -->
 
+  <script>
+    // Ajoutez ce script pour gérer la disparition automatique des alertes
+    $(document).ready(function () {
+      $('.custom-alert').each(function () {
+        // Ajoutez la classe "fade-out" après 5 secondes
+        var alertElement = $(this)
+        setTimeout(function () {
+          alertElement.addClass('fade-out')
+        }, 5000)
+      })
+    
+      // Supprimez l'élément après la fin de l'animation
+      $('.custom-alert').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+        $(this).remove()
+      })
+    })
+  </script>
+
+  <style>
+    /* Ajoutez cette règle CSS pour définir l'animation de fade-out */
+    .fade-out {
+      opacity: 0;
+      transition: opacity 1s ease-out;
+    }
+  </style>
   <!-- Footer Section Begin -->
   <footer class="footer">
     <div class="container">
@@ -359,7 +406,7 @@
             <h6>Contact</h6>
             <ul>
               <li>
-                <a href="{{ url_for('Contact') }}">Nous Contactez </a>
+                <a href="{{ url_for('Contact') }}">Nous Contactez</a>
               </li>
               <li>
                 <a href="{{ url_for('Faqs') }}">FAQ</a>
@@ -372,10 +419,10 @@
             <h6>Profile</h6>
             <ul>
               <li>
-                <a href="#">Mon compte</a>
+                <a href="{{ url_for('Profile') }}">Mon compte</a>
               </li>
               <li>
-                <a href="#">Mes Commandes</a>
+                <a href="{{ url_for('OrderPage') }}">Mes Commandes</a>
               </li>
               <li>
                 <a href="{{ url_for('wishlist') }}">Mes Favoris</a>
@@ -386,8 +433,8 @@
         <div class="col-lg-4 col-md-8 col-sm-8">
           <div class="footer__newslatter">
             <h6>Newsletter</h6>
-            <form action="#">
-              <input type="text" placeholder="Email" />
+            <form id="newsletter-form" action="/newsletter" method="post">
+              <input type="text" placeholder="Email" name="email" />
               <button type="submit" class="site-btn">S'inscire</button>
             </form>
             <div class="footer__social">

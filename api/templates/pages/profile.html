@@ -1,0 +1,315 @@
+{% extends './layout/secondBase.html' %}
+
+{% block title %}
+  {{ super() }} | Article
+{% endblock %}
+
+{% block content %}
+  <section style="background-color: #eee;">
+    <div class="container py-5">
+      <div class="row">
+        <div class="col">
+          <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item">
+                <a href="#">Home</a>
+              </li>
+
+              <li class="breadcrumb-item active" aria-current="page">Profile</li>
+            </ol>
+          </nav>
+        </div>
+
+        {% for message, category in get_flashed_messages(with_categories = true) %}
+          <div class="alert alert-{{ message }} alert-dismissible fade show custom-alert col-lg-12" role="alert">
+            <strong>{{ category.capitalize() }}!</strong>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-body text-center">
+              {% if current_user.is_authenticated %}
+                <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 150px;  border-radius: 50%;" />
+              {% else %}
+                <a class="btn" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" style=" width: 150px; background-color: #d85629; border-radius: 100%;  color:white;"><i class="fas fa-user"></i></a>
+              {% endif %}
+
+              <h5 class="my-3">{{ user.nom }}</h5>
+              <p class="text-muted mb-1">{{ user.date_created|datetimeformat }}</p>
+
+              <p class="text-muted mb-4">{{ user.prenom }}</p>
+              <div class="d-flex justify-content-center mb-2 flex-column">
+                {% if current_user.is_subscriber() %}
+                  <button type="button" class="btn mb-2 disabled" style="background:#d85629; color: white;">Vous êtes abonné à notre newsletter</button>
+                  <button type="button" class="btn ms-1 mb-3 hoverbutton" style="border-color: #d85629;">Se désabonner de la newsletter</button>
+                {% else %}
+                  <button type="button" id="newsletter" class="btn mb-3 hoverbutton" style="border-color: #d85629;">Vous n'êtes abonné à notre newsletter cliquer ici</button>
+                {% endif %}
+
+                <button type="button" class="btn ms-1 hoverbutton" id="profile" style="border-color: #d85629;">Modifier ton profil</button>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-4 mb-lg-0">
+            <div class="card-body p-0">
+              <ul class="list-group list-group-flush rounded-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                  <i class="fas fa-globe fa-lg text-warning"></i>
+                  <p class="mb-0">DyDyShop</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Nom Complet</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="text-muted mb-0">{{ user.nom }}</p>
+                </div>
+              </div>
+              <hr />
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Email</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="text-muted mb-0">{{ user.login }}</p>
+                </div>
+              </div>
+              <hr />
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Phone</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="text-muted mb-0">
+                    {% if google_id is none %}
+                      Aucun numéro
+                    {% else %}
+                      (097) {{ user.tel }}
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+
+              <hr />
+              <div class="row">
+                <div class="col-sm-3">
+                  <p class="mb-0">Adresse</p>
+                </div>
+                <div class="col-sm-9">
+                  <p class="text-muted mb-0">Aucune adresse</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4 mb-md-0">
+                <div class="card-body">
+                  <p class="mb-4">
+                    <span class="font-italic me-1" style="color:#d85629;">commande</span> Voir le pourcentage
+                  </p>
+                  <p class="mb-1" style="font-size: .77rem; color:#d85629; ">pourcentage</p>
+                  <div class="progress rounded" style="height: 5px;  color:#d85629;">
+                    <div class="progress-bar" role="progressbar" style="width: 80%; background:#d85629; " aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card mb-4 mb-md-0">
+                <div class="card-body">
+                  <p class="mb-4">
+                    <span class="font-italic me-1" style="color:#d85629;">favori</span> Voir le pourcentage
+                  </p>
+                  <p class="mb-1" style="font-size: .77rem;">pourcentage</p>
+                  <div class="progress rounded" style="height: 5px;   ">
+                    <div class="progress-bar" role="progressbar" style="width: 80%; background:#d85629; " aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">newsletter</h5>
+
+          <style>
+            .custom-close-button {
+              background: none;
+              border: none;
+              padding: 0;
+              font-size: inherit;
+              color: inherit;
+            }
+          </style>
+
+          <button type="button" class="close custom-close-button" data-dismiss="modal" aria-label="Close"><i class="fa-solid fa-circle-xmark" style="color: white; background: #d85629; padding: 5px; border-radius: 50px;"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning" role="alert">
+            En vous inscrivant vous recevevrez l'actualité de <strong>DydyShop par Mail</strong>
+          </div>
+          <form>
+            <div class="form-group">
+              <label for="recipient-name" class="col-form-label">Votre email :</label>
+              <input type="text" class="form-control" id="email" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary close" data-dismiss="modal">Fermer</button>
+          <button type="button" class="btn" style="color: white; background: #d85629; ">S'inscrire</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .custom-close-button {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+      color: inherit;
+    }
+    input[disabled] {
+      cursor: not-allowed;
+      color: black;
+    }
+  </style>
+
+  <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modification de profil</h5>
+          <button type="button" class="close custom-close-button" data-dismiss="modal" aria-label="Close"><i class="fa-solid fa-circle-xmark" style="color: white; background: #d85629; padding: 5px; border-radius: 50px;"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <form method="POST" action="{{ url_for('Profile') }}">
+            {{ form.hidden_tag() }}
+            <div class="alert alert-warning" role="alert">
+              Merci de mettre des informations <strong>Exactes</strong> lors de la mise à jour. Les informations utiles à la plateforme ne peuvent être modifiées.
+            </div>
+
+            <!-- User Info -->
+            <div class="user-info text-center mb-3">
+              {% if current_user.is_authenticated %}
+                <img src="{{ current_user.profile_image }}" alt="User Image" style="width: 150px; border-radius: 50%;" />
+              {% else %}
+                <a class="btn" role="button" style="width: 150px; background-color: #d85629; border-radius: 100%; color: white;"><i class="fas fa-user"></i></a>
+              {% endif %}
+              <h5>{{ user.nom }}</h5>
+              <p class="text-muted">{{ user.date_created|datetimeformat }}</p>
+            </div>
+
+            <!-- Form Fields -->
+            <div class="form-group">
+              <label for="email" class="col-form-label">Votre email :</label>
+              <input type="text" class="form-control" id="email" value="{{ user.login }}" disabled readonly />
+            </div>
+
+            {{ form.tel.label(class = 'col-form-label') }}
+            {{ form.tel(class = 'form-control') }}
+
+            <div class="row">
+              <div class="col-6">{{ form.nom.label(class = 'col-form-label') }}
+                {{ form.nom(class = 'form-control') }}</div>
+              <div class="col-6">{{ form.prenom.label(class = 'col-form-label') }}
+                {{ form.prenom(class = 'form-control') }}</div>
+            </div>
+
+            <div class="row">
+              <div class="col-6">{{ form.pays.label(class = 'col-form-label') }}
+                {{ form.pays(class = 'form-control') }}</div>
+              <div class="col-6">{{ form.adresse.label(class = 'col-form-label') }}
+                {{ form.adresse(class = 'form-control') }}</div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+              {{ form.submit(class = 'btn', style = 'color: white; background: #d85629;') }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      $('.custom-alert').each(function () {
+        var alertElement = $(this)
+        setTimeout(function () {
+          alertElement.addClass('fade-out')
+        }, 5000)
+      })
+    
+      $('.custom-alert').on('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+        $(this).remove()
+      })
+    })
+  </script>
+
+  <style>
+    .fade-out {
+      opacity: 0;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease-out, height 0.5s, margin 0.5s, padding 0.5s;
+    }
+  </style>
+  <script>
+    $(document).ready(function () {
+      $('#newsletter').click(function () {
+        $('#exampleModal').modal('show')
+      })
+    
+      $('#exampleModal .close').on('click', function () {
+        $('#exampleModal').modal('hide')
+      })
+    
+      $(document).on('click', function (e) {
+        if ($(e.target).hasClass('modal')) {
+          $('#exampleModal').modal('hide')
+        }
+      })
+    })
+    
+    $(document).ready(function () {
+      $('#profile').click(function () {
+        $('#exampleModal2').modal('show')
+      })
+    
+      $('#exampleModal2 .close2').on('click', function () {
+        $('#exampleModal2').modal('hide')
+      })
+    
+      $(document).on('click', function (e) {
+        if ($(e.target).hasClass('modal')) {
+          $('#exampleModal2').modal('hide')
+        }
+      })
+    })
+  </script>
+{% endblock %}

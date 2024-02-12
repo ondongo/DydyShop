@@ -3781,9 +3781,47 @@ ol {
   }
   
   .form-range::-ms-thumb {
-	background: #d85629; /* Couleur de la poignée du slider en blanc */
+	background: #d85629; 
   }
 
 .checked {
 	color: #d85629;
   }
+
+
+  .circle-ripple {
+	position: fixed;
+    bottom: 50px; 
+    right: 50px; 
+    z-index: 1000; 
+	background-color: #35ffc3;
+	width: 1em;
+	height: 1em;
+	border-radius: 50%;
+	animation: ripple 0.7s linear infinite;
+	color: white;
+	padding: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  
+  @keyframes ripple {
+	0% {
+	  box-shadow: 0 0 0 0 rgba(2, 207, 170, 0.3), 0 0 0 12px rgba(2, 207, 170, 0.3), 0 0 0 20px rgba(2, 207, 170, 0.3), 0 0 0 28px rgba(2, 207, 170, 0.3);
+	}
+	100% {
+	  box-shadow: 0 0 0 12px rgba(2, 207, 170, 0.3), 0 0 0 20px rgba(2, 207, 170, 0.3), 0 0 0 28px rgba(2, 207, 170, 0.3), 0 0 0 40px rgba(2, 207, 170, 0);
+	}
+  }
+
+
+.hoverbutton:hover{
+  background: #d85629;
+  color: white;
+  }
+
+.breadcrumb-item a{
+	color: #d85629;
+  }
+
