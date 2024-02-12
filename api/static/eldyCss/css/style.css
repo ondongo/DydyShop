@@ -3791,7 +3791,7 @@ ol {
 
   .circle-ripple {
 	position: fixed;
-    bottom: 50px; 
+    bottom: 100px; 
     right: 50px; 
     z-index: 1000; 
 	background-color: #35ffc3;
